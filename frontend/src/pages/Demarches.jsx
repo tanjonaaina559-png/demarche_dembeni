@@ -49,7 +49,10 @@ const Demarches = () => {
     const fetchDemarches = async () => {
       try {
         const res = await api.get('/procedures');
-        setDemarchesList(Array.isArray(res.data) ? res.data : []);
+
+console.log("DONNEES API :", res.data);
+
+setDemarchesList(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error('Erreur lors du chargement des démarches', error);
       } finally {
@@ -78,7 +81,8 @@ const Demarches = () => {
     setSelectedModal(demarche);
     document.body.style.overflow = 'hidden';
   };
-
+console.log("demarchesList =", demarchesList);
+console.log("activeCategory =", activeCategory);
   const filteredDemarches = (Array.isArray(demarchesList) ? demarchesList : []).filter(d => {
     let matchesCategory = false;
     if (activeCategory === 'all') {
@@ -94,7 +98,8 @@ const Demarches = () => {
                           (d.category || '').toLowerCase().includes(q);
     return matchesCategory && matchesSearch;
   });
-
+console.log("filteredDemarches =", filteredDemarches);
+console.log("Nombre =", filteredDemarches.length);
   const totalPages = Math.ceil(filteredDemarches.length / itemsPerPage);
   const paginatedDemarches = filteredDemarches.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
