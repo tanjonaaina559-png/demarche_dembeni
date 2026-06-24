@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dembéni · Administration — Connexion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ── SKELETON ── */
+    @keyframes sk-shimmer { 0%{background-position:-600px 0} 100%{background-position:600px 0} }
+    .sk-shimmer {
+      background: linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.08) 75%);
+      background-size:1200px 100%;
+      animation: sk-shimmer 1.6s infinite linear;
+    }
+    #page-skeleton {
+      position:fixed; inset:0; z-index:99999;
+      transition: opacity .45s ease, visibility .45s ease;
+    }
+    #page-skeleton.sk-hidden { opacity:0; visibility:hidden; pointer-events:none; }
+    /* ── END SKELETON ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: #0d1117;
+      overflow: hidden;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      width: 55%;
+      background: linear-gradient(160deg, #0A2713 0%, #155228 45%, #1C6B35 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .left-panel::after {
+      content: '';
+      position: absolute; bottom: -80px; right: -80px;
+      width: 320px; height: 320px;
+      background: rgba(192,35,43,0.12);
+      border-radius: 50%;
+    }
+
+    .brand-logo {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #C0232B, #D63940);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900; font-size: 2rem; color: white;
+      margin-bottom: 2rem;
+      box-shadow: 0 12px 40px rgba(192,35,43,0.45);
+      position: relative; z-index: 1;
+    }
+
+    .brand-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.8rem; font-weight: 800;
+      color: white; letter-spacing: 4px;
+      text-transform: uppercase;
+      position: relative; z-index: 1;
+      margin-bottom: .6rem;
+    }
+
+    .brand-sub {
+      color: rgba(255,255,255,.65);
+      font-size: .95rem; text-align: center;
+      max-width: 320px; line-height: 1.7;
+      position: relative; z-index: 1;
+      margin-bottom: 3rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      position: relative; z-index: 1;
+      width: 100%; max-width: 340px;
+    }
+
+    .feature-list li {
+      display: flex; align-items: center; gap: 12px;
+      color: rgba(255,255,255,.80);
+      font-size: .88rem; padding: .6rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .feature-list li:last-child { border-bottom: none; }
+
+    .feature-list li i {
+      width: 30px; height: 30px;
+      background: rgba(255,255,255,.12);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; color: #A5D6A7;
+      flex-shrink: 0;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      background: #f8fafc;
+      padding: 2rem;
+    }
+
+    .login-card {
+      width: 100%; max-width: 420px;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.10);
+      padding: 2.5rem;
+    }
+
+    .card-header {
+      margin-bottom: 2rem;
+    }
+
+    .access-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #FDE8E8; color: #A01B1B;
+      font-size: .72rem; font-weight: 700;
+      padding: .3rem .8rem; border-radius: 50px;
+      text-transform: uppercase; letter-spacing: .5px;
+      margin-bottom: 1rem;
+    }
+
+    .card-header h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem; font-weight: 700;
+      color: #0f1923; margin-bottom: .4rem;
+    }
+
+    .card-header p { color: #718096; font-size: .88rem; }
+
+    .form-group { margin-bottom: 1.2rem; }
+
+    .form-group label {
+      display: block; font-size: .82rem; font-weight: 600;
+      color: #374140; margin-bottom: .45rem;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-icon {
+      position: absolute; left: .9rem; top: 50%;
+      transform: translateY(-50%);
+      color: #a0aec0; font-size: .85rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: #f7f8fa;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: .8rem 1rem .8rem 2.6rem;
+      font-size: .9rem; font-family: 'Inter', sans-serif;
+      color: #1a202c; outline: none;
+      transition: all .2s;
+    }
+
+    .form-input:focus {
+      border-color: #1C6B35;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(28,107,53,.10);
+    }
+
+    .toggle-pw {
+      position: absolute; right: .9rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: #a0aec0; font-size: .85rem;
+    }
+
+    .error-box {
+      background: #FDE8E8; color: #A01B1B;
+      border-radius: 10px; padding: .75rem 1rem;
+      font-size: .85rem; font-weight: 500;
+      margin-bottom: 1rem;
+      display: none; align-items: center; gap: 8px;
+    }
+
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, #155228, #237A3E);
+      color: white; border: none; border-radius: 50px;
+      padding: .9rem; font-size: .95rem; font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: all .25s;
+      box-shadow: 0 4px 16px rgba(21,82,40,.30);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: .5rem;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(21,82,40,.40);
+    }
+
+    .back-link {
+      text-align: center; margin-top: 1.5rem;
+      color: #718096; font-size: .82rem;
+    }
+
+    .back-link a {
+      color: #1C6B35; text-decoration: none; font-weight: 600;
+    }
+
+    .demo-creds {
+      background: #f0f9f4; border: 1px solid #c6f0d4;
+      border-radius: 10px; padding: .75rem 1rem;
+      margin-bottom: 1.5rem; font-size: .8rem; color: #155228;
+    }
+
+    .demo-creds strong { display: block; margin-bottom: .3rem; font-size: .78rem; color: #237A3E; }
+
+    @media (max-width: 768px) {
+      .left-panel { display: none; }
+      body { background: #f8fafc; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SKELETON PAGE ═══ -->
+<div id="page-skeleton" style="background:#0d1117;">
+  <div style="display:flex;height:100vh;">
+    <!-- Left green panel skeleton -->
+    <div style="width:55%;background:linear-gradient(160deg,#0A2713,#155228,#1C6B35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;padding:3rem;">
+      <div class="sk-shimmer" style="width:80px;height:80px;border-radius:22px;background:rgba(192,35,43,.35);"></div>
+      <div class="sk-shimmer" style="width:220px;height:44px;border-radius:8px;background:rgba(255,255,255,.12);"></div>
+      <div class="sk-shimmer" style="width:300px;height:16px;border-radius:50px;background:rgba(255,255,255,.08);"></div>
+      <div class="sk-shimmer" style="width:280px;height:16px;border-radius:50px;background:rgba(255,255,255,.06);"></div>
+      <div style="display:flex;flex-direction:column;gap:.7rem;width:280px;margin-top:1rem;">
+        <div class="sk-shimmer" style="height:40px;border-radius:8px;background:rgba(255,255,255,.07);"></div>
+        <div class="sk-shimmer" style="height:40px;border-radius:8px;background:rgba(255,255,255,.05);"></div>
+        <div class="sk-shimmer" style="height:40px;border-radius:8px;background:rgba(255,255,255,.04);"></div>
+        <div class="sk-shimmer" style="height:40px;border-radius:8px;background:rgba(255,255,255,.03);"></div>
+      </div>
+    </div>
+    <!-- Right form panel skeleton -->
+    <div style="flex:1;background:#f8fafc;display:flex;align-items:center;justify-content:center;padding:2rem;">
+      <div style="width:380px;background:#fff;border-radius:24px;padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,.10);display:flex;flex-direction:column;gap:1.2rem;">
+        <div class="sk-shimmer" style="height:22px;width:160px;border-radius:50px;"></div>
+        <div class="sk-shimmer" style="height:32px;width:220px;border-radius:8px;"></div>
+        <div class="sk-shimmer" style="height:14px;width:260px;border-radius:50px;"></div>
+        <div class="sk-shimmer" style="height:46px;border-radius:12px;"></div>
+        <div class="sk-shimmer" style="height:46px;border-radius:12px;"></div>
+        <div class="sk-shimmer" style="height:48px;border-radius:50px;background:rgba(21,82,40,.2);margin-top:.5rem;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function hideSkeleton() {
+      var sk = document.getElementById('page-skeleton');
+      if (sk) {
+        sk.classList.add('sk-hidden');
+        setTimeout(function(){ if(sk.parentNode) sk.parentNode.removeChild(sk); }, 500);
+      }
+    }
+    if (document.readyState === 'complete') { hideSkeleton(); }
+    else { window.addEventListener('load', hideSkeleton); setTimeout(hideSkeleton, 2500); }
+  })();
+</script>
+
+  <!-- LEFT: Branding -->
+  <div class="left-panel">
+    <div class="brand-logo">D</div>
+    <h1 class="brand-title">DEMBÉNI</h1>
+    <p class="brand-sub">Panneau d'administration officiel du portail citoyen de la commune de Dembéni, Mayotte.</p>
+
+    <ul class="feature-list">
+      <li><i class="fas fa-newspaper"></i> Gérer les actualités et annonces</li>
+      <li><i class="fas fa-calendar-alt"></i> Planifier les collectes</li>
+      <li><i class="fas fa-image"></i> Gérer les images et médias</li>
+      <li><i class="fas fa-th-large"></i> Modifier les services publics</li>
+      <li><i class="fas fa-envelope"></i> Mettre à jour les coordonnées</li>
+      <li><i class="fas fa-cog"></i> Configurer les paramètres du site</li>
+    </ul>
+  </div>
+
+  <!-- RIGHT: Login form -->
+  <div class="right-panel">
+    <div class="login-card">
+      <div class="card-header">
+        <span class="access-badge"><i class="fas fa-shield-alt"></i> Accès sécurisé</span>
+        <h2>Connexion Admin</h2>
+        <p>Entrez vos identifiants pour accéder au tableau de bord.</p>
+      </div>
+
+      <div class="demo-creds">
+        <strong><i class="fas fa-info-circle"></i> Identifiants par défaut</strong>
+        Utilisateur : <b>admin</b> &nbsp;|&nbsp; Mot de passe : <b>dembeni2026</b>
+      </div>
+
+      <div class="error-box" id="errorBox">
+        <i class="fas fa-exclamation-circle"></i>
+        Identifiants incorrects. Veuillez réessayer.
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Identifiant</label>
+          <div class="input-wrap">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" class="form-input" id="username" placeholder="admin" autocomplete="username" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" class="form-input" id="password" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" class="toggle-pw" id="togglePw"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <i class="fas fa-sign-in-alt"></i> Accéder au tableau de bord
+        </button>
+      </form>
+
+      <div class="back-link">
+        <a href="accueil.html"><i class="fas fa-arrow-left"></i> Retour au portail citoyen</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Redirect if already authenticated
+    if (sessionStorage.getItem('admin_logged') === 'true') {
+      window.location.href = 'admin_dashboard.html';
+    }
+
+    document.getElementById('togglePw').addEventListener('click', function() {
+      const pw = document.getElementById('password');
+      const ic = this.querySelector('i');
+      if (pw.type === 'password') { pw.type = 'text'; ic.className = 'fas fa-eye-slash'; }
+      else { pw.type = 'password'; ic.className = 'fas fa-eye'; }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value;
+      const btn  = document.getElementById('loginBtn');
+      const err  = document.getElementById('errorBox');
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification...';
+      btn.disabled = true;
+      err.style.display = 'none';
+
+      // Read stored credentials (allow password change via settings)
+      const stored = JSON.parse(localStorage.getItem('dembeni_admin_creds') || '{"user":"admin","pass":"dembeni2026"}');
+
+      setTimeout(() => {
+        if (user === stored.user && pass === stored.pass) {
+          sessionStorage.setItem('admin_logged', 'true');
+          sessionStorage.setItem('admin_user', user);
+          window.location.href = 'admin_dashboard.html';
+        } else {
+          err.style.display = 'flex';
+          btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Accéder au tableau de bord';
+          btn.disabled = false;
+        }
+      }, 800);
+    });
+  </script>
+</body>
+</html>

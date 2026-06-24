@@ -1,0 +1,43 @@
+/* Button.module.css */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.buttonPrimary {
+  background-color: #15803d; /* green */
+  color: #fff;
+}
+.buttonPrimary:hover {
+  background-color: #166534;
+}
+.buttonSecondary {
+  background-color: #64748b; /* gray */
+  color: #fff;
+}
+.buttonSecondary:hover {
+  background-color: #475569;
+}
+.buttonDanger {
+  background-color: #b91c1c; /* red */
+  color: #fff;
+}
+.buttonDanger:hover {
+  background-color: #991b1b;
+}
+.buttonSuccess {
+  background-color: #16a34a; /* green */
+  color: #fff;
+}
+.buttonSuccess:hover {
+  background-color: #15803d;
+}
+.button:active {
+  transform: scale(0.97);
+}

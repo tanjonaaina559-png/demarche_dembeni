@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dembéni — Portail Citoyen Officiel</title>
+  <meta name="description"
+    content="Portail citoyen officiel de la commune de Dembéni, Mayotte. Démarches administratives, services municipaux, collecte.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== HERO ACCUEIL ===== */
+    .hero {
+      position: relative;
+      min-height: 540px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--vert-900) 0%, var(--vert-700) 50%, var(--vert-500) 100%);
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&q=60&w=1400') center/cover no-repeat;
+      opacity: .18;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 6rem 2.5rem 5rem;
+      display: flex;
+      align-items: center;
+      gap: 4rem;
+    }
+
+    .hero-content {
+      flex: 1;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .2);
+      color: rgba(255, 255, 255, .85);
+      padding: .35rem 1rem;
+      border-radius: var(--radius-pill);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-tag i {
+      color: var(--vert-300);
+    }
+
+    .hero h1 {
+      color: var(--blanc);
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 strong {
+      color: var(--vert-300);
+      font-weight: 900;
+    }
+
+    .hero p {
+      color: rgba(255, 255, 255, .72);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blanc);
+      color: var(--vert-700);
+      padding: .9rem 2rem;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      font-size: .95rem;
+      text-decoration: none;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+    }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+      background: var(--vert-50);
+    }
+
+    .btn-hero-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, .1);
+      border: 1.5px solid rgba(255, 255, 255, .25);
+      color: var(--blanc);
+      padding: .9rem 2rem;
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      font-size: .95rem;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .btn-hero-ghost:hover {
+      background: rgba(255, 255, 255, .18);
+      border-color: rgba(255, 255, 255, .45);
+    }
+
+    /* Carte stats hero */
+    .hero-stats {
+      background: rgba(255, 255, 255, .08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      flex-shrink: 0;
+      width: 240px;
+    }
+
+    .hero-stats h3 {
+      color: var(--blanc);
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1.2rem;
+      opacity: .7;
+    }
+
+    .hero-stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: .7rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .hero-stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon i {
+      color: var(--vert-300);
+      font-size: .8rem;
+    }
+
+    .hero-stat-row .info .num {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--blanc);
+      line-height: 1;
+    }
+
+    .hero-stat-row .info .lbl {
+      font-size: .72rem;
+      color: rgba(255, 255, 255, .55);
+    }
+
+    /* Wave hero bottom */
+    .hero-wave {
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      line-height: 0;
+    }
+
+    .hero-wave svg {
+      display: block;
+      width: 100%;
+    }
+
+    /* ===== NEW SERVICES GRID ===== */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+
+    .service-card-new {
+      background: var(--blanc);
+      border: 1px solid var(--gris-200);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .service-card-new:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--vert-200);
+    }
+
+    .scn-img {
+      height: 180px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .scn-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .service-card-new:hover .scn-img img {
+      transform: scale(1.05);
+    }
+
+    .scn-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .scn-icon {
+      width: 40px;
+      height: 40px;
+      /* removed background and border to match the mockup completely (it's just a black icon in the mockup) */
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      color: var(--vert-900);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .scn-body h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--vert-900);
+      margin-bottom: 0.8rem;
+    }
+
+    .scn-body p {
+      font-size: 0.85rem;
+      color: var(--gris-600);
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+
+    .scn-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-top: 1px solid var(--gris-200);
+      border-bottom: 1px solid var(--gris-200);
+      padding: 1rem 0;
+      margin-bottom: 1.2rem;
+    }
+
+    .scn-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border-right: 1px solid var(--gris-200);
+    }
+
+    .scn-stat:last-child {
+      border-right: none;
+    }
+
+    .scn-stat strong {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--vert-900);
+    }
+
+    .scn-stat span {
+      font-size: 0.75rem;
+      color: var(--gris-500);
+      margin-top: 2px;
+    }
+
+    .scn-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scn-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--vert-50);
+      background: #fdfdfd;
+      border: 1px solid var(--gris-200);
+      border-radius: 12px;
+      padding: 0.8rem 0.5rem;
+      flex: 1;
+      text-decoration: none;
+      color: var(--vert-800);
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .scn-action-btn:hover {
+      background: var(--vert-50);
+      border-color: var(--vert-200);
+      transform: translateY(-2px);
+    }
+
+    .scn-action-btn i {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--gris-500);
+    }
+
+    .scn-action-btn:hover i {
+      color: var(--vert-600);
+    }
+
+    .scn-action-btn span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.2;
+      color: var(--vert-900);
+    }
+
+    .btn-scn-main {
+      background: linear-gradient(135deg, var(--vert-800), var(--vert-600));
+      color: var(--blanc);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.5rem;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      margin: 0 auto;
+    }
+
+    .btn-scn-main:hover {
+      box-shadow: 0 4px 15px rgba(35, 122, 62, 0.3);
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, var(--vert-700), var(--vert-500));
+    }
+
+    .btn-scn-main i {
+      font-size: 1rem;
+      color: var(--vert-300);
+    }
+
+    /* ===== HIGHLIGHT SECTIONS ===== */
+    .highlight-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .highlight-row.reverse {
+      direction: rtl;
+    }
+
+    .highlight-row.reverse>* {
+      direction: ltr;
+    }
+
+    .highlight-img {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      aspect-ratio: 4/3;
+    }
+
+    .highlight-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .5s ease;
+    }
+
+    .highlight-img:hover img {
+      transform: scale(1.03);
+    }
+
+    .highlight-content h2 {
+      margin-bottom: 1rem;
+    }
+
+    .highlight-content p {
+      color: var(--gris-500);
+      font-size: .95rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 1.25rem 0;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .9rem;
+      color: var(--gris-700);
+      padding: .55rem .85rem;
+      background: var(--vert-50);
+      border-radius: var(--radius-sm);
+      margin-bottom: .5rem;
+      border-left: 3px solid var(--vert-400);
+    }
+
+    .checklist li i {
+      color: var(--vert-500);
+      font-size: .85rem;
+    }
+
+    /* ===== LOISIRS ===== */
+    .activities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1rem;
+    }
+
+    .activity-card {
+      background: var(--blanc);
+      border: 1px solid var(--gris-200);
+      border-radius: var(--radius-md);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      transition: var(--transition);
+      cursor: default;
+    }
+
+    .activity-card:hover {
+      background: var(--vert-600);
+      border-color: var(--vert-600);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .activity-card i {
+      font-size: 1.6rem;
+      color: var(--vert-500);
+      display: block;
+      margin-bottom: .75rem;
+      transition: var(--transition);
+    }
+
+    .activity-card:hover i {
+      color: var(--blanc);
+    }
+
+    .activity-card span {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--gris-700);
+      transition: var(--transition);
+    }
+
+    .activity-card:hover span {
+      color: var(--blanc);
+    }
+
+    /* ===== TARIFS ===== */
+    .tarif-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .tarif-card {
+      background: var(--blanc);
+      border: 2px solid var(--gris-200);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .tarif-card:hover {
+      border-color: var(--vert-400);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .tarif-card.featured {
+      border-color: var(--vert-500);
+      position: relative;
+    }
+
+    .tarif-card.featured::before {
+      content: 'Populaire';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--vert-500);
+      color: var(--blanc);
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .2rem .85rem;
+      border-radius: var(--radius-pill);
+    }
+
+    .tarif-card h3 {
+      font-size: .9rem;
+      color: var(--gris-500);
+      margin-bottom: 1rem;
+    }
+
+    .tarif-price {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--vert-700);
+      line-height: 1;
+      font-family: var(--font-head);
+    }
+
+    .tarif-price span {
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--gris-500);
+    }
+
+    /* ===== FAQ ===== */
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .faq-card {
+      background: var(--blanc);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      border: 1px solid var(--gris-200);
+      border-left: 4px solid var(--vert-500);
+      transition: var(--transition);
+    }
+
+    .faq-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      border-left-color: var(--rouge-500);
+    }
+
+    .faq-card h3 {
+      font-size: 1rem;
+      color: var(--vert-800);
+      margin-bottom: .6rem;
+    }
+
+    .faq-card p {
+      font-size: .88rem;
+      color: var(--gris-500);
+      line-height: 1.6;
+    }
+
+    /* Alerte info */
+    .info-alert {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-left: 4px solid #F59E0B;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .info-alert i {
+      color: #F59E0B;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .info-alert p {
+      font-size: .88rem;
+      color: #78350F;
+    }
+
+    .info-alert strong {
+      color: #92400E;
+    }
+
+    /* CTA band */
+    .cta-band {
+      background: linear-gradient(135deg, var(--vert-800), var(--vert-600));
+      border-radius: var(--radius-xl);
+      padding: 3.5rem;
+      text-align: center;
+      margin: 0 2.5rem;
+    }
+
+    .cta-band h2 {
+      color: var(--blanc);
+      font-size: 1.8rem;
+      margin-bottom: .75rem;
+    }
+
+    .cta-band p {
+      color: rgba(255, 255, 255, .72);
+      font-size: .95rem;
+      max-width: 460px;
+      margin: 0 auto 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero-inner {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 4rem 1.25rem 3rem;
+      }
+
+      .hero-stats {
+        width: 100%;
+      }
+
+      .highlight-row,
+      .highlight-row.reverse {
+        grid-template-columns: 1fr;
+        direction: ltr;
+      }
+
+      .cta-band {
+        margin: 0 1.25rem;
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ SKELETON PAGE ═══ -->
+  <div id="page-skeleton">
+    <!-- Navbar skeleton -->
+    <div class="sk-navbar">
+      <div class="sk-nav-links">
+        <div class="sk-nav-link"></div>
+        <div class="sk-nav-link" style="width:60px"></div>
+        <div class="sk-nav-link"></div>
+      </div>
+      <div class="sk-logo"></div>
+      <div class="sk-nav-links">
+        <div class="sk-nav-link" style="width:70px"></div>
+        <div class="sk-nav-link" style="width:90px"></div>
+        <div class="sk-nav-link" style="width:50px"></div>
+      </div>
+    </div>
+    <!-- Hero skeleton -->
+    <div class="sk-hero">
+      <div class="sk-hero-content">
+        <div class="sk-hero-tag"></div>
+        <div class="sk-hero-title"></div>
+        <div class="sk-hero-title-2"></div>
+        <div class="sk-hero-para"></div>
+        <div class="sk-hero-para" style="width:60%"></div>
+        <div class="sk-hero-btns">
+          <div class="sk-hero-btn"></div>
+          <div class="sk-hero-btn"></div>
+        </div>
+      </div>
+      <div class="sk-hero-card">
+        <div class="sk-hero-card-line" style="width:80%"></div>
+        <div class="sk-hero-card-line"></div>
+        <div class="sk-hero-card-line" style="width:70%"></div>
+        <div class="sk-hero-card-line"></div>
+        <div class="sk-hero-card-line" style="width:60%"></div>
+      </div>
+    </div>
+    <!-- Body skeleton -->
+    <div class="sk-body">
+      <div class="sk-section-header">
+        <div class="sk-tag sk-shimmer"></div>
+        <div class="sk-h2 sk-shimmer"></div>
+        <div class="sk-divider sk-shimmer"></div>
+        <div class="sk-sub sk-shimmer"></div>
+      </div>
+      <div class="sk-cards-grid">
+        <div class="sk-card">
+          <div class="sk-card-img sk-shimmer"></div>
+          <div class="sk-card-body">
+            <div class="sk-card-icon sk-shimmer"></div>
+            <div class="sk-card-title sk-shimmer"></div>
+            <div class="sk-card-text sk-shimmer"></div>
+            <div class="sk-card-text-2 sk-shimmer"></div>
+            <div class="sk-card-btn sk-shimmer"></div>
+          </div>
+        </div>
+        <div class="sk-card">
+          <div class="sk-card-img sk-shimmer"></div>
+          <div class="sk-card-body">
+            <div class="sk-card-icon sk-shimmer"></div>
+            <div class="sk-card-title sk-shimmer"></div>
+            <div class="sk-card-text sk-shimmer"></div>
+            <div class="sk-card-text-2 sk-shimmer"></div>
+            <div class="sk-card-btn sk-shimmer"></div>
+          </div>
+        </div>
+        <div class="sk-card">
+          <div class="sk-card-img sk-shimmer"></div>
+          <div class="sk-card-body">
+            <div class="sk-card-icon sk-shimmer"></div>
+            <div class="sk-card-title sk-shimmer"></div>
+            <div class="sk-card-text sk-shimmer"></div>
+            <div class="sk-card-text-2 sk-shimmer"></div>
+            <div class="sk-card-btn sk-shimmer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Masquer le skeleton dès que la page est prête
+    (function () {
+      function hideSkeleton() {
+        var sk = document.getElementById('page-skeleton');
+        if (sk) {
+          sk.classList.add('sk-hidden');
+          setTimeout(function () { if (sk.parentNode) sk.parentNode.removeChild(sk); }, 500);
+        }
+      }
+      if (document.readyState === 'complete') {
+        hideSkeleton();
+      } else {
+        window.addEventListener('load', hideSkeleton);
+        // Fallback : masquer après 3s maximum
+        setTimeout(hideSkeleton, 3000);
+      }
+    })();
+  </script>
+
+  <!-- NAVBAR GLOBALE -->
+  <div id="site-nav"></div>
+  <script src="navbar.js"></script>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <span class="hero-tag"><i class="fas fa-map-marker-alt"></i> Commune de Dembéni — Mayotte</span>
+        <h1>Toutes vos démarches<br><strong>en un seul endroit</strong></h1>
+        <p>État civil, documents officiels, collecte d'encombrants, crèche, centre de loisirs, urbanisme… Simplifiez vos
+          procédures depuis chez vous.</p>
+        <div class="hero-actions">
+          <a href="demarches.html" class="btn-hero-primary">
+            <i class="fas fa-rocket"></i> Lancer une démarche
+          </a>
+          <a href="service_public.html" class="btn-hero-ghost">
+            <i class="fas fa-info-circle"></i> Nos services
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <h3>Services disponibles</h3>
+        <div class="hero-stat-row">
+          <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+          <div class="info">
+            <div class="num">12+</div>
+            <div class="lbl">Démarches en ligne</div>
+          </div>
+        </div>
+        <div class="hero-stat-row">
+          <div class="stat-icon"><i class="far fa-clock"></i></div>
+          <div class="info">
+            <div class="num">24/7</div>
+            <div class="lbl">Portail accessible</div>
+          </div>
+        </div>
+        <div class="hero-stat-row">
+          <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+          <div class="info">
+            <div class="num">98%</div>
+            <div class="lbl">Taux de satisfaction</div>
+          </div>
+        </div>
+        <div class="hero-stat-row">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="info">
+            <div class="num">2500+</div>
+            <div class="lbl">Citoyens inscrits</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <path d="M0 60L1440 60L1440 20C1200 60 800 0 500 30C280 52 100 10 0 30L0 60Z" fill="#F8FAF9" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- DÉMARCHES EN LIGNE -->
+  <section class="section" id="services">
+    <div class="section-header center">
+      <span class="section-tag"><i class="fas fa-laptop"></i> En ligne</span>
+      <h2 class="section-title">Démarches administratives</h2>
+      <div class="divider"></div>
+      <p class="section-subtitle mt-2">Accédez rapidement à tous les services de la mairie depuis votre domicile.</p>
+    </div>
+
+    <div class="info-alert">
+      <i class="fas fa-info-circle"></i>
+      <p><strong>Information :</strong> Mairie ouverte du lundi au vendredi de 8h à 16h30. Tél. <strong>+262 XXX XXX
+          XXX</strong> — dembenimairie@gmail.com</p>
+    </div>
+
+    <div class="services-grid">
+      <!-- CARTE 1 -->
+      <div class="service-card-new">
+        <div class="scn-img">
+          <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&auto=format&fit=crop&q=60"
+            alt="État Civil">
+        </div>
+        <div class="scn-body">
+          <div class="scn-icon"><i class="fas fa-users"></i></div>
+          <h3>État Civil & Famille</h3>
+          <p>Naissance, mariage, livret... Le service État Civil vous accompagne dans les moments importants de la vie :
+            naissance, mariage, décès, reconnaissance, livret de famille.</p>
+
+          <div class="scn-stats">
+            <div class="scn-stat"><strong>1 mois</strong><span>Délai mariage</span></div>
+            <div class="scn-stat"><strong>48h</strong><span>Acte naissance</span></div>
+            <div class="scn-stat"><strong>Gratuit</strong><span>Livret</span></div>
+          </div>
+
+          <div class="scn-actions">
+            <a href="demarches.html" class="scn-action-btn"><i class="fas fa-ring"></i><span>Se marier</span></a>
+            <a href="demarches.html" class="scn-action-btn"><i
+                class="fas fa-file-signature"></i><span>Acte<br>naissance</span></a>
+            <a href="demarches.html" class="scn-action-btn"><i class="fas fa-book"></i><span>Livret famille</span></a>
+          </div>
+
+          <a href="demarches.html" class="btn-scn-main">Accéder à l'état civil <i
+              class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+
+      <!-- CARTE 2 -->
+      <div class="service-card-new">
+        <div class="scn-img">
+          <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=60"
+            alt="Documents">
+        </div>
+        <div class="scn-body">
+          <div class="scn-icon"><i class="fas fa-file-alt"></i></div>
+          <h3>Documents officiels</h3>
+          <p>CNI, passeport, identité numérique... Carte nationale d'identité, passeport, identité numérique et acte de
+            décès. Démarches sur rendez-vous.</p>
+
+          <div class="scn-stats">
+            <div class="scn-stat"><strong>15j</strong><span>Délai CNI</span></div>
+            <div class="scn-stat"><strong>86€</strong><span>Passeport</span></div>
+            <div class="scn-stat"><strong>Gratuit</strong><span>CNI</span></div>
+          </div>
+
+          <div class="scn-actions">
+            <a href="demarches.html" class="scn-action-btn"><i class="fas fa-id-card"></i><span>CNI
+                &<br>Passeport</span></a>
+            <a href="demarches.html" class="scn-action-btn"><i
+                class="fas fa-fingerprint"></i><span>Identité<br>numérique</span></a>
+            <a href="demarches.html" class="scn-action-btn"><i class="fas fa-file-medical-alt"></i><span>Acte
+                de<br>décès</span></a>
+          </div>
+
+          <a href="demarches.html" class="btn-scn-main">Accéder aux documents <i
+              class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+
+      <!-- CARTE 3 -->
+      <div class="service-card-new">
+        <div class="scn-img">
+          <img src="d:\dembeni\lagglomeration-dembeni-mamoudzou-adopte-les-bornes-enterrees-1.jpeg" alt="Collecte">
+        </div>
+        <div class="scn-body">
+          <div class="scn-icon"><i class="fas fa-trash-alt"></i></div>
+          <h3>Collecte d'encombrants</h3>
+          <p>Préservons notre environnement... Service de collecte des objets volumineux pour préserver la propreté et
+            le cadre de vie de la commune.</p>
+
+          <div class="scn-stats">
+            <div class="scn-stat"><strong>2/mois</strong><span>Collectes</span></div>
+            <div class="scn-stat"><strong>5</strong><span>Déchetteries</span></div>
+            <div class="scn-stat"><strong>Gratuit</strong><span>Service</span></div>
+          </div>
+
+          <div class="scn-actions">
+            <a href="collecte.html" class="scn-action-btn"><i
+                class="fas fa-calendar-alt"></i><span>Calendrier</span></a>
+            <a href="collecte.html" class="scn-action-btn"><i class="fas fa-edit"></i><span>Inscription</span></a>
+            <a href="collecte.html" class="scn-action-btn"><i
+                class="fas fa-exclamation-triangle"></i><span>Consignes</span></a>
+          </div>
+
+          <a href="collecte.html" class="btn-scn-main">Voir les collectes <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+
+      <!-- CARTE 4 -->
+      <div class="service-card-new">
+        <div class="scn-img">
+          <img src="https://images.unsplash.com/photo-1587691592099-24045742c181?w=600&auto=format&fit=crop&q=60"
+            alt="Crèche">
+        </div>
+        <div class="scn-body">
+          <div class="scn-icon"><i class="fas fa-baby"></i></div>
+          <h3>Inscription en crèche</h3>
+          <p>Accueil des jeunes enfants... L'inscription en crèche permet l'accueil des jeunes enfants de la commune.
+            Accompagnement personnalisé.</p>
+
+          <div class="scn-stats">
+            <div class="scn-stat"><strong>120</strong><span>Places</span></div>
+            <div class="scn-stat"><strong>3</strong><span>Crèches</span></div>
+            <div class="scn-stat"><strong>2-8€</strong><span>Tarif/h</span></div>
+          </div>
+
+          <div class="scn-actions">
+            <a href="inscription.html" class="scn-action-btn"><i
+                class="fas fa-folder-open"></i><span>Documents</span></a>
+            <a href="inscription.html" class="scn-action-btn"><i class="fas fa-euro-sign"></i><span>Tarifs</span></a>
+            <a href="inscription.html" class="scn-action-btn"><i
+                class="fas fa-clipboard-list"></i><span>Pré-<br>inscription</span></a>
+          </div>
+
+          <a href="inscription.html" class="btn-scn-main"
+            style="background: linear-gradient(135deg, var(--vert-900), var(--vert-700));">Inscrire mon enfant <i
+              class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+
+      <!-- CARTE 5 -->
+      <div class="service-card-new">
+        <div class="scn-img">
+          <img src="https://images.unsplash.com/photo-1600109968705-cb63b1451a54?w=600&auto=format&fit=crop&q=60"
+            alt="Loisirs">
+        </div>
+        <div class="scn-body">
+          <div class="scn-icon"><i class="fas fa-gamepad"></i></div>
+          <h3>Centre de loisirs</h3>
+          <p>Activités pour enfants 3-12 ans... Accueil pendant les vacances scolaires et les mercredis. Activités
+            variées et encadrement professionnel.</p>
+
+          <div class="scn-stats">
+            <div class="scn-stat"><strong>30+</strong><span>Places</span></div>
+            <div class="scn-stat"><strong>12</strong><span>Animateurs</span></div>
+            <div class="scn-stat"><strong>5-12€</strong><span>Tarif/jour</span></div>
+          </div>
+
+          <div class="scn-actions">
+            <a href="#loisirs" class="scn-action-btn"><i class="fas fa-futbol"></i><span>Activités</span></a>
+            <a href="#loisirs" class="scn-action-btn"><i class="fas fa-calendar-day"></i><span>Calendrier</span></a>
+            <a href="#loisirs" class="scn-action-btn"><i class="fas fa-user-plus"></i><span>Inscription</span></a>
+          </div>
+
+          <a href="#loisirs" class="btn-scn-main"
+            style="background: linear-gradient(135deg, var(--vert-900), var(--vert-700));">Voir les activités <i
+              class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+
+      <!-- CARTE 6 -->
+      <div class="service-card-new">
+        <div class="scn-img">
+          <img src="https://images.unsplash.com/photo-1522030299830-16b8d3d049f5?w=600&auto=format&fit=crop&q=60"
+            alt="Urbanisme">
+        </div>
+        <div class="scn-body">
+          <div class="scn-icon"><i class="fas fa-city"></i></div>
+          <h3>Urbanisme & habitat</h3>
+          <p>Permis, travaux, cadastre... Permis de construire, déclaration préalable de travaux, renseignements
+            cadastraux. Instruction et suivi des dossiers.</p>
+
+          <div class="scn-stats">
+            <div class="scn-stat"><strong>2 mois</strong><span>Permis</span></div>
+            <div class="scn-stat"><strong>1 mois</strong><span>Travaux</span></div>
+            <div class="scn-stat"><strong>24h</strong><span>Cadastre</span></div>
+          </div>
+
+          <div class="scn-actions">
+            <a href="demarches.html" class="scn-action-btn"><i
+                class="fas fa-clipboard-check"></i><span>Permis</span></a>
+            <a href="demarches.html" class="scn-action-btn"><i class="fas fa-tools"></i><span>Travaux</span></a>
+            <a href="demarches.html" class="scn-action-btn"><i class="fas fa-map"></i><span>Cadastre</span></a>
+          </div>
+
+          <a href="demarches.html" class="btn-scn-main"
+            style="background: linear-gradient(135deg, var(--vert-900), var(--vert-700));">Consulter urbanisme <i
+              class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLLECTE section -->
+  <div
+    style="background:var(--vert-50); border-top:1px solid var(--vert-100); border-bottom:1px solid var(--vert-100); padding:1rem 0;">
+    <section class="section" style="padding:3rem 2.5rem;">
+      <div class="highlight-row">
+        <div class="highlight-img">
+          <img src="d:\dembeni\téléchargement (7).jpg" alt="Collecte des encombrants Dembeni" loading="lazy">
+        </div>
+        <div class="highlight-content">
+          <span class="section-tag"><i class="fas fa-recycle"></i> Écologie</span>
+          <h2 class="section-title">Collecte d'encombrants</h2>
+          <div class="divider"></div>
+          <p class="mt-2">La commune organise deux collectes d'encombrants par mois pour maintenir la propreté et le
+            cadre de vie de Dembéni. Service entièrement gratuit pour les habitants.</p>
+          <ul class="checklist">
+            <li><i class="fas fa-check"></i> Meubles, électroménager, literie acceptés</li>
+            <li><i class="fas fa-calendar-alt"></i> 2 passages par mois, sur inscription</li>
+            <li><i class="fas fa-leaf"></i> Alternatives écologiques disponibles</li>
+            <li><i class="fas fa-ban"></i> Gravats et déchets verts refusés</li>
+          </ul>
+          <a href="collecte.html" class="btn btn-primary">S'inscrire à la collecte <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- SERVICE PUBLIC section -->
+  <section class="section">
+    <div class="highlight-row reverse">
+      <div class="highlight-img">
+        <img src="d:\dembeni\téléchargement (8).jpg" alt="Service public Dembeni" loading="lazy">
+      </div>
+      <div class="highlight-content">
+        <span class="section-tag"><i class="fas fa-landmark"></i> Proximité</span>
+        <h2 class="section-title">Service public de proximité</h2>
+        <div class="divider"></div>
+        <p class="mt-2">Les services municipaux accompagnent les habitants de Dembéni dans toutes leurs démarches. État
+          civil, vie scolaire, action sociale, urbanisme.</p>
+        <div class="stats-strip mt-3" style="grid-template-columns:1fr 1fr; gap:.75rem;">
+          <div class="stat-box">
+            <div class="stat-num">98%</div>
+            <div class="stat-label">Satisfaction</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">24/7</div>
+            <div class="stat-label">Portail en ligne</div>
+          </div>
+        </div>
+        <a href="service_public.html" class="btn btn-primary mt-3">Voir tous les services <i
+            class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOISIRS & TARIFS -->
+  <section class="section" id="loisirs"
+    style="background:var(--gris-100); border-radius:var(--radius-xl); max-width:100%; padding:4rem 0;">
+    <div style="max-width:1200px; margin:0 auto; padding:0 2.5rem;">
+      <div class="section-header center">
+        <span class="section-tag"><i class="fas fa-child"></i> Petite enfance</span>
+        <h2 class="section-title">Enfance &amp; Loisirs</h2>
+        <div class="divider"></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; margin-top:2.5rem;" class="loisirs-grid">
+        <div>
+          <h3
+            style="font-size:1.1rem; color:var(--vert-800); margin-bottom:1.25rem; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-palette" style="color:var(--vert-500);"></i> Activités du centre de loisirs
+          </h3>
+          <div class="activities-grid">
+            <div class="activity-card"><i class="fas fa-palette"></i><span>Arts</span></div>
+            <div class="activity-card"><i class="fas fa-futbol"></i><span>Sports</span></div>
+            <div class="activity-card"><i class="fas fa-theater-masks"></i><span>Théâtre</span></div>
+            <div class="activity-card"><i class="fas fa-leaf"></i><span>Nature</span></div>
+            <div class="activity-card"><i class="fas fa-music"></i><span>Musique</span></div>
+            <div class="activity-card"><i class="fas fa-swimmer"></i><span>Natation</span></div>
+          </div>
+        </div>
+
+        <div>
+          <h3
+            style="font-size:1.1rem; color:var(--vert-800); margin-bottom:1.25rem; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-euro-sign" style="color:var(--vert-500);"></i> Tarifs Crèche — Quotient Familial
+          </h3>
+          <div class="tarif-grid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="tarif-card">
+              <h3>QF faible</h3>
+              <div class="tarif-price">1,50<span> €/h</span></div>
+            </div>
+            <div class="tarif-card featured">
+              <h3>QF moyen</h3>
+              <div class="tarif-price">3,20<span> €/h</span></div>
+            </div>
+            <div class="tarif-card">
+              <h3>QF élevé</h3>
+              <div class="tarif-price">5,00<span> €/h</span></div>
+            </div>
+          </div>
+          <p style="font-size:.82rem; color:var(--gris-500); margin-top:1rem;"><i class="fas fa-info-circle"
+              style="color:var(--vert-400);"></i> Tarifs définis selon le quotient familial CAF. Sur dossier.</p>
+          <a href="inscription.html" class="btn btn-primary mt-3" style="width:100%; justify-content:center;">Inscrire
+            mon enfant <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="section-header center">
+      <span class="section-tag"><i class="fas fa-question-circle"></i> Aide</span>
+      <h2 class="section-title">Questions fréquentes</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="faq-grid mt-3">
+      <div class="faq-card">
+        <h3>Quels documents pour un mariage ?</h3>
+        <p>Pièces d'identité, justificatifs de domicile, actes de naissance de moins de 3 mois, et la liste complète des
+          témoins.</p>
+      </div>
+      <div class="faq-card">
+        <h3>Comment obtenir un passeport ?</h3>
+        <p>Sur rendez-vous en mairie : photo conforme, justificatif de domicile et timbre fiscal (86 € adulte). Délai
+          ~15 jours.</p>
+      </div>
+      <div class="faq-card">
+        <h3>Quels objets pour les encombrants ?</h3>
+        <p>Acceptés : meubles, électroménager, literie, cartons. Refusés : gravats, déchets verts et produits chimiques.
+        </p>
+      </div>
+      <div class="faq-card">
+        <h3>Comment inscrire mon enfant en crèche ?</h3>
+        <p>Pré-inscription en ligne puis dépôt d'un dossier complet. Places attribuées selon disponibilités et quotient
+          familial.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div style="padding:0 0 5rem;">
+    <div class="cta-band">
+      <h2>Besoin d'aide pour vos démarches ?</h2>
+      <p>Notre équipe est disponible pour vous accompagner et répondre à toutes vos questions.</p>
+      <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="contact.html" class="btn btn-primary btn-lg"><i class="fas fa-envelope"></i> Nous contacter</a>
+        <a href="demarches.html" class="btn btn-secondary btn-lg"><i class="fas fa-list"></i> Toutes les démarches</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="accueil.html" class="footer-logo">
+          <div class="logo-icon">D</div>
+          <span class="logo-name">DEMBÉNI<em>.</em></span>
+        </a>
+        <p>Portail citoyen officiel de la commune de Dembéni, Mayotte. Simplifiez vos démarches administratives en
+          ligne, en toute sécurité.</p>
+        <div class="footer-socials">
+          <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="accueil.html">Accueil</a></li>
+          <li><a href="demarches.html">Démarches</a></li>
+          <li><a href="collecte.html">Collecte</a></li>
+          <li><a href="service_public.html">Service public</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="demarches.html">État civil</a></li>
+          <li><a href="demarches.html">Documents officiels</a></li>
+          <li><a href="demarches.html">Urbanisme</a></li>
+          <li><a href="inscription.html">Crèche</a></li>
+          <li><a href="collecte.html">Encombrants</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Informations</h4>
+        <div class="footer-contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Mairie de Dembéni, Mayotte 97680</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-phone"></i>
+          <span>+262 269 XX XX XX</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>dembenimairie@gmail.com</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="far fa-clock"></i>
+          <span>Lun–Ven · 8h00 – 16h30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Mairie de Dembéni — Tous droits réservés</p>
+      <div class="footer-bottom-links">
+        <a href="#">Mentions légales</a>
+        <a href="#">Confidentialité</a>
+        <a href="#">Accessibilité</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+
+    // Smooth scroll sur les ancres
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          navLinks.classList.remove('open');
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Active nav link au scroll
+    const sections = document.querySelectorAll('[id]');
+    const links = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 100) current = sec.id;
+      });
+      links.forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+      });
+    }, { passive: true });
+  </script>
+
+</body>
+
+</html>

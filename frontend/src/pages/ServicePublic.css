@@ -1,0 +1,81 @@
+/* Services grid */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.svc-card {
+  background: var(--blanc);
+  border: 1px solid var(--gris-200);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+
+.svc-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--vert-600), var(--vert-300));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .4s ease;
+}
+
+.svc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--vert-200);
+}
+
+.svc-card:hover::after { transform: scaleX(1); }
+
+.svc-icon {
+  width: 52px; height: 52px; border-radius: var(--radius-md);
+  background: var(--vert-50); border: 1px solid var(--vert-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: var(--vert-600);
+  margin-bottom: 1.2rem; transition: var(--transition);
+}
+
+.svc-card:hover .svc-icon {
+  background: var(--vert-600); color: var(--blanc); border-color: var(--vert-600);
+}
+
+.svc-card h3 { font-size: 1.05rem; color: var(--vert-800); margin-bottom: .5rem; }
+.svc-card p { font-size: .88rem; color: var(--gris-500); line-height: 1.65; margin-bottom: 1rem; }
+
+.svc-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 1rem; border-top: 1px solid var(--gris-100); gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.svc-hours {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .78rem; color: var(--gris-500);
+}
+
+.svc-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .82rem; font-weight: 600;
+  color: var(--vert-600); text-decoration: none; transition: var(--transition);
+}
+
+.svc-link:hover { gap: 8px; color: var(--vert-800); }
+
+/* CTA band */
+.cta-band {
+  background: linear-gradient(135deg, var(--vert-800), var(--vert-600));
+  border-radius: var(--radius-xl);
+  padding: 3.5rem; text-align: center; margin: 0 2.5rem;
+}
+
+.cta-band h2 { color: var(--blanc); font-size: 1.8rem; margin-bottom: .8rem; }
+.cta-band p { color: rgba(255,255,255,.75); font-size: .95rem; max-width: 480px; margin: 0 auto 2rem; }
+
+@media (max-width: 768px) {
+  .cta-band { margin: 0 1.25rem; padding: 2rem 1.5rem; }
+}

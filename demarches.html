@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dembéni · Démarches Administratives</title>
+  <meta name="description" content="Toutes vos démarches administratives en ligne - Mairie de Dembéni, Mayotte">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* SEARCH BAR */
+    .search-wrap {
+      max-width: 800px; margin: -30px auto 3rem;
+      padding: 0 2rem; position: relative; z-index: 10;
+    }
+
+    .search-bar {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--blanc);
+      border-radius: var(--radius-pill);
+      padding: .6rem .6rem .6rem 1.8rem;
+      box-shadow: 0 15px 40px rgba(0,0,0,.1);
+      border: 1px solid var(--vert-100);
+    }
+
+    .search-bar input {
+      border: none; outline: none; flex: 1;
+      font-size: 1rem; color: var(--gris-700);
+      font-family: var(--font-body);
+    }
+
+    .search-bar input::placeholder { color: var(--gris-300); }
+
+    .search-bar button {
+      background: linear-gradient(135deg, var(--vert-600), var(--vert-400));
+      color: var(--blanc); border: none;
+      padding: .85rem 2rem; border-radius: var(--radius-pill);
+      font-weight: 700; font-size: .95rem; font-family: var(--font-body);
+      cursor: pointer; transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(35,122,62,.3);
+    }
+
+    .search-bar button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(35,122,62,.4); }
+
+    /* CATEGORIES TABS */
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: .75rem;
+      justify-content: center; margin-bottom: 3rem;
+    }
+
+    .tab-btn {
+      padding: .65rem 1.4rem;
+      border: 1.5px solid var(--vert-200);
+      border-radius: var(--radius-pill);
+      background: var(--blanc); color: var(--gris-500);
+      font-weight: 600; font-size: .9rem; font-family: var(--font-body);
+      cursor: pointer; transition: var(--transition);
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: var(--vert-600); border-color: var(--vert-600);
+      color: var(--blanc);
+      box-shadow: 0 4px 12px rgba(35,122,62,.2);
+      transform: translateY(-2px);
+    }
+
+    /* DEMARCHES GRID */
+    .demarches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .demarche-card {
+      background: var(--blanc);
+      border-radius: var(--radius-lg);
+      padding: 1.8rem;
+      border: 1px solid var(--gris-200);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer; position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    .demarche-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--vert-600), var(--vert-300));
+      transform: scaleY(0); transform-origin: top; transition: transform .4s ease;
+    }
+
+    .demarche-card:hover {
+      transform: translateY(-4px); box-shadow: var(--shadow-md);
+      border-color: var(--vert-200);
+    }
+
+    .demarche-card:hover::before { transform: scaleY(1); }
+
+    .card-top { display: flex; align-items: center; gap: 1.2rem; }
+
+    .card-icon {
+      width: 55px; height: 55px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; background: var(--vert-50);
+      color: var(--vert-600); transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .demarche-card:hover .card-icon { background: var(--vert-600); color: var(--blanc); }
+
+    .card-meta h3 { font-size: 1.05rem; font-weight: 700; color: var(--vert-800); margin-bottom: .3rem; }
+    
+    .card-desc { font-size: .9rem; color: var(--gris-500); line-height: 1.6; flex: 1; }
+
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 1rem; border-top: 1px solid var(--gris-100); margin-top: auto;
+    }
+    
+    .card-info-mini { font-size: .8rem; color: var(--gris-500); display: flex; align-items: center; gap: 6px; }
+    
+    .card-link {
+      font-size: .85rem; font-weight: 600; color: var(--vert-600);
+      text-decoration: none; display: flex; align-items: center; gap: 5px; transition: var(--transition);
+    }
+
+    .card-link:hover { color: var(--vert-800); gap: 8px; }
+
+    .no-results {
+      text-align: center; grid-column: 1 / -1; padding: 4rem 2rem;
+      color: var(--gris-500); font-size: 1.1rem;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 2000;
+      align-items: center; justify-content: center;
+      padding: 1.5rem; backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active { display: flex; animation: fadeIn .3s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--blanc); border-radius: var(--radius-lg);
+      padding: 2.5rem; max-width: 550px; width: 100%;
+      position: relative; box-shadow: var(--shadow-xl);
+      animation: slideUp .3s ease; max-height: 90vh; overflow-y: auto;
+    }
+
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal .close-btn {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      background: var(--gris-100); border: none;
+      width: 36px; height: 36px; border-radius: 50%;
+      cursor: pointer; font-size: 1rem; color: var(--gris-500);
+      transition: var(--transition);
+    }
+
+    .modal .close-btn:hover { background: var(--rouge-500); color: var(--blanc); }
+
+    .modal-icon {
+      width: 65px; height: 65px; background: var(--vert-50); border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color: var(--vert-600); margin-bottom: 1.5rem;
+    }
+
+    .modal h2 { font-size: 1.5rem; color: var(--vert-800); margin-bottom: .8rem; }
+    .modal p { color: var(--gris-500); font-size: .95rem; margin-bottom: 1.2rem; line-height: 1.6; }
+
+    .modal-steps {
+      background: var(--vert-50); border-radius: var(--radius-md); border: 1px solid var(--vert-100);
+      padding: 1.2rem 1.5rem; margin: 1.2rem 0;
+    }
+
+    .modal-steps h4 { color: var(--vert-800); font-size: .95rem; margin-bottom: .8rem; font-family: var(--font-body); }
+    .modal-steps ol { padding-left: 1.2rem; }
+    .modal-steps li { color: var(--vert-700); font-size: .9rem; margin-bottom: .5rem; font-weight: 500; }
+
+    .modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+
+    @media (max-width: 768px) {
+      .search-wrap { margin-top: -25px; padding: 0 1rem; }
+      .search-bar button { padding: .7rem 1.2rem; font-size: .9rem; }
+      .modal-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SKELETON PAGE ═══ -->
+<div id="page-skeleton">
+  <div class="sk-navbar">
+    <div class="sk-nav-links">
+      <div class="sk-nav-link"></div>
+      <div class="sk-nav-link" style="width:60px"></div>
+      <div class="sk-nav-link"></div>
+    </div>
+    <div class="sk-logo"></div>
+    <div class="sk-nav-links">
+      <div class="sk-nav-link" style="width:70px"></div>
+      <div class="sk-nav-link" style="width:90px"></div>
+    </div>
+  </div>
+  <div class="sk-banner">
+    <div class="sk-banner-bread"></div>
+    <div class="sk-banner-title"></div>
+    <div class="sk-banner-sub"></div>
+  </div>
+  <div class="sk-body">
+    <!-- Tabs -->
+    <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+      <div class="sk-shimmer" style="height:36px;width:140px;border-radius:50px;"></div>
+      <div class="sk-shimmer" style="height:36px;width:100px;border-radius:50px;"></div>
+      <div class="sk-shimmer" style="height:36px;width:110px;border-radius:50px;"></div>
+      <div class="sk-shimmer" style="height:36px;width:130px;border-radius:50px;"></div>
+      <div class="sk-shimmer" style="height:36px;width:100px;border-radius:50px;"></div>
+    </div>
+    <div class="sk-cards-grid">
+      <div class="sk-card">
+        <div class="sk-card-body">
+          <div class="sk-card-icon sk-shimmer"></div>
+          <div class="sk-card-title sk-shimmer"></div>
+          <div class="sk-card-text sk-shimmer"></div>
+          <div class="sk-card-text-2 sk-shimmer"></div>
+        </div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-card-body">
+          <div class="sk-card-icon sk-shimmer"></div>
+          <div class="sk-card-title sk-shimmer"></div>
+          <div class="sk-card-text sk-shimmer"></div>
+          <div class="sk-card-text-2 sk-shimmer"></div>
+        </div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-card-body">
+          <div class="sk-card-icon sk-shimmer"></div>
+          <div class="sk-card-title sk-shimmer"></div>
+          <div class="sk-card-text sk-shimmer"></div>
+          <div class="sk-card-text-2 sk-shimmer"></div>
+        </div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-card-body">
+          <div class="sk-card-icon sk-shimmer"></div>
+          <div class="sk-card-title sk-shimmer"></div>
+          <div class="sk-card-text sk-shimmer"></div>
+          <div class="sk-card-text-2 sk-shimmer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function hideSkeleton() {
+      var sk = document.getElementById('page-skeleton');
+      if (sk) {
+        sk.classList.add('sk-hidden');
+        setTimeout(function(){ if(sk.parentNode) sk.parentNode.removeChild(sk); }, 500);
+      }
+    }
+    if (document.readyState === 'complete') { hideSkeleton(); }
+    else { window.addEventListener('load', hideSkeleton); setTimeout(hideSkeleton, 3000); }
+  })();
+</script>
+
+<div id="site-nav"></div>
+<script src="navbar.js"></script>
+
+<!-- HERO -->
+<section class="page-banner">
+  <div class="page-banner-inner">
+    <div class="breadcrumb">
+      <a href="accueil.html"><i class="fas fa-home"></i> Accueil</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Démarches Administratives</span>
+    </div>
+    <h1>Vos démarches en ligne</h1>
+    <p>Accédez à tous vos services municipaux de manière simplifiée. Trouvez l'information et initiez vos procédures depuis chez vous, 24h/24.</p>
+  </div>
+</section>
+
+<!-- SEARCH BAR -->
+<div class="search-wrap">
+  <div class="search-bar">
+    <i class="fas fa-search" style="color:var(--gris-300);"></i>
+    <input type="text" id="searchInput" placeholder="Rechercher une démarche (passeport, mariage, crèche...)">
+    <button onclick="filterCards()"><i class="fas fa-search"></i> &nbsp;Rechercher</button>
+  </div>
+</div>
+
+<section class="section pt-0">
+  
+  <div class="info-alert" style="margin-top: 1rem;">
+    <i class="fas fa-info-circle"></i>
+    <p><strong>Rappel :</strong> Certaines démarches nécessitent une prise de rendez-vous en mairie. Mairie ouverte du lundi au vendredi, de 8h à 16h30. Téléphone : <strong>+262 XXX XXX XXX</strong></p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="filterByCategory('all', this)">Tous les services</button>
+    <button class="tab-btn" onclick="filterByCategory('civil', this)">État Civil</button>
+    <button class="tab-btn" onclick="filterByCategory('documents', this)">Documents</button>
+    <button class="tab-btn" onclick="filterByCategory('enfance', this)">Enfance &amp; Loisirs</button>
+    <button class="tab-btn" onclick="filterByCategory('logement', this)">Logement</button>
+    <button class="tab-btn" onclick="filterByCategory('urbanisme', this)">Urbanisme</button>
+    <button class="tab-btn" onclick="filterByCategory('ecologie', this)">Écologie</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="demarches-grid" id="demarchesGrid">
+
+    <!-- CIVIL -->
+    <div class="demarche-card" data-category="civil" onclick="openModal('naissance')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-baby"></i></div>
+        <div class="card-meta">
+          <h3>Déclaration de naissance</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Déclarez la naissance de votre enfant dans les 5 jours suivant l'accouchement à la mairie du lieu de naissance.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> Sous 5 jours</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <div class="demarche-card" data-category="civil" onclick="openModal('mariage')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-ring"></i></div>
+        <div class="card-meta">
+          <h3>Célébration de mariage</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Déposez et complétez votre dossier de mariage civil en mairie au moins 1 mois avant la date souhaitée.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> 1 mois min.</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <div class="demarche-card" data-category="civil" onclick="openModal('deces')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-book-open"></i></div>
+        <div class="card-meta">
+          <h3>Déclaration de décès</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Déclarez le décès d'un proche dans les 24 heures pour obtenir l'acte officiel en mairie.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> Sous 24h</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="demarche-card" data-category="documents" onclick="openModal('cni')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-id-card"></i></div>
+        <div class="card-meta">
+          <h3>Carte Nationale d'Identité</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Demandez ou renouvelez votre CNI sur rendez-vous. Valable 10 ans pour les adultes (5 ans pour majeurs).</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> 3 à 6 semaines</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <div class="demarche-card" data-category="documents" onclick="openModal('passeport')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-passport"></i></div>
+        <div class="card-meta">
+          <h3>Passeport biométrique</h3>
+          <span class="badge badge-rouge">86 € (Adulte)</span>
+        </div>
+      </div>
+      <p class="card-desc">Obtenez votre passeport biométrique avec photo conforme et timbre fiscal (prise de rdv obligatoire).</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> ~15 jours</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <div class="demarche-card" data-category="documents" onclick="openModal('acte')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-file-alt"></i></div>
+        <div class="card-meta">
+          <h3>Acte d'état civil</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Demandez une copie intégrale ou un extrait d'acte de naissance, de mariage ou de décès.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> 48h</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <!-- ENFANCE -->
+    <div class="demarche-card" data-category="enfance" onclick="openModal('creche')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-baby-carriage"></i></div>
+        <div class="card-meta">
+          <h3>Inscription en crèche</h3>
+          <span class="badge badge-gris">Selon QF</span>
+        </div>
+      </div>
+      <p class="card-desc">Pré-inscrivez votre enfant (0-3 ans) en crèche municipale. Attribution selon quotient familial CAF.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="fas fa-users"></i> Commission</span>
+        <a href="inscription.html" class="card-link" onclick="event.stopPropagation()">S'inscrire <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="demarche-card" data-category="enfance" onclick="openModal('loisirs')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+        <div class="card-meta">
+          <h3>Centre de loisirs</h3>
+          <span class="badge badge-rouge">5-12 €/jour</span>
+        </div>
+      </div>
+      <p class="card-desc">Activités éducatives (arts, sports) pour enfants de 3 à 12 ans pendant les vacances scolaires.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="fas fa-calendar"></i> Vacances scol.</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <!-- LOGEMENT -->
+    <div class="demarche-card" data-category="logement" onclick="openModal('hlm')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-home"></i></div>
+        <div class="card-meta">
+          <h3>Logement social (HLM)</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Déposez et renouvelez votre demande de logement social. Obtenez votre numéro unique départemental.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> Dossier</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <!-- URBANISME -->
+    <div class="demarche-card" data-category="urbanisme" onclick="openModal('permis')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-hard-hat"></i></div>
+        <div class="card-meta">
+          <h3>Permis de construire</h3>
+          <span class="badge badge-gris">Dossier</span>
+        </div>
+      </div>
+      <p class="card-desc">Essentiel pour construction >20m². Instruction par le service urbanisme de la mairie.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> 2 mois max.</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <div class="demarche-card" data-category="urbanisme" onclick="openModal('declaration')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-tools"></i></div>
+        <div class="card-meta">
+          <h3>Déclaration de travaux</h3>
+          <span class="badge badge-vert">Gratuit</span>
+        </div>
+      </div>
+      <p class="card-desc">Obligatoire pour les petits aménagements, extensions (<20m²), changement de fenêtres, clôtures etc.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="far fa-clock"></i> 1 mois max.</span>
+        <span class="card-link">Consulter <i class="fas fa-arrow-right"></i></span>
+      </div>
+    </div>
+
+    <!-- ECOLOGIE -->
+    <div class="demarche-card" data-category="ecologie" onclick="openModal('encombrants')">
+      <div class="card-top">
+        <div class="card-icon"><i class="fas fa-recycle"></i></div>
+        <div class="card-meta">
+          <h3>Collecte d'encombrants</h3>
+          <span class="badge badge-vert">Gratuit (2/mois)</span>
+        </div>
+      </div>
+      <p class="card-desc">Demandez le retrait à domicile de vos objets volumineux. Service municipal bimensuel 100% gratuit.</p>
+      <div class="card-footer">
+        <span class="card-info-mini"><i class="fas fa-truck"></i> Bimensuel</span>
+        <a href="collecte.html" class="card-link" onclick="event.stopPropagation()">S'inscrire <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MODAL CACHÉE -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-icon" id="modalIcon"><i class="fas fa-file-alt"></i></div>
+    <h2 id="modalTitle">Démarche</h2>
+    <p id="modalDesc">Description de la démarche.</p>
+    <div class="modal-steps">
+      <h4><i class="fas fa-list-ol" style="margin-right:8px;color:var(--vert-500);"></i> Étapes à suivre</h4>
+      <ol id="modalSteps"></ol>
+    </div>
+    <div class="modal-actions">
+      <a href="contact.html" class="btn btn-primary" style="flex:1; justify-content:center;"><i class="fas fa-envelope"></i> Nous contacter</a>
+      <a href="index.html" class="btn btn-outline" style="flex:1; justify-content:center;">Mon espace Citoyen</a>
+    </div>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+
+<script>
+  // ===== MODALS DATA =====
+  const modals = {
+    naissance: {
+      icon: 'fas fa-baby',
+      title: 'Déclaration de naissance',
+      desc: 'La déclaration de naissance est obligatoire dans les 5 jours qui suivent le jour de l\'accouchement. Elle se fait à la mairie du lieu de naissance.',
+      steps: [
+        'Se rendre à la mairie muni du certificat médical d\'accouchement',
+        'Présenter les pièces d\'identité des deux parents',
+        'Fournir le livret de famille s\'il existe',
+        'L\'officier établit l\'acte de naissance immédiatement'
+      ]
+    },
+    mariage: {
+      icon: 'fas fa-ring',
+      title: 'Célébration de mariage civil',
+      desc: 'La célébration du mariage civil se fait à la mairie du domicile de l\'un des futurs époux. Le dossier doit être déposé au moins 1 mois avant la cérémonie.',
+      steps: [
+        'Retirer le dossier de mariage en mairie',
+        'Rassembler les pièces : CNI, extrait acte de naissance, justificatif de domicile',
+        'Choisir 2 témoins (avec leurs pièces d\'identité)',
+        'Déposer le dossier complet en mairie',
+        'Fixer la date de cérémonie avec l\'officier d\'état civil'
+      ]
+    },
+    deces: {
+      icon: 'fas fa-book-open',
+      title: 'Déclaration de décès',
+      desc: 'La déclaration de décès doit être effectuée dans les 24 heures du décès à la mairie du lieu du décès, par un proche ou l\'entreprise de pompes funèbres.',
+      steps: [
+        'Obtenir le certificat médical constatant le décès',
+        'Se rendre à la mairie du lieu du décès',
+        'Présenter le livret de famille du défunt',
+        'L\'acte de décès est délivré immédiatement'
+      ]
+    },
+    cni: {
+      icon: 'fas fa-id-card',
+      title: 'Carte Nationale d\'Identité',
+      desc: 'La CNI est gratuite et valable 10 ans pour les adultes (5 ans pour les mineurs). La demande se fait sur rendez-vous en mairie.',
+      steps: [
+        'Pré-demande en ligne sur le site de l\'ANTS (ants.gouv.fr)',
+        'Prendre rendez-vous en mairie (lundi-vendredi, 8h-16h30)',
+        'Apporter : photo d\'identité conforme, justificatif de domicile, ancienne CNI',
+        'La carte est disponible sous 3 à 6 semaines',
+        'Retrait en mairie sur présentation du justificatif'
+      ]
+    },
+    passeport: {
+      icon: 'fas fa-passport',
+      title: 'Passeport biométrique',
+      desc: 'Le passeport biométrique est valable 10 ans (5 ans pour les mineurs). Le timbre fiscal de 86 € (adultes) ou 42 € (mineurs) est nécessaire.',
+      steps: [
+        'Acheter le timbre fiscal sur timbres.impots.gouv.fr ou en bureau de tabac',
+        'Télécharger les formulaires sur service-public.fr',
+        'Prendre rendez-vous en mairie avec : photo, justificatif domicile, timbre fiscal, ancienne CNI',
+        'Le passeport est prêt sous 15 jours environ',
+        'Retrait en mairie uniquement'
+      ]
+    },
+    acte: {
+      icon: 'fas fa-file-alt',
+      title: 'Demande d\'acte d\'état civil',
+      desc: 'Vous pouvez demander des copies ou extraits d\'actes de naissance, mariage ou décès. La délivrance est gratuite et disponible sous 48h.',
+      steps: [
+        'Remplir le formulaire de demande en ligne ou en mairie',
+        'Préciser le type d\'acte (naissance, mariage, décès) et la date',
+        'Joindre une copie de votre pièce d\'identité',
+        'L\'acte vous est envoyé par courrier ou remis en mairie sous 48h'
+      ]
+    },
+    creche: {
+      icon: 'fas fa-child',
+      title: 'Inscription en crèche',
+      desc: 'La crèche municipale accueille les enfants de 2 mois à 3 ans. Les tarifs sont calculés selon le quotient familial de la CAF.',
+      steps: [
+        'Pré-inscription en ligne ou en mairie (dès la grossesse)',
+        'Constituer le dossier : acte de naissance, attestation CAF, carnet de santé',
+        'Attendre la convocation de la commission d\'attribution',
+        'Signer le contrat d\'accueil',
+        'Visite d\'adaptation avant l\'entrée officielle'
+      ]
+    },
+    loisirs: {
+      icon: 'fas fa-gamepad',
+      title: 'Centre de loisirs municipal',
+      desc: 'Le centre de loisirs accueille les enfants de 3 à 12 ans pendant les vacances scolaires. Activités arts, sports, nature, théâtre et plus.',
+      steps: [
+        'Retirer le dossier d\'inscription au centre de loisirs ou en mairie',
+        'Joindre : photo, carnet de vaccination, attestation d\'assurance',
+        'Calculer votre quotient familial CAF pour le tarif',
+        'Remettre le dossier complété avant la période de vacances',
+        'Tarif : 5 à 12 € par jour selon quotient familial'
+      ]
+    },
+    hlm: {
+      icon: 'fas fa-home',
+      title: 'Demande de logement social',
+      desc: 'Pour faire une demande de logement social (HLM), vous devez disposer d\'un numéro unique de demandeur (NUD).',
+      steps: [
+        'Remplir le formulaire de demande de logement en mairie',
+        'Joindre les pièces justificatives (revenus, pièce d\'identité, situation familiale)',
+        'Recevoir votre numéro unique départemental',
+        'Candidater aux logements disponibles',
+        'Renouveler votre demande chaque année'
+      ]
+    },
+    permis: {
+      icon: 'fas fa-hard-hat',
+      title: 'Permis de construire',
+      desc: 'Le permis de construire est obligatoire pour toute construction de plus de +20m². Le dossier est instruit par le service urbanisme (délai de 2 mois approx).',
+      steps: [
+        'Consulter le Plan Local d\'Urbanisme (PLU) en mairie',
+        'Constituer le dossier CERFA avec plans, photos, et descriptif',
+        'Déposer 4 exemplaires papier ou dépôt dématérialisé',
+        'Affichage public par la mairie',
+        'Décision finale et affichage du permis sur le terrain des travaux'
+      ]
+    },
+    declaration: {
+      icon: 'fas fa-tools',
+      title: 'Déclaration préalable de travaux',
+      desc: 'La déclaration préalable est obligatoire pour les travaux d\'extension de moins de 20m², modification de façade, clôture...',
+      steps: [
+        'Télécharger le formulaire CERFA sur service-public.fr',
+        'Joindre le plan de situation, de masse et les photos du projet',
+        'Déposer le dossier en mairie',
+        'Délai d\'instruction : 1 mois',
+        'Afficher la décision en mairie et sur le terrain'
+      ]
+    },
+    encombrants: {
+      icon: 'fas fa-recycle',
+      title: 'Collecte d\'encombrants',
+      desc: 'La commune organise deux collectes d\'encombrants par mois. Gratuit pour les habitants. Sont acceptés : meubles, électroménager, literie, cartons.',
+      steps: [
+        'Consulter le calendrier des collectes sur le portail en ligne',
+        'S\'inscrire via le formulaire dédié',
+        'Déposer vos objets en bas de chez vous la veille au soir',
+        'Interdit : gravats, déchets verts, toxiques',
+        'Penser au don ou à la déchetterie si pressé'
+      ]
+    }
+  };
+
+  // MODAL LOGIC
+  function openModal(key) {
+    const data = modals[key];
+    if (!data) return;
+    document.getElementById('modalIcon').innerHTML = `<i class="${data.icon}"></i>`;
+    document.getElementById('modalTitle').textContent = data.title;
+    document.getElementById('modalDesc').textContent = data.desc;
+    document.getElementById('modalSteps').innerHTML = data.steps.map(s => `<li>${s}</li>`).join('');
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) {
+    if (!e || e.target === document.getElementById('modalOverlay')) {
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // KEYBOARD ESC
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal({target: document.getElementById('modalOverlay')});
+  });
+
+  // FILTER CARDS
+  function filterByCategory(cat, btn) {
+    let visibleCount = 0;
+    document.querySelectorAll('.demarche-card').forEach(card => {
+      if (cat === 'all' || card.dataset.category === cat) {
+        card.style.display = 'flex';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    checkEmpty(visibleCount);
+  }
+
+  function filterCards() {
+    const val = document.getElementById('searchInput').value.toLowerCase();
+    let visibleCount = 0;
+    document.querySelectorAll('.demarche-card').forEach(card => {
+      const text = card.innerText.toLowerCase();
+      if (text.includes(val)) {
+        card.style.display = 'flex';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    // Remove active state from tabs
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    checkEmpty(visibleCount);
+  }
+
+  document.getElementById('searchInput').addEventListener('keyup', e => {
+    if (e.key === 'Enter') filterCards();
+  });
+
+  function checkEmpty(count) {
+    let emptyEl = document.getElementById('noResultsMsg');
+    if (count === 0) {
+      if (!emptyEl) {
+        emptyEl = document.createElement('div');
+        emptyEl.id = 'noResultsMsg';
+        emptyEl.className = 'no-results';
+        emptyEl.innerHTML = '<i class="fas fa-search" style="font-size:2rem;margin-bottom:1rem;opacity:.5;"></i><br>Aucune démarche ne correspond à votre recherche.';
+        document.getElementById('demarchesGrid').appendChild(emptyEl);
+      }
+    } else if (emptyEl) {
+      emptyEl.remove();
+    }
+  }
+</script>
+
+</body>
+</html>
