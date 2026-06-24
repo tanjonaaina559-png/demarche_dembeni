@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dembéni · Service Public de Proximité</title>
+  <meta name="description" content="Les services municipaux de Dembéni : état civil, scolaire, social, urbanisme, propreté, petite enfance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Services grid */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .svc-card {
+      background: var(--blanc);
+      border: 1px solid var(--gris-200);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      transition: var(--transition);
+      position: relative; overflow: hidden;
+    }
+
+    .svc-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--vert-600), var(--vert-300));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .4s ease;
+    }
+
+    .svc-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--vert-200);
+    }
+
+    .svc-card:hover::after { transform: scaleX(1); }
+
+    .svc-icon {
+      width: 52px; height: 52px; border-radius: var(--radius-md);
+      background: var(--vert-50); border: 1px solid var(--vert-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: var(--vert-600);
+      margin-bottom: 1.2rem; transition: var(--transition);
+    }
+
+    .svc-card:hover .svc-icon {
+      background: var(--vert-600); color: var(--blanc); border-color: var(--vert-600);
+    }
+
+    .svc-card h3 { font-size: 1.05rem; color: var(--vert-800); margin-bottom: .5rem; }
+    .svc-card p { font-size: .88rem; color: var(--gris-500); line-height: 1.65; margin-bottom: 1rem; }
+
+    .svc-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 1rem; border-top: 1px solid var(--gris-100); gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .svc-hours {
+      display: flex; align-items: center; gap: 6px;
+      font-size: .78rem; color: var(--gris-500);
+    }
+
+    .svc-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .82rem; font-weight: 600;
+      color: var(--vert-600); text-decoration: none; transition: var(--transition);
+    }
+
+    .svc-link:hover { gap: 8px; color: var(--vert-800); }
+
+    /* CTA band */
+    .cta-band {
+      background: linear-gradient(135deg, var(--vert-800), var(--vert-600));
+      border-radius: var(--radius-xl);
+      padding: 3.5rem; text-align: center; margin: 0 2.5rem;
+    }
+
+    .cta-band h2 { color: var(--blanc); font-size: 1.8rem; margin-bottom: .8rem; }
+    .cta-band p { color: rgba(255,255,255,.75); font-size: .95rem; max-width: 480px; margin: 0 auto 2rem; }
+
+    @media (max-width: 768px) {
+      .cta-band { margin: 0 1.25rem; padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SKELETON PAGE ═══ -->
+<div id="page-skeleton">
+  <div class="sk-navbar">
+    <div class="sk-nav-links">
+      <div class="sk-nav-link"></div>
+      <div class="sk-nav-link" style="width:60px"></div>
+      <div class="sk-nav-link"></div>
+    </div>
+    <div class="sk-logo"></div>
+    <div class="sk-nav-links">
+      <div class="sk-nav-link" style="width:70px"></div>
+      <div class="sk-nav-link" style="width:90px"></div>
+    </div>
+  </div>
+  <div class="sk-banner">
+    <div class="sk-banner-bread"></div>
+    <div class="sk-banner-title"></div>
+    <div class="sk-banner-sub"></div>
+  </div>
+  <div class="sk-body">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;">
+      <div class="sk-shimmer" style="height:160px;border-radius:var(--radius-lg);"></div>
+      <div class="sk-shimmer" style="height:160px;border-radius:var(--radius-lg);"></div>
+      <div class="sk-shimmer" style="height:160px;border-radius:var(--radius-lg);"></div>
+      <div class="sk-shimmer" style="height:160px;border-radius:var(--radius-lg);"></div>
+      <div class="sk-shimmer" style="height:160px;border-radius:var(--radius-lg);"></div>
+      <div class="sk-shimmer" style="height:160px;border-radius:var(--radius-lg);"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function hideSkeleton() {
+      var sk = document.getElementById('page-skeleton');
+      if (sk) {
+        sk.classList.add('sk-hidden');
+        setTimeout(function(){ if(sk.parentNode) sk.parentNode.removeChild(sk); }, 500);
+      }
+    }
+    if (document.readyState === 'complete') { hideSkeleton(); }
+    else { window.addEventListener('load', hideSkeleton); setTimeout(hideSkeleton, 3000); }
+  })();
+</script>
+
+<div id="site-nav"></div>
+<script src="navbar.js"></script>
+
+<!-- HERO -->
+<section class="page-banner">
+  <div class="page-banner-inner">
+    <div class="breadcrumb">
+      <a href="accueil.html"><i class="fas fa-home"></i> Accueil</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Service Public</span>
+    </div>
+    <h1>Service Public de Proximité</h1>
+    <p>Tous les services municipaux à votre disposition. Accueil, information, accompagnement dans vos démarches du quotidien.</p>
+  </div>
+</section>
+
+<!-- KPIs -->
+<div class="section section-sm" style="padding-top:2.5rem; padding-bottom:2.5rem;">
+  <div class="stats-strip" style="grid-template-columns:repeat(4,1fr);">
+    <div class="stat-box"><div class="stat-num">98%</div><div class="stat-label">Satisfaction usagers</div></div>
+    <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-label">Portail en ligne</div></div>
+    <div class="stat-box"><div class="stat-num">12</div><div class="stat-label">Services disponibles</div></div>
+    <div class="stat-box"><div class="stat-num">&lt;48h</div><div class="stat-label">Délai de réponse</div></div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-tag"><i class="fas fa-concierge-bell"></i> Municipal</span>
+    <h2 class="section-title">Nos services municipaux</h2>
+    <div class="divider"></div>
+    <p class="section-subtitle mt-2">Retrouvez l'ensemble des services proposés aux habitants de Dembéni.</p>
+  </div>
+
+  <div class="services-grid">
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-landmark"></i></div>
+      <h3>État Civil</h3>
+      <p>Naissances, mariages, décès, livrets de famille. Délivrance d'actes et apostilles officielles.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> Lun–Ven 8h–16h30</span>
+        <a href="demarches.html" class="svc-link">Accéder <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-school"></i></div>
+      <h3>Vie Scolaire</h3>
+      <p>Inscriptions, périscolaire, cantine municipale et transport scolaire pour les enfants.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> Lun–Ven 8h–12h</span>
+        <a href="contact.html" class="svc-link">Contacter <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-hands-helping"></i></div>
+      <h3>Action Sociale — CCAS</h3>
+      <p>Accompagnement des familles, aide aux personnes âgées/handicapées et aides d'urgence.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> Lun–Ven 8h–16h</span>
+        <a href="contact.html" class="svc-link">Prendre RDV <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-city"></i></div>
+      <h3>Urbanisme</h3>
+      <p>Permis de construire, déclarations de travaux, consultation du PLU et conseils.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> Mar &amp; Jeu 9h–12h</span>
+        <a href="demarches.html" class="svc-link">Voir démarches <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-recycle"></i></div>
+      <h3>Hygiène &amp; Propreté</h3>
+      <p>Collecte des ordures, encombrants, nettoiement des espaces publics et déchetterie.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> 7j/7 — programmé</span>
+        <a href="collecte.html" class="svc-link">Calendrier <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-baby"></i></div>
+      <h3>Petite Enfance</h3>
+      <p>Crèche municipale et centre de loisirs. Accueil des enfants de 2 mois à 12 ans.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> Lun–Ven 7h30–18h</span>
+        <a href="inscription.html" class="svc-link">S'inscrire <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-road"></i></div>
+      <h3>Voirie &amp; Espaces Publics</h3>
+      <p>Signalement de dégradations, entretien des routes, éclairage et jardins municipaux.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> Lun–Ven 7h–16h</span>
+        <a href="contact.html" class="svc-link">Signaler <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="svc-card">
+      <div class="svc-icon"><i class="fas fa-shield-alt"></i></div>
+      <h3>Police Municipale</h3>
+      <p>Maintien de l'ordre public, médiation, sécurité des manifestations et tranquillité.</p>
+      <div class="svc-footer">
+        <span class="svc-hours"><i class="far fa-clock"></i> 24h/24 – 7j/7</span>
+        <a href="contact.html" class="svc-link">Contacter <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HORAIRES -->
+<div style="background:var(--vert-50); border-top:1px solid var(--vert-100); border-bottom:1px solid var(--vert-100);">
+  <section class="section">
+    <div class="section-header center">
+      <span class="section-tag"><i class="far fa-clock"></i> Mairie</span>
+      <h2 class="section-title">Horaires d'ouverture</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="table-wrap mt-3" style="max-width:700px; margin:2rem auto 0;">
+      <table class="pro-table">
+        <thead>
+          <tr>
+            <th>Jour</th>
+            <th>Matin</th>
+            <th>Après-midi</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Lundi</strong></td><td>8h00 – 12h00</td><td>13h30 – 16h30</td><td><span class="badge badge-vert">Ouvert</span></td></tr>
+          <tr><td><strong>Mardi</strong></td><td>8h00 – 12h00</td><td>13h30 – 16h30</td><td><span class="badge badge-vert">Ouvert</span></td></tr>
+          <tr><td><strong>Mercredi</strong></td><td>8h00 – 12h00</td><td>13h30 – 16h30</td><td><span class="badge badge-vert">Ouvert</span></td></tr>
+          <tr><td><strong>Jeudi</strong></td><td>8h00 – 12h00</td><td>13h30 – 16h30</td><td><span class="badge badge-vert">Ouvert</span></td></tr>
+          <tr><td><strong>Vendredi</strong></td><td>8h00 – 12h00</td><td>13h30 – 16h00</td><td><span class="badge badge-vert">Ouvert</span></td></tr>
+          <tr><td><strong>Samedi</strong></td><td colspan="2" style="color:var(--gris-300);">Fermé</td><td><span class="badge badge-rouge">Fermé</span></td></tr>
+          <tr><td><strong>Dimanche</strong></td><td colspan="2" style="color:var(--gris-300);">Fermé</td><td><span class="badge badge-rouge">Fermé</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- CTA -->
+<div style="padding: 3rem 0 0;">
+  <div class="cta-band">
+    <h2>Besoin d'aide ?</h2>
+    <p>Notre équipe est disponible pour répondre à toutes vos questions et vous orienter vers le bon service.</p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="contact.html" class="btn btn-primary btn-lg"><i class="fas fa-envelope"></i> Nous contacter</a>
+      <a href="demarches.html" class="btn btn-secondary btn-lg"><i class="fas fa-list"></i> Toutes les démarches</a>
+    </div>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+
+</body>
+</html>

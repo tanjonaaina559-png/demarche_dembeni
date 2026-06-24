@@ -1,0 +1,51 @@
+/* DataTable.module.css – Modern 2026 */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.th {
+  padding: 12px 20px;
+  background: #fafafa;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #71717a;
+  border-bottom: 1px solid #e4e4e7;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f4f4f5;
+  font-size: 0.875rem;
+  color: #27272a;
+  vertical-align: middle;
+}
+
+.tr {
+  transition: background 0.15s ease;
+}
+
+.tr:hover {
+  background: #fafafa;
+}
+
+.tr:last-child .td {
+  border-bottom: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}

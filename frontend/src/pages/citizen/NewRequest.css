@@ -1,0 +1,218 @@
+/* NewRequest.css */
+
+.new-request-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  padding: 2.5rem;
+  border: 1px solid #eef2f7;
+}
+
+.new-request-card h2 {
+  color: #164022;
+  margin-bottom: 0.5rem;
+}
+
+.new-request-card .subtitle {
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+}
+
+.new-request-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.form-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #2E5A27;
+  font-size: 1.2rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f0f4f0;
+  padding-bottom: 0.75rem;
+}
+
+.step-num {
+  background: var(--vert-600, #2E5A27);
+  color: white;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  font-family: inherit;
+  background-color: #f9fafb;
+}
+
+.form-control:focus {
+  border-color: var(--vert-500, #417B38);
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(65, 123, 56, 0.1);
+}
+
+.proc-details {
+  margin-top: 1.25rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  color: #166534;
+  font-size: 0.95rem;
+}
+
+.proc-details p {
+  margin: 5px 0 0;
+}
+
+.upload-help {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.file-upload-zone {
+  border: 2px dashed #cbd5e1;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-upload-zone:hover {
+  border-color: var(--vert-400, #4a8f42);
+  background: #f0fdf4;
+}
+
+.file-upload-zone i {
+  font-size: 2.5rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.file-upload-zone:hover i {
+  color: var(--vert-500, #417B38);
+}
+
+.file-upload-zone p {
+  margin: 0;
+  font-weight: 500;
+  color: #475569;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.file-list li span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+}
+
+.file-list li i {
+  color: #e21b1b;
+  font-size: 1.1rem;
+}
+
+.file-list button {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.file-list button:hover {
+  background: #fee2e2;
+}
+
+.upload-progress {
+  margin-bottom: -1rem;
+}
+
+.progress-bar-container {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--vert-500, #417B38);
+  transition: width 0.3s ease;
+}
+
+.upload-progress p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: right;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  border-top: 1px solid #f0f4f0;
+  padding-top: 1.5rem;
+}
+
+.form-actions button,
+.form-actions a {
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+  .new-request-card { padding: 1.5rem; }
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions button, .form-actions a { width: 100%; }
+}

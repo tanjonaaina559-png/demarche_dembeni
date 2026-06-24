@@ -1,0 +1,232 @@
+.mes-demandes-container {
+  padding: 0 20px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mes-demandes-header {
+  margin-bottom: 40px;
+}
+
+.mes-demandes-header h1 {
+  color: var(--vert-800);
+  margin: 0 0 10px;
+  font-size: 2.2rem;
+  letter-spacing: -0.5px;
+}
+
+.mes-demandes-header p {
+  color: var(--gris-500);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.demandes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.demande-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.demande-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.demande-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gris-300);
+  transition: background 0.3s ease;
+}
+
+.demande-card.status-en-attente::before { background: #F59E0B; }
+.demande-card.status-approuvée::before { background: #10B981; }
+.demande-card.status-rejetée::before { background: #EF4444; }
+
+.demande-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.demande-info h3 {
+  margin: 0 0 8px;
+  color: var(--gris-800);
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demande-meta {
+  display: flex;
+  gap: 20px;
+  color: var(--gris-500);
+  font-size: 0.9rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demande-status {
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demande-status.en-attente { background: #FEF3C7; color: #D97706; }
+.demande-status.approuvée { background: #D1FAE5; color: #059669; }
+.demande-status.rejetée { background: #FEE2E2; color: #DC2626; }
+
+/* Timeline */
+.demande-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gris-200);
+}
+
+.timeline-line {
+  position: absolute;
+  top: 36px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: var(--gris-200);
+  z-index: 1;
+}
+
+.timeline-progress {
+  position: absolute;
+  top: 36px;
+  left: 20px;
+  height: 2px;
+  background: var(--vert-500);
+  z-index: 2;
+  transition: width 0.5s ease;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 3;
+  position: relative;
+  width: 100px;
+}
+
+.step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--gris-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gris-400);
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gris-500);
+  text-align: center;
+}
+
+.timeline-step.active .step-icon {
+  border-color: var(--vert-500);
+  background: var(--vert-50);
+  color: var(--vert-600);
+}
+
+.timeline-step.active .step-label {
+  color: var(--vert-700);
+  font-weight: 600;
+}
+
+.timeline-step.completed .step-icon {
+  background: var(--vert-500);
+  border-color: var(--vert-500);
+  color: white;
+}
+
+.demande-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.demande-comment {
+  background: var(--gris-50);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: var(--gris-700);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .demande-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .demande-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .demande-timeline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .timeline-line, .timeline-progress {
+    display: none;
+  }
+  .timeline-step {
+    flex-direction: row;
+    width: 100%;
+    gap: 16px;
+  }
+}

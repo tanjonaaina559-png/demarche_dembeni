@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dembéni · Collecte Décentralisée</title>
+  <meta name="description" content="Inscrivez-vous à la collecte d'encombrants décentralisée de la commune de Dembeni — gratuit, 2 fois par mois.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* CALENDAR */
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .cal-card {
+      background: var(--blanc);
+      border: 1px solid var(--gris-200);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1.25rem;
+      transition: var(--transition);
+    }
+
+    .cal-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--vert-200);
+    }
+
+    .cal-date {
+      background: var(--vert-50);
+      border: 1px solid var(--vert-100);
+      border-radius: var(--radius-md);
+      width: 62px; height: 62px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .cal-date .d { font-size: 1.5rem; font-weight: 900; color: var(--vert-700); line-height: 1; font-family: var(--font-head); }
+    .cal-date .m { font-size: .68rem; font-weight: 700; color: var(--vert-500); text-transform: uppercase; letter-spacing: .5px; }
+
+    .cal-info h4 { font-size: .95rem; font-weight: 700; color: var(--vert-800); margin-bottom: .3rem; }
+    .cal-info p { font-size: .82rem; color: var(--gris-500); }
+
+    /* GUIDE */
+    .guide-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .guide-box {
+      background: var(--blanc);
+      border: 1px solid var(--gris-200);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+
+    .guide-box.ok { border-top: 4px solid var(--vert-500); }
+    .guide-box.ko { border-top: 4px solid var(--rouge-500); }
+
+    .guide-box .gh3 {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 1rem; font-weight: 700;
+      font-family: var(--font-head);
+      margin-bottom: 1.2rem;
+    }
+
+    .guide-box.ok .gh3 { color: var(--vert-700); }
+    .guide-box.ko .gh3 { color: var(--rouge-600); }
+
+    .guide-list { list-style: none; }
+
+    .guide-list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: .6rem 0;
+      border-bottom: 1px solid var(--gris-100);
+      font-size: .88rem; color: var(--gris-700);
+    }
+
+    .guide-list li:last-child { border-bottom: none; }
+    .guide-list li i { font-size: .82rem; flex-shrink: 0; }
+    .guide-box.ok .guide-list li i { color: var(--vert-500); }
+    .guide-box.ko .guide-list li i { color: var(--rouge-500); }
+
+    /* FORM SECTION */
+    .form-section {
+      background: linear-gradient(135deg, var(--vert-800), var(--vert-600));
+      border-radius: var(--radius-xl);
+      padding: 3rem;
+      color: var(--blanc);
+    }
+
+    .form-section h2 { color: var(--blanc); font-size: 1.6rem; margin-bottom: .4rem; }
+    .form-section .sub { color: rgba(255,255,255,.7); font-size: .9rem; margin-bottom: 2rem; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .form-group label { color: rgba(255,255,255,.85); }
+
+    .btn-form-submit {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--blanc); color: var(--vert-700);
+      border: none; padding: .9rem 2.2rem;
+      border-radius: var(--radius-pill);
+      font-size: .95rem; font-weight: 700;
+      cursor: pointer; transition: var(--transition);
+      font-family: var(--font-body);
+      margin-top: .75rem;
+    }
+
+    .btn-form-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    }
+
+    #formStatus { margin-top: .75rem; font-size: .88rem; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .guide-row { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-section { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SKELETON PAGE ═══ -->
+<div id="page-skeleton">
+  <div class="sk-navbar">
+    <div class="sk-nav-links">
+      <div class="sk-nav-link"></div>
+      <div class="sk-nav-link" style="width:60px"></div>
+      <div class="sk-nav-link"></div>
+    </div>
+    <div class="sk-logo"></div>
+    <div class="sk-nav-links">
+      <div class="sk-nav-link" style="width:70px"></div>
+      <div class="sk-nav-link" style="width:90px"></div>
+    </div>
+  </div>
+  <div class="sk-banner">
+    <div class="sk-banner-bread"></div>
+    <div class="sk-banner-title"></div>
+    <div class="sk-banner-sub"></div>
+  </div>
+  <div class="sk-body">
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;">
+      <div class="sk-shimmer" style="height:80px;border-radius:14px;"></div>
+      <div class="sk-shimmer" style="height:80px;border-radius:14px;"></div>
+      <div class="sk-shimmer" style="height:80px;border-radius:14px;"></div>
+      <div class="sk-shimmer" style="height:80px;border-radius:14px;"></div>
+    </div>
+    <!-- Calendar cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;">
+      <div class="sk-shimmer" style="height:70px;border-radius:14px;"></div>
+      <div class="sk-shimmer" style="height:70px;border-radius:14px;"></div>
+      <div class="sk-shimmer" style="height:70px;border-radius:14px;"></div>
+      <div class="sk-shimmer" style="height:70px;border-radius:14px;"></div>
+    </div>
+    <!-- Form block -->
+    <div class="sk-shimmer" style="height:280px;border-radius:var(--radius-xl);"></div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function hideSkeleton() {
+      var sk = document.getElementById('page-skeleton');
+      if (sk) {
+        sk.classList.add('sk-hidden');
+        setTimeout(function(){ if(sk.parentNode) sk.parentNode.removeChild(sk); }, 500);
+      }
+    }
+    if (document.readyState === 'complete') { hideSkeleton(); }
+    else { window.addEventListener('load', hideSkeleton); setTimeout(hideSkeleton, 3000); }
+  })();
+</script>
+
+<!-- NAVBAR PARTAGÉE -->
+<div id="site-nav"></div>
+<script src="navbar.js"></script>
+
+<!-- HERO -->
+<section class="page-banner">
+  <div class="page-banner-inner">
+    <div class="breadcrumb">
+      <a href="accueil.html"><i class="fas fa-home"></i> Accueil</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Collecte Décentralisée</span>
+    </div>
+    <h1><i class="fas fa-recycle" style="opacity:.8;margin-right:10px;"></i>Collecte d'Encombrants</h1>
+    <p>Planifiez la collecte de vos objets volumineux. Service 100% gratuit pour les habitants, deux fois par mois.</p>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="section section-sm">
+  <div class="stats-strip">
+    <div class="stat-box"><div class="stat-num">2×</div><div class="stat-label">Collectes par mois</div></div>
+    <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label">Gratuit habitants</div></div>
+    <div class="stat-box"><div class="stat-num">48h</div><div class="stat-label">Délai confirmation</div></div>
+    <div class="stat-box"><div class="stat-num">6</div><div class="stat-label">Quartiers desservis</div></div>
+  </div>
+</div>
+
+<!-- CALENDRIER -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-tag"><i class="far fa-calendar-alt"></i> Planification</span>
+    <h2 class="section-title">Calendrier des collectes — Mai/Juin 2026</h2>
+    <div class="divider"></div>
+    <p class="section-subtitle mt-2">Inscrivez-vous avant J-3 du passage prévu dans votre quartier.</p>
+  </div>
+
+  <div class="cal-grid">
+    <div class="cal-card">
+      <div class="cal-date"><span class="d">08</span><span class="m">Mai</span></div>
+      <div class="cal-info">
+        <h4>Quartier Centre-Ville</h4>
+        <p>7h00 – 14h00 &nbsp;·&nbsp; <span class="badge badge-vert">Places disponibles</span></p>
+      </div>
+    </div>
+    <div class="cal-card">
+      <div class="cal-date"><span class="d">12</span><span class="m">Mai</span></div>
+      <div class="cal-info">
+        <h4>Quartier Nord &amp; RN4</h4>
+        <p>7h00 – 14h00 &nbsp;·&nbsp; <span class="badge badge-vert">Places disponibles</span></p>
+      </div>
+    </div>
+    <div class="cal-card">
+      <div class="cal-date"><span class="d">19</span><span class="m">Mai</span></div>
+      <div class="cal-info">
+        <h4>Quartier Sud</h4>
+        <p>7h00 – 14h00 &nbsp;·&nbsp; <span class="badge badge-rouge">Complet</span></p>
+      </div>
+    </div>
+    <div class="cal-card">
+      <div class="cal-date"><span class="d">22</span><span class="m">Mai</span></div>
+      <div class="cal-info">
+        <h4>Quartier Ouest &amp; Résidences</h4>
+        <p>7h00 – 14h00 &nbsp;·&nbsp; <span class="badge badge-vert">Places disponibles</span></p>
+      </div>
+    </div>
+    <div class="cal-card">
+      <div class="cal-date"><span class="d">05</span><span class="m">Juin</span></div>
+      <div class="cal-info">
+        <h4>Toute la commune</h4>
+        <p>7h00 – 15h00 &nbsp;·&nbsp; <span class="badge badge-gris">Ouverture inscriptions</span></p>
+      </div>
+    </div>
+    <div class="cal-card">
+      <div class="cal-date"><span class="d">19</span><span class="m">Juin</span></div>
+      <div class="cal-info">
+        <h4>Toute la commune</h4>
+        <p>7h00 – 15h00 &nbsp;·&nbsp; <span class="badge badge-gris">Ouverture inscriptions</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUIDE ACCEPTÉ/REFUSÉ -->
+<div style="background:var(--gris-100); padding:1px 0;">
+  <section class="section">
+    <div class="section-header center">
+      <span class="section-tag"><i class="fas fa-info-circle"></i> Règles</span>
+      <h2 class="section-title">Ce qui est accepté &amp; refusé</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="guide-row mt-3">
+      <div class="guide-box ok">
+        <div class="gh3"><i class="fas fa-check-circle"></i> Objets acceptés</div>
+        <ul class="guide-list">
+          <li><i class="fas fa-check"></i> Meubles (armoires, canapés, tables)</li>
+          <li><i class="fas fa-check"></i> Électroménager (frigos, lave-linge, fours)</li>
+          <li><i class="fas fa-check"></i> Literie (matelas, sommiers, oreillers)</li>
+          <li><i class="fas fa-check"></i> Cartons et emballages en volume</li>
+          <li><i class="fas fa-check"></i> Petits appareils électroniques</li>
+          <li><i class="fas fa-check"></i> Jouets et articles de puériculture</li>
+        </ul>
+      </div>
+      <div class="guide-box ko">
+        <div class="gh3"><i class="fas fa-times-circle"></i> Objets refusés</div>
+        <ul class="guide-list">
+          <li><i class="fas fa-times"></i> Gravats et matériaux de construction</li>
+          <li><i class="fas fa-times"></i> Déchets verts (branches, herbe, terre)</li>
+          <li><i class="fas fa-times"></i> Produits chimiques et dangereux</li>
+          <li><i class="fas fa-times"></i> Pneus et batteries automobiles</li>
+          <li><i class="fas fa-times"></i> Amiante et matériaux polluants</li>
+          <li><i class="fas fa-times"></i> Déchets ménagers courants</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FORMULAIRE D'INSCRIPTION -->
+<section class="section">
+  <div class="form-section">
+    <h2><i class="fas fa-clipboard-list" style="margin-right:10px;opacity:.8;"></i>S'inscrire à la collecte</h2>
+    <p class="sub">Remplissez ce formulaire pour réserver votre créneau. Confirmation sous 48h par téléphone ou email.</p>
+
+    <form id="collecteForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nom complet *</label>
+          <input type="text" class="form-field dark" id="col_name" placeholder="Votre nom et prénom" required>
+        </div>
+        <div class="form-group">
+          <label>Téléphone *</label>
+          <input type="tel" class="form-field dark" id="col_phone" placeholder="+262 6XX XXX XXX" required>
+        </div>
+        <div class="form-group">
+          <label>Adresse exacte *</label>
+          <input type="text" class="form-field dark" id="col_address" placeholder="Numéro, rue, quartier" required>
+        </div>
+        <div class="form-group">
+          <label>Créneau souhaité *</label>
+          <select class="form-field dark" id="col_date" required>
+            <option value="">— Choisir un créneau —</option>
+            <option>08 Mai – Centre-Ville (7h–14h)</option>
+            <option>12 Mai – Quartier Nord &amp; RN4 (7h–14h)</option>
+            <option>22 Mai – Quartier Ouest (7h–14h)</option>
+            <option>05 Juin – Toute la commune (7h–15h)</option>
+            <option>19 Juin – Toute la commune (7h–15h)</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Description des objets à collecter *</label>
+          <textarea class="form-field dark" id="col_items" rows="3" placeholder="Ex : 1 armoire 2 portes, 1 vieux matelas, 1 frigo hors service…" required></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn-form-submit">
+        <i class="fas fa-paper-plane"></i> Envoyer ma demande
+      </button>
+      <p id="formStatus"></p>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER PARTAGÉ -->
+<div id="site-footer"></div>
+
+<script>
+  document.getElementById('collecteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn-form-submit');
+    const status = document.getElementById('formStatus');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours…';
+    btn.disabled = true;
+    status.textContent = '';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.disabled = false;
+      status.innerHTML = '<i class="fas fa-check-circle"></i> Demande envoyée ! Vous serez contacté sous 48h.';
+      status.style.color = '#A5D6A7';
+      this.reset();
+      setTimeout(() => status.textContent = '', 6000);
+    }, 1800);
+  });
+</script>
+</body>
+</html>

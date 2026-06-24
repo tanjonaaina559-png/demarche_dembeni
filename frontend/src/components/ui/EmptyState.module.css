@@ -1,0 +1,14 @@
+/* EmptyState.module.css */
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  color: #4a5568;
+}
+.message {
+  font-size: 1rem;
+  font-weight: 500;
+}

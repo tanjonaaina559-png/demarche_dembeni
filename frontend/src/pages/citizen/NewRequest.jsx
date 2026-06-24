@@ -1,0 +1,843 @@
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
+import api from '../../services/api';
+import Loader from '../../components/ui/Loader';
+import UploadDocument from '../../components/ui/UploadDocument';
+import Toast from '../../components/ui/Toast';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  FileText, UploadCloud, CheckCircle, ArrowRight, 
+  ArrowLeft, Info, FileDigit, X, Loader2, Plus, Shield, AlertTriangle
+} from 'lucide-react';
+import './NewRequest.css';
+import { getDocumentTemplate } from '../../utils/documentTemplates';
+import ErrorBoundary from '../../components/ErrorBoundary';
+
+// Style constants — defined here to be accessible throughout the component
+const lStyle = { display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '5px' };
+const iStyle = { width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB' };
+const inputStyle = {
+  width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #D1D5DB',
+  fontSize: '0.95rem', outline: 'none', background: 'white'
+};
+
+const STEPS = [
+  { id: 1, title: 'Démarche' },
+  { id: 2, title: 'Formulaire' },
+  { id: 3, title: 'Pièces jointes' },
+  { id: 4, title: 'Confirmation' }
+];
+
+
+const NewRequestComponent = () => {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const paramProcId = searchParams.get('procedureId');
+
+  const [procedures, setProcedures] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedProcedure, setSelectedProcedure] = useState('');
+  const [files, setFiles] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [successData, setSuccessData] = useState(null);
+
+  const [showDocModal, setShowDocModal] = useState(false);
+  const [citizenDocs, setCitizenDocs] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+
+  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
+
+  // Quick Creator States
+  const [showQuickCreator, setShowQuickCreator] = useState(false);
+  const [quickDocType, setQuickDocType] = useState('');
+  const [submittingQuick, setSubmittingQuick] = useState(false);
+  const [quickFormData, setQuickFormData] = useState({
+    nom: user?.lastname || user?.nom || '',
+    prenom: user?.firstname || user?.prenom || '',
+    dateNaissance: '',
+    lieuNaissance: '',
+    adresse: user?.address || user?.adresse || '',
+    telephone: user?.phone || user?.telephone || '',
+    nationalite: 'Mahoraise',
+    profession: '',
+    nomPere: '',
+    nomMere: ''
+  });
+
+  const openQuickCreator = (docName) => {
+    setQuickDocType(docName);
+    setShowQuickCreator(true);
+  };
+
+  const safeParseJSON = (value, fallback = {}) => {
+    try {
+      if (!value) return fallback;
+      return typeof value === "string" ? JSON.parse(value) : value;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const handleQuickCreate = async (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    console.log("[QuickCreate] Démarrage process...");
+    
+    try {
+      const template = getDocumentTemplate(quickDocType);
+      if (template) {
+        const missing = (template?.fields || []).filter(f => f?.required && !quickFormData?.[f?.name]);
+        if ((missing || []).length > 0) {
+          showToast("Veuillez remplir les champs obligatoires", "error");
+          return;
+        }
+      } else {
+        if (!quickFormData?.nom || !quickFormData?.prenom || !quickFormData?.dateNaissance) {
+          showToast("Veuillez remplir les champs obligatoires", "error");
+          return;
+        }
+      }
+
+      setSubmittingQuick(true);
+      console.log("[QuickCreate] Soumission du payload MongoDB...");
+      
+      const payload = {
+        documentType: quickDocType || "Document",
+        formData: quickFormData || {}
+      };
+      
+      const res = await api.post('/citizen-documents', payload);
+      console.log("[QuickCreate] Réponse API POST :", res?.data);
+      
+      const newDoc = res?.data?.document;
+      if (!newDoc) throw new Error("Document introuvable dans la réponse API");
+      
+      if (res?.data?.pdfError) {
+        showToast('Document créé sans PDF', 'warning');
+      } else {
+        showToast('Création réussie. Ajout du PDF en cours...', 'success');
+        try {
+          console.log("[QuickCreate] Téléchargement du PDF...");
+          const pdfRes = await api.get(`/citizen-documents/pdf/${newDoc?._id}`, { responseType: 'blob' });
+          if (pdfRes?.data) {
+            const fileName = `${newDoc?.documentType || 'doc'}-${newDoc?.referenceNumber || 'demo'}.pdf`;
+            const file = new File([pdfRes.data], fileName, { type: 'application/pdf' });
+            setFiles(prev => [...(prev || []), file]);
+            console.log("[QuickCreate] PDF ajouté avec succès aux pièces jointes.");
+          }
+        } catch (pdfErr) {
+          console.error("[QuickCreate] Erreur récupération PDF:", pdfErr);
+          showToast("Document créé, mais récupération du PDF échouée.", "error");
+        }
+      }
+      
+      setCitizenDocs(prev => [...(prev || []), newDoc]);
+      setShowQuickCreator(false);
+      
+      if (!res?.data?.pdfError) {
+        showToast('Document généré et ajouté avec succès', 'success');
+      }
+    } catch (err) {
+      console.error("[QuickCreate] Erreur FATALE :", err);
+      showToast(err?.message || "Une erreur inattendue a empêché la génération", "error");
+    } finally {
+      setSubmittingQuick(false);
+      console.log("[QuickCreate] Processus terminé.");
+    }
+  };
+
+
+  const showToast = (message, type = 'success') => setToast({ open: true, message, type });
+  const closeToast = () => setToast(prev => ({ ...prev, open: false }));
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    const fetchProcsAndDocs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch citizen docs
+        try {
+          const docRes = await api.get('/citizen-documents/my-documents');
+          setCitizenDocs(docRes.data || []);
+        } catch(e) {
+          console.error("Erreur chargement documents", e);
+        }
+
+        if (paramProcId) {
+          try {
+            const procRes = await api.get(`/procedures/${paramProcId}`);
+            if (procRes.data) {
+              setProcedures([procRes.data]);
+              setSelectedProcedure(paramProcId);
+              initializeFormData(procRes.data);
+              setCurrentStep(2);
+            } else {
+              setError("Procédure introuvable");
+            }
+          } catch (e) {
+            setError("Procédure introuvable");
+            showToast("Procédure introuvable", "error");
+          }
+        } else {
+          try {
+            const procRes = await api.get('/procedures');
+            const activeProcedures = Array.isArray(procRes.data) ? procRes.data.filter(p => p?.isActive || p?.active !== false) : [];
+            setProcedures(activeProcedures);
+          } catch (e) {
+            setError("Erreur de chargement des procédures");
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching data', e);
+        showToast('Erreur de chargement', 'error');
+        setError("Erreur de chargement");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProcsAndDocs();
+  }, [user, navigate, paramProcId]);
+
+  useEffect(() => {
+    if (location.state?.preloadedDoc) {
+      const loadDoc = async () => {
+        try {
+          const doc = location.state.preloadedDoc;
+          const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
+          const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
+          setFiles(prev => [...prev, file]);
+          showToast(`Document ajouté automatiquement: ${doc.documentType}`, 'success');
+          navigate(location.pathname + location.search, { replace: true, state: {} });
+        } catch(e) {
+          showToast('Erreur lors du chargement du document pré-sélectionné', 'error');
+        }
+      };
+      loadDoc();
+    }
+  }, [location.state, navigate, location.pathname, location.search]);
+
+  const openDocModal = async () => {
+    setShowDocModal(true);
+    setLoadingDocs(true);
+    try {
+      const { data } = await api.get('/citizen-documents/my-documents');
+      setCitizenDocs(data || []);
+    } catch(e) {
+      showToast('Erreur lors du chargement de vos documents', 'error');
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
+  const handleSelectDemoDoc = async (doc) => {
+    try {
+      showToast(`Téléchargement de ${doc.documentType}...`, 'success');
+      const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
+      const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
+      setFiles(prev => [...prev, file]);
+      setShowDocModal(false);
+      showToast('Document ajouté avec succès.', 'success');
+    } catch(e) {
+      showToast("Erreur lors de l'ajout du document.", "error");
+    }
+  };
+
+  const getMatchingDemoDocs = (docName) => {
+    if (!docName || (citizenDocs?.length || 0) === 0) return [];
+    const nameLower = docName.toLowerCase();
+    return (citizenDocs || []).filter(demoDoc => {
+      const typeLower = demoDoc?.documentType?.toLowerCase() || '';
+      if (nameLower.includes(typeLower) || typeLower.includes(nameLower)) return true;
+      if (nameLower.includes('identité') && (typeLower.includes('cni') || typeLower.includes('carte nationale'))) return true;
+      if (nameLower.includes('cni') && typeLower.includes('identité')) return true;
+      if (nameLower.includes('domicile') && typeLower.includes('domicile')) return true;
+      if (nameLower.includes('naissance') && typeLower.includes('naissance')) return true;
+      return false;
+    });
+  };
+
+  const handleProcedureChange = (procId) => {
+    setSelectedProcedure(procId);
+    if (procId) {
+      initializeFormData(procedures.find(p => p?._id === procId));
+    } else {
+      setFormData({});
+    }
+  };
+
+  const initializeFormData = (proc) => {
+    if (!proc || !proc.requiredFields) return;
+    const initialData = {};
+    (proc.requiredFields || []).forEach(f => {
+      let val = '';
+      const nameLower = f?.name?.toLowerCase() || '';
+      if (nameLower === 'nom' || nameLower === 'lastname') val = user?.lastname || user?.nom || '';
+      else if (nameLower === 'prenom' || nameLower === 'firstname' || nameLower === 'prénom') val = user?.firstname || user?.prenom || '';
+      else if (nameLower === 'email') val = user?.email || '';
+      else if (nameLower === 'telephone' || nameLower === 'téléphone' || nameLower === 'phone') val = user?.phone || user?.telephone || '';
+      else if (nameLower === 'adresse' || nameLower === 'address') val = user?.address || user?.adresse || '';
+      else if (nameLower === 'cin' || nameLower === 'cni') val = user?.CIN || user?.cin || '';
+      else if (nameLower === 'datenaissance' || nameLower === 'date de naissance') val = user?.dateNaissance ? user.dateNaissance.split('T')[0] : '';
+      if (f?.name) {
+        initialData[f.name] = val;
+      }
+    });
+    setFormData(initialData);
+  };
+
+  const handleFormDataChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const selectedProcDetails = (procedures || []).find(p => p?._id === selectedProcedure);
+
+  const nextStep = () => {
+    if (currentStep === 1 && !selectedProcedure) {
+      showToast('Veuillez sélectionner une démarche.', 'error');
+      return;
+    }
+    if (currentStep === 2) {
+      const missingFields = (selectedProcDetails?.requiredFields || []).filter(f => f?.required && !formData[f.name]);
+      if (missingFields && missingFields.length > 0) {
+        showToast('Veuillez remplir tous les champs obligatoires.', 'error');
+        return;
+      }
+    }
+    setCurrentStep(prev => Math.min(prev + 1, 4));
+  };
+
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
+
+  const handleSubmit = async () => {
+    const requiredDocs = (selectedProcDetails?.documents || []).filter(d => d?.required) || [];
+    if ((files?.length || 0) < requiredDocs.length) {
+      showToast(`Veuillez fournir au moins ${requiredDocs.length} document(s) obligatoire(s).`, 'error');
+      return;
+    }
+
+    setSubmitting(true);
+    setUploadProgress(10);
+
+    const formDataPayload = new FormData();
+    formDataPayload.append('procedureId', selectedProcedure);
+    formDataPayload.append('formData', JSON.stringify(formData));
+    files.forEach(file => formDataPayload.append('documents', file));
+
+    try {
+      const res = await api.post('/requests', formDataPayload, {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
+        }
+      });
+      
+      setUploadProgress(100);
+      setSuccessData(res.data.request);
+      setCurrentStep(4);
+    } catch (err) {
+      console.error('Error submitting request', err);
+      showToast(err.response?.data?.message || 'Erreur lors de la soumission de la demande', 'error');
+      setUploadProgress(0);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // UI Renderers
+  const renderStepIndicator = () => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '15px', left: '0', right: '0', height: '2px', background: '#E5E7EB', zIndex: 0 }}></div>
+      <div style={{ position: 'absolute', top: '15px', left: '0', height: '2px', background: 'var(--vert-500)', zIndex: 1, width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`, transition: 'width 0.3s ease' }}></div>
+      
+      {STEPS.map(step => {
+        const isActive = step.id === currentStep;
+        const isCompleted = step.id < currentStep;
+        return (
+          <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 2, background: 'white', padding: '0 10px' }}>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: isActive ? 'var(--vert-500)' : isCompleted ? '#10B981' : '#F3F4F6',
+              color: isActive || isCompleted ? 'white' : '#9CA3AF',
+              border: isActive || isCompleted ? 'none' : '2px solid #E5E7EB',
+              fontWeight: 'bold', fontSize: '14px', transition: 'all 0.3s ease'
+            }}>
+              {isCompleted ? <CheckCircle size={18} /> : step.id}
+            </div>
+            <span style={{ fontSize: '0.8rem', marginTop: '8px', color: isActive ? 'var(--vert-700)' : '#6B7280', fontWeight: isActive ? 'bold' : 'normal' }}>
+              {step.title}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (loading) return <Loader />;
+
+  if (error) {
+    return (
+      <div style={{ padding: '0 20px 40px', maxWidth: '850px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ background: 'white', borderRadius: '16px', padding: '60px 20px', marginTop: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #F3F4F6' }}>
+          <div style={{ width: '80px', height: '80px', background: '#FEE2E2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#DC2626' }}>
+            <X size={40} />
+          </div>
+          <h2 style={{ color: '#111827', fontSize: '1.8rem', marginBottom: '10px' }}>Procédure introuvable</h2>
+          <p style={{ color: '#6B7280', fontSize: '1.1rem', marginBottom: '30px' }}>La démarche que vous avez demandée n'existe pas ou n'est plus disponible.</p>
+          <Link to="/demarches" className="btn btn-primary" style={{ padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <ArrowLeft size={18} /> Retour aux démarches
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '0 20px 40px', maxWidth: '850px', margin: '0 auto' }}>
+      <Toast isOpen={toast.open} onClose={closeToast} message={toast.message} type={toast.type} />
+      
+      <div style={{ marginBottom: '30px', marginTop: '20px' }}>
+        <h1 style={{ color: '#111827', margin: '0 0 10px', fontSize: '2rem' }}>Nouvelle demande</h1>
+        <p style={{ color: '#6B7280', margin: 0 }}>Effectuez vos démarches administratives directement en ligne.</p>
+      </div>
+
+      <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '30px', border: '1px solid #F3F4F6' }}>
+        
+        {renderStepIndicator()}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* STEP 1 : Procedure Selection */}
+            {currentStep === 1 && (
+              <div>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre d\u00e9marche</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
+                  {(procedures || []).map(p => (
+                    <div
+                      key={p?._id}
+                      onClick={() => handleProcedureChange(p?._id)}
+                      style={{
+                        border: `2px solid ${selectedProcedure === p?._id ? 'var(--vert-500)' : '#E5E7EB'}`,
+                        background: selectedProcedure === p?._id ? '#F0FDF4' : 'white',
+                        padding: '15px', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s',
+                        display: 'flex', alignItems: 'flex-start', gap: '12px'
+                      }}
+                    >
+                      <div style={{ color: selectedProcedure === p?._id ? 'var(--vert-600)' : '#9CA3AF', marginTop: '2px' }}>
+                        <FileDigit size={24} />
+                      </div>
+                      <div>
+                        <h4 style={{ margin: '0 0 4px', color: '#111827', fontSize: '1rem' }}>{p?.title || 'Sans titre'}</h4>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#6B7280' }}>D\u00e9lai estim\u00e9: {p?.duration || 'Variable'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2 : Dynamic Form */}
+            {currentStep === 2 && (
+              <div>
+                {selectedProcDetails ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', background: '#F9FAFB', padding: '12px', borderRadius: '8px' }}>
+                      <Info size={20} color="var(--vert-500)" />
+                      <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>Veuillez renseigner les informations requises pour : <strong>{selectedProcDetails?.title}</strong></span>
+                    </div>
+                    {(selectedProcDetails?.requiredFields || []).length > 0 ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                        {(selectedProcDetails?.requiredFields || []).map((field, idx) => {
+                          if (!field) return null;
+                          const nameLower = field?.name?.toLowerCase() || '';
+                          let inputType = field?.type || 'text';
+                          let extraProps = {};
+                          if (inputType === 'text') {
+                            if (nameLower.includes('t\u00e9l\u00e9phone') || nameLower.includes('telephone')) { inputType = 'tel'; extraProps = { pattern: '[0-9]*', maxLength: 20 }; }
+                            else if (nameLower.includes('email')) { inputType = 'email'; }
+                            else if (nameLower.includes('date')) { inputType = 'date'; }
+                            else if (nameLower.includes('age') || nameLower.includes('\u00e2ge')) { inputType = 'number'; extraProps = { min: 0, max: 120 }; }
+                            else if (nameLower.includes('nombre') || nameLower.includes('quantit\u00e9')) { inputType = 'number'; extraProps = { min: 1 }; }
+                            else if (nameLower.includes('description') || nameLower.includes('motif') || nameLower.includes('commentaire')) { inputType = 'textarea'; }
+                          }
+                          return (
+                            <div key={idx} style={{ gridColumn: inputType === 'textarea' ? '1 / -1' : 'auto' }}>
+                              <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
+                                {field?.label} {field?.required && <span style={{ color: '#DC2626' }}>*</span>}
+                              </label>
+                              {inputType === 'textarea' ? (
+                                <textarea name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} rows="3" style={inputStyle} onInvalid={e => e.target.setCustomValidity('Ce champ est obligatoire')} onInput={e => e.target.setCustomValidity('')} {...extraProps} />
+                              ) : inputType === 'select' ? (
+                                <select name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} style={inputStyle} onInvalid={e => e.target.setCustomValidity('Ce champ est obligatoire')} onInput={e => e.target.setCustomValidity('')}>
+                                  <option value="">S\u00e9lectionner...</option>
+                                  {(field?.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                </select>
+                              ) : (
+                                <input type={inputType} name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} style={inputStyle} onInvalid={e => { if (e.target.validity.valueMissing) e.target.setCustomValidity('Ce champ est obligatoire'); else e.target.setCustomValidity(''); }} onInput={e => e.target.setCustomValidity('')} {...extraProps} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '30px', color: '#6B7280' }}>
+                        Aucune information suppl\u00e9mentaire n'est requise pour cette d\u00e9marche. Cliquez sur Suivant.
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la proc\u00e9dure...</div>
+                )}
+              </div>
+            )}
+
+            {/* STEP 3 : Uploads */}
+            {currentStep === 3 && (
+              <div>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pi\u00e8ces justificatives</h2>
+
+                {(selectedProcDetails?.documents || []).length > 0 ? (
+                  <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
+                    <h4 style={{ margin: '0 0 10px', color: '#065F46', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <FileText size={18} /> Documents requis
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none', color: '#064E3B', fontSize: '0.9rem' }}>
+                      {(selectedProcDetails?.documents || []).map((doc, idx) => {
+                        if (!doc) return null;
+                        const matches = getMatchingDemoDocs(doc?.name);
+                        return (
+                          <li key={idx} style={{ marginBottom: '10px', background: 'white', padding: '10px', borderRadius: '8px', border: '1px dashed #A7F3D0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: (matches?.length || 0) > 0 ? '8px' : '0' }}>
+                              <FileText size={16} color="#059669" />
+                              <strong>{doc?.name}</strong>
+                              {doc?.required
+                                ? <span style={{ color: '#DC2626', fontSize: '0.8rem' }}>* (Obligatoire)</span>
+                                : <span style={{ color: '#6B7280', fontSize: '0.8rem' }}>(Optionnel)</span>}
+                            </div>
+                            {(matches?.length || 0) === 0 && doc?.required && (
+                              <div style={{ paddingLeft: '24px', marginTop: '8px' }}>
+                                <p style={{ margin: '0 0 5px', fontSize: '0.8rem', color: '#6B7280' }}>Je ne poss\u00e8de pas encore ce document :</p>
+                                <button type="button" onClick={() => openQuickCreator(doc.name)} style={{ background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE', padding: '6px 12px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <Plus size={16} /> Cr\u00e9er rapidement
+                                </button>
+                              </div>
+                            )}
+                            {(matches?.length || 0) > 0 && (
+                              <div style={{ paddingLeft: '24px' }}>
+                                {(matches || []).map(m => (
+                                  <button key={m?._id} type="button" onClick={() => handleSelectDemoDoc(m)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '8px', marginTop: '4px' }}>
+                                    \u2713 Utiliser {m?.documentType} enregistr\u00e9
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '30px', color: '#6B7280', background: '#F9FAFB', borderRadius: '8px', marginBottom: '20px' }}>
+                    Aucune pi\u00e8ce justificative demand\u00e9e pour cette d\u00e9marche.
+                  </div>
+                )}
+
+                <UploadDocument onUpload={(file) => setFiles(prev => [...prev, file])} maxSizeMB={5} acceptedType=".pdf,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf" />
+
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <button type="button" onClick={openDocModal} style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={18} /> Utiliser mes documents enregistr\u00e9s
+                  </button>
+                </div>
+
+                {(files?.length || 0) > 0 && (
+                  <div style={{ marginTop: '20px' }}>
+                    <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Documents pr\u00eats \u00e0 l'envoi ({files?.length || 0})</h4>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {(files || []).map((file, idx) => (
+                        <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', padding: '10px 15px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
+                            <FileText size={18} color="#6B7280" />
+                            <span>{file?.name} ({((file?.size || 0) / 1024 / 1024).toFixed(2)} Mo)</span>
+                          </div>
+                          <button type="button" onClick={() => removeFile(idx)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}>✖</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {submitting && (
+                  <div style={{ marginTop: '20px' }}>
+                    <div style={{ background: '#E5E7EB', borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
+                      <div style={{ background: 'var(--vert-500)', height: '100%', width: `${uploadProgress}%`, transition: 'width 0.2s' }}></div>
+                    </div>
+                    <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#6B7280', marginTop: '8px' }}>Envoi en cours... {uploadProgress}%</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* STEP 4 : Confirmation */}
+            {currentStep === 4 && (
+              <div style={{ textAlign: 'center', padding: '30px 10px' }}>
+                <div style={{ width: '80px', height: '80px', background: '#10B981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: 'white' }}>
+                  <CheckCircle size={40} />
+                </div>
+                <h2 style={{ color: '#111827', fontSize: '1.8rem', marginBottom: '10px' }}>Demande envoy\u00e9e avec succ\u00e8s !</h2>
+                <p style={{ color: '#6B7280', fontSize: '1.1rem', marginBottom: '30px' }}>Votre dossier a bien \u00e9t\u00e9 transmis aux services de la mairie.</p>
+                <div style={{ background: '#F9FAFB', border: '1px dashed #D1D5DB', borderRadius: '12px', padding: '20px', maxWidth: '400px', margin: '0 auto 30px' }}>
+                  <p style={{ fontSize: '0.9rem', color: '#6B7280', margin: '0 0 5px' }}>Num\u00e9ro de suivi</p>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '1px' }}>
+                    {successData?.referenceNumber || successData?._id || '---'}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+                  <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Suivre ma demande <ArrowRight size={18} />
+                  </Link>
+                  {successData?.generatedPdf && (
+                    <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}/${successData.generatedPdf.replace(/\\/g, '/')}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <FileText size={18} /> R\u00e9c\u00e9piss\u00e9 PDF
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+
+
+
+        {/* Navigation Buttons */}
+        {currentStep < 4 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #F3F4F6' }}>
+            <button 
+              type="button" 
+              onClick={prevStep} 
+              disabled={currentStep === 1 || submitting}
+              className="btn btn-outline" 
+              style={{ padding: '10px 20px', opacity: currentStep === 1 ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <ArrowLeft size={16} /> Précédent
+            </button>
+
+            {currentStep < 3 ? (
+              <button 
+                type="button" 
+                onClick={nextStep} 
+                className="btn btn-primary"
+                style={{ padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                Suivant <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                onClick={handleSubmit} 
+                disabled={submitting}
+                className="btn btn-primary"
+                style={{ padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '8px', background: '#10B981', border: 'none' }}
+              >
+                {submitting ? 'Envoi...' : <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>Soumettre <UploadCloud size={16} /></span>}
+              </button>
+            )}
+          </div>
+        )}
+
+      </div>
+
+      {/* Demo Docs Selection Modal */}
+      <AnimatePresence>
+        {showDocModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={(e) => e.target === e.currentTarget && setShowDocModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              style={{ background: 'white', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#111827' }}>Sélectionner un document (Démo)</h3>
+                <button onClick={() => setShowDocModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} color="#6B7280" /></button>
+              </div>
+              
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                {loadingDocs ? (
+                  <div style={{ textAlign: 'center', padding: '20px' }}><Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /></div>
+                ) : (citizenDocs?.length || 0) === 0 ? (
+                  <div style={{ textAlign: 'center', color: '#6B7280', padding: '20px' }}>Aucun document trouvé. Vous pouvez en créer dans votre Espace Citoyen.</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {(citizenDocs || []).map(doc => (
+                      <div key={doc?._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
+                        <div>
+                          <div style={{ fontWeight: 600, color: '#111827' }}>{doc?.documentType}</div>
+                          <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Réf: {doc?.referenceNumber}</div>
+                        </div>
+                        <button 
+                          onClick={() => handleSelectDemoDoc(doc)}
+                          style={{ padding: '6px 12px', background: 'var(--vert-500)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                          Sélectionner
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Quick Creator Modal */}
+      <AnimatePresence>
+        {showQuickCreator && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={(e) => e.target === e.currentTarget && setShowQuickCreator(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              style={{ background: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#164022', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Shield size={24} color="#16A34A" /> Création rapide : {quickDocType}
+                  </h3>
+                </div>
+                <button onClick={() => setShowQuickCreator(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} color="#6B7280" /></button>
+              </div>
+
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: '#991B1B' }}>
+                <AlertTriangle size={20} />
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>DOCUMENT FICTIF DESTINÉ UNIQUEMENT À LA DÉMONSTRATION</span>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
+                {(() => {
+                  const template = getDocumentTemplate(quickDocType);
+
+                  return (
+                    <form id="quick-create-form" onSubmit={handleQuickCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '5px' }}>Type de document</label>
+                        <input value={template?.title || quickDocType} disabled style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: '#F3F4F6' }} />
+                      </div>
+                      
+                      {(template?.fields || []).map((field, idx) => (
+                        <div key={idx} style={{ gridColumn: (field?.type === 'textarea' || field?.type === 'file') ? '1 / -1' : 'auto' }}>
+                          <label style={lStyle}>{field?.label || 'Champ'} {field?.required && '*'}</label>
+                          {field?.type === 'select' ? (
+                            <select
+                              required={field?.required}
+                              value={quickFormData?.[field?.name] ?? ''}
+                              onChange={e => setQuickFormData(prev => ({ ...(prev || {}), [field?.name || 'unknown']: e.target.value }))}
+                              style={iStyle}
+                            >
+                              <option value="">Sélectionner...</option>
+                              {(field?.options || []).map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          ) : field?.type === 'file' ? (
+                            <input
+                              type="file"
+                              required={field?.required}
+                              accept="image/*,application/pdf"
+                              onChange={e => {
+                                try {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      setQuickFormData(prev => ({ ...(prev || {}), [field?.name || 'fichier']: reader.result }));
+                                    };
+                                    reader.onerror = () => {
+                                      console.error("Erreur FileReader sur le champ :", field?.name);
+                                      showToast("Impossible de lire le fichier", "error");
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                } catch (err) {
+                                  console.error("Erreur sur input file:", err);
+                                }
+                              }}
+                              style={iStyle}
+                            />
+                          ) : field?.type === 'textarea' ? (
+                            <textarea
+                              required={field?.required}
+                              placeholder={field?.placeholder || ''}
+                              value={quickFormData?.[field?.name] ?? ''}
+                              onChange={e => setQuickFormData(prev => ({ ...(prev || {}), [field?.name || 'unknown']: e.target.value }))}
+                              style={{...iStyle, minHeight: '80px', resize: 'vertical'}}
+                            />
+                          ) : (
+                            <input
+                              type={field?.type || 'text'}
+                              required={field?.required}
+                              placeholder={field?.placeholder || ''}
+                              value={quickFormData?.[field?.name] ?? ''}
+                              onChange={e => setQuickFormData(prev => ({ ...(prev || {}), [field?.name || 'unknown']: e.target.value }))}
+                              style={iStyle}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </form>
+                  );
+                })()}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px', borderTop: '1px solid #E5E7EB', paddingTop: '15px' }}>
+                <button type="button" onClick={() => setShowQuickCreator(false)} style={{ padding: '10px 15px', borderRadius: '6px', border: '1px solid #D1D5DB', background: 'white', cursor: 'pointer', fontWeight: 600 }}>Annuler</button>
+                <button type="submit" form="quick-create-form" disabled={submittingQuick} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', background: 'var(--vert-500)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {submittingQuick ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <FileText size={18} />}
+                  Générer et Ajouter
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+};
+
+
+export default function NewRequest() {
+  return (
+    <ErrorBoundary>
+      <NewRequestComponent />
+    </ErrorBoundary>
+  );
+}

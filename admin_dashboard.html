@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dembéni · Tableau de bord Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ── SKELETON ── */
+    @keyframes sk-shimmer { 0%{background-position:-600px 0} 100%{background-position:600px 0} }
+    .sk-shimmer {
+      background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);
+      background-size:1200px 100%;
+      animation: sk-shimmer 1.6s infinite linear;
+    }
+    #page-skeleton {
+      position:fixed; inset:0; z-index:99999;
+      transition: opacity .45s ease, visibility .45s ease;
+    }
+    #page-skeleton.sk-hidden { opacity:0; visibility:hidden; pointer-events:none; }
+    .sk-admin { display:flex; height:100vh; background:#f0f2f5; }
+    .sk-sidebar { width:240px; background:#0f1923; flex-shrink:0; display:flex; flex-direction:column; padding:1.5rem 1rem; gap:1rem; }
+    .sk-admin-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .sk-topbar { height:60px; background:#fff; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; padding:0 2rem; gap:1rem; flex-shrink:0; }
+    .sk-admin-content { padding:2rem; display:flex; flex-direction:column; gap:1.5rem; overflow:auto; }
+    .sk-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; }
+    .sk-stat-card { background:#fff; border-radius:12px; padding:1.4rem; display:flex; gap:1rem; align-items:center; }
+    @media(max-width:768px) { .sk-stats-row { grid-template-columns:1fr 1fr; } }
+    /* ── END SKELETON ── */
+    :root {
+      --sb: #0f1923; --sb-hover: #1a2d3d; --sb-active: #155228;
+      --green: #1C6B35; --green-light: #237A3E; --red: #C0232B;
+      --bg: #f0f2f5; --card: #fff; --border: #e2e8f0;
+      --text: #1a202c; --muted: #718096;
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+      --radius: 12px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width:240px; background:var(--sb); display:flex; flex-direction:column;
+      position:fixed; top:0; left:0; height:100vh; z-index:100;
+      transition:.3s;
+    }
+    .sb-brand {
+      padding:1.4rem 1.2rem; border-bottom:1px solid rgba(255,255,255,.07);
+      display:flex; align-items:center; gap:10px;
+    }
+    .sb-logo {
+      width:36px; height:36px; background:linear-gradient(135deg,var(--red),#D63940);
+      border-radius:10px; display:flex; align-items:center; justify-content:center;
+      font-family:'Poppins',sans-serif; font-weight:900; font-size:.95rem; color:#fff;
+      flex-shrink:0;
+    }
+    .sb-name { font-family:'Poppins',sans-serif; font-weight:700; font-size:.95rem; color:#fff; letter-spacing:1px; }
+    .sb-name span { color:#86efac; font-size:.7rem; display:block; font-weight:400; letter-spacing:.5px; }
+    .sb-nav { flex:1; overflow-y:auto; padding:.75rem 0; }
+    .sb-section { font-size:.65rem; font-weight:700; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1px; padding:.6rem 1.2rem .3rem; }
+    .sb-item {
+      display:flex; align-items:center; gap:10px;
+      padding:.65rem 1.2rem; color:rgba(255,255,255,.65);
+      text-decoration:none; font-size:.85rem; font-weight:500;
+      cursor:pointer; transition:.2s; border:none; background:none;
+      width:100%; text-align:left; border-left:3px solid transparent;
+    }
+    .sb-item:hover { background:var(--sb-hover); color:#fff; }
+    .sb-item.active { background:var(--sb-active); color:#fff; border-left-color:var(--red); }
+    .sb-item i { width:18px; text-align:center; font-size:.85rem; }
+    .sb-badge { margin-left:auto; background:var(--red); color:#fff; font-size:.65rem; font-weight:700; padding:.15rem .45rem; border-radius:50px; }
+    .sb-footer { padding:.75rem 1.2rem; border-top:1px solid rgba(255,255,255,.07); }
+    .sb-user { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.7); font-size:.82rem; margin-bottom:.5rem; }
+    .sb-avatar { width:28px; height:28px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-size:.75rem; color:#fff; font-weight:700; }
+
+    /* ── MAIN ── */
+    .main { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background:var(--card); border-bottom:1px solid var(--border);
+      padding:0 2rem; height:60px; display:flex; align-items:center;
+      justify-content:space-between; position:sticky; top:0; z-index:50;
+      box-shadow:var(--shadow);
+    }
+    .topbar-title { font-family:'Poppins',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); }
+    .topbar-actions { display:flex; align-items:center; gap:1rem; }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:.5rem 1.1rem; border-radius:50px; font-size:.82rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; border:none; transition:.2s; text-decoration:none; }
+    .btn-primary { background:linear-gradient(135deg,var(--green),var(--green-light)); color:#fff; box-shadow:0 4px 12px rgba(28,107,53,.25); }
+    .btn-primary:hover { transform:translateY(-1px); filter:brightness(1.06); }
+    .btn-danger { background:linear-gradient(135deg,#9B1C1C,var(--red)); color:#fff; }
+    .btn-danger:hover { filter:brightness(1.08); }
+    .btn-ghost { background:#f1f5f9; color:var(--muted); border:1px solid var(--border); }
+    .btn-ghost:hover { background:#e2e8f0; color:var(--text); }
+    .btn-sm { padding:.35rem .8rem; font-size:.78rem; }
+
+    /* ── CONTENT ── */
+    .content { padding:2rem; flex:1; }
+    .section-panel { display:none; }
+    .section-panel.active { display:block; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.2rem; margin-bottom:2rem; }
+    .stat-card {
+      background:var(--card); border-radius:var(--radius); padding:1.4rem 1.5rem;
+      border:1px solid var(--border); box-shadow:var(--shadow);
+      display:flex; align-items:center; gap:1rem;
+    }
+    .stat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+    .stat-icon.green { background:#dcfce7; color:#15803d; }
+    .stat-icon.red   { background:#fee2e2; color:#b91c1c; }
+    .stat-icon.blue  { background:#dbeafe; color:#1d4ed8; }
+    .stat-icon.amber { background:#fef3c7; color:#d97706; }
+    .stat-num { font-family:'Poppins',sans-serif; font-size:1.8rem; font-weight:800; color:var(--text); line-height:1; }
+    .stat-lbl { font-size:.78rem; color:var(--muted); margin-top:.2rem; }
+
+    /* ── CARDS ── */
+    .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden; }
+    .card-header { padding:1.1rem 1.4rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .card-header h3 { font-family:'Poppins',sans-serif; font-size:.95rem; font-weight:700; color:var(--text); }
+    .card-body { padding:1.4rem; }
+
+    /* ── TABLE ── */
+    .data-table { width:100%; border-collapse:collapse; }
+    .data-table thead th { background:#f8fafc; padding:.75rem 1rem; text-align:left; font-size:.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); }
+    .data-table tbody td { padding:.8rem 1rem; font-size:.85rem; border-bottom:1px solid #f0f2f5; vertical-align:middle; }
+    .data-table tbody tr:last-child td { border-bottom:none; }
+    .data-table tbody tr:hover td { background:#f8fafc; }
+
+    /* ── BADGES ── */
+    .badge { display:inline-flex; align-items:center; gap:4px; padding:.2rem .65rem; border-radius:50px; font-size:.72rem; font-weight:700; }
+    .badge-green { background:#dcfce7; color:#15803d; }
+    .badge-red   { background:#fee2e2; color:#b91c1c; }
+    .badge-gray  { background:#f1f5f9; color:#64748b; }
+
+    /* ── FORM ── */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+    .form-grid.full-col { grid-template-columns:1fr; }
+    .fg { display:flex; flex-direction:column; gap:.4rem; }
+    .fg.col2 { grid-column:1/-1; }
+    .fg label { font-size:.82rem; font-weight:600; color:var(--text); }
+    .fg input, .fg select, .fg textarea {
+      border:1.5px solid var(--border); border-radius:10px;
+      padding:.7rem .9rem; font-size:.88rem; font-family:'Inter',sans-serif;
+      color:var(--text); background:#f8fafc; outline:none; transition:.2s; width:100%;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus {
+      border-color:var(--green); background:#fff;
+      box-shadow:0 0 0 3px rgba(28,107,53,.10);
+    }
+    .fg textarea { resize:vertical; min-height:90px; }
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:.8rem 1rem; background:#f8fafc; border-radius:10px; border:1px solid var(--border); }
+    .toggle-label { font-size:.85rem; font-weight:600; color:var(--text); }
+    .toggle { position:relative; width:44px; height:24px; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; inset:0; background:#cbd5e1; border-radius:50px; cursor:pointer; transition:.3s; }
+    .toggle-slider::before { content:''; position:absolute; width:20px; height:20px; left:2px; top:2px; background:#fff; border-radius:50%; transition:.3s; }
+    .toggle input:checked + .toggle-slider { background:var(--green); }
+    .toggle input:checked + .toggle-slider::before { transform:translateX(20px); }
+
+    /* ── MODAL ── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:#fff; border-radius:20px; width:620px; max-width:95vw;
+      max-height:90vh; overflow-y:auto;
+      box-shadow:0 30px 80px rgba(0,0,0,.2);
+      animation:modalIn .25s ease;
+    }
+    @keyframes modalIn { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-header { padding:1.4rem 1.6rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .modal-header h3 { font-family:'Poppins',sans-serif; font-size:1rem; font-weight:700; }
+    .modal-close { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1.1rem; padding:.3rem; border-radius:6px; }
+    .modal-close:hover { background:#f1f5f9; color:var(--text); }
+    .modal-body { padding:1.6rem; }
+    .modal-footer { padding:1.2rem 1.6rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:.75rem; }
+
+    /* ── MEDIA GRID ── */
+    .media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; }
+    .media-item { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; position:relative; background:#f8fafc; aspect-ratio:1; }
+    .media-item img { width:100%; height:100%; object-fit:cover; }
+    .media-item-label { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,.6); color:#fff; font-size:.7rem; padding:.3rem .5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .media-item-del { position:absolute; top:.4rem; right:.4rem; background:var(--red); color:#fff; border:none; border-radius:6px; width:24px; height:24px; cursor:pointer; font-size:.72rem; display:none; align-items:center; justify-content:center; }
+    .media-item:hover .media-item-del { display:flex; }
+    .upload-zone { border:2px dashed var(--border); border-radius:var(--radius); padding:2.5rem; text-align:center; cursor:pointer; transition:.2s; margin-bottom:1.2rem; }
+    .upload-zone:hover { border-color:var(--green); background:#f0fdf4; }
+    .upload-zone i { font-size:2rem; color:var(--muted); margin-bottom:.75rem; }
+    .upload-zone p { color:var(--muted); font-size:.88rem; }
+
+    /* ── RECENT ACTIVITY ── */
+    .activity-list { list-style:none; }
+    .activity-item { display:flex; align-items:center; gap:.9rem; padding:.7rem 0; border-bottom:1px solid #f0f2f5; }
+    .activity-item:last-child { border-bottom:none; }
+    .activity-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .activity-dot.green { background:var(--green); }
+    .activity-dot.red   { background:var(--red); }
+    .activity-dot.blue  { background:#3b82f6; }
+    .activity-text { font-size:.83rem; color:var(--text); flex:1; }
+    .activity-time { font-size:.75rem; color:var(--muted); white-space:nowrap; }
+
+    /* ── TOAST ── */
+    .toast { position:fixed; bottom:1.5rem; right:1.5rem; background:#1a202c; color:#fff; padding:.8rem 1.2rem; border-radius:12px; font-size:.85rem; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:9999; display:flex; align-items:center; gap:8px; transform:translateY(100px); opacity:0; transition:.3s; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { border-left:4px solid #22c55e; }
+    .toast.error   { border-left:4px solid var(--red); }
+
+    /* ── PAGE TITLE ── */
+    .page-title { margin-bottom:1.5rem; }
+    .page-title h2 { font-family:'Poppins',sans-serif; font-size:1.4rem; font-weight:700; color:var(--text); }
+    .page-title p  { color:var(--muted); font-size:.88rem; margin-top:.2rem; }
+
+    .empty-state { text-align:center; padding:3rem 2rem; color:var(--muted); }
+    .empty-state i { font-size:2.5rem; margin-bottom:.75rem; opacity:.4; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SKELETON PAGE ═══ -->
+<div id="page-skeleton" style="background:#f0f2f5;">
+  <div class="sk-admin">
+    <!-- Sidebar -->
+    <div class="sk-sidebar">
+      <div class="sk-shimmer" style="height:36px;border-radius:10px;background:rgba(255,255,255,.1);"></div>
+      <div style="margin-top:.5rem;display:flex;flex-direction:column;gap:.6rem;">
+        <div class="sk-shimmer" style="height:12px;width:70px;border-radius:50px;background:rgba(255,255,255,.2);"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(21,82,40,.6);"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(255,255,255,.06);"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(255,255,255,.04);"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(255,255,255,.04);"></div>
+        <div class="sk-shimmer" style="height:12px;width:70px;border-radius:50px;background:rgba(255,255,255,.2);margin-top:.5rem;"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(255,255,255,.04);"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(255,255,255,.04);"></div>
+        <div class="sk-shimmer" style="height:12px;width:70px;border-radius:50px;background:rgba(255,255,255,.2);margin-top:.5rem;"></div>
+        <div class="sk-shimmer" style="height:36px;border-radius:8px;background:rgba(255,255,255,.04);"></div>
+      </div>
+    </div>
+    <!-- Main -->
+    <div class="sk-admin-main">
+      <!-- Topbar -->
+      <div class="sk-topbar">
+        <div class="sk-shimmer" style="height:22px;width:180px;border-radius:8px;"></div>
+        <div style="margin-left:auto;display:flex;gap:.75rem;">
+          <div class="sk-shimmer" style="height:34px;width:100px;border-radius:50px;"></div>
+          <div class="sk-shimmer" style="height:34px;width:110px;border-radius:50px;background:rgba(192,35,43,.15);"></div>
+        </div>
+      </div>
+      <!-- Content -->
+      <div class="sk-admin-content">
+        <div class="sk-shimmer" style="height:24px;width:260px;border-radius:8px;"></div>
+        <div class="sk-stats-row">
+          <div class="sk-stat-card">
+            <div class="sk-shimmer" style="height:48px;width:48px;border-radius:12px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:.5rem;">
+              <div class="sk-shimmer" style="height:28px;width:60px;border-radius:6px;"></div>
+              <div class="sk-shimmer" style="height:12px;width:120px;border-radius:50px;"></div>
+            </div>
+          </div>
+          <div class="sk-stat-card">
+            <div class="sk-shimmer" style="height:48px;width:48px;border-radius:12px;flex-shrink:0;background:#dbeafe;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:.5rem;">
+              <div class="sk-shimmer" style="height:28px;width:60px;border-radius:6px;"></div>
+              <div class="sk-shimmer" style="height:12px;width:120px;border-radius:50px;"></div>
+            </div>
+          </div>
+          <div class="sk-stat-card">
+            <div class="sk-shimmer" style="height:48px;width:48px;border-radius:12px;flex-shrink:0;background:#fef3c7;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:.5rem;">
+              <div class="sk-shimmer" style="height:28px;width:60px;border-radius:6px;"></div>
+              <div class="sk-shimmer" style="height:12px;width:120px;border-radius:50px;"></div>
+            </div>
+          </div>
+          <div class="sk-stat-card">
+            <div class="sk-shimmer" style="height:48px;width:48px;border-radius:12px;flex-shrink:0;background:#fee2e2;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:.5rem;">
+              <div class="sk-shimmer" style="height:28px;width:60px;border-radius:6px;"></div>
+              <div class="sk-shimmer" style="height:12px;width:120px;border-radius:50px;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:1.2rem;">
+          <div class="sk-shimmer" style="height:240px;border-radius:12px;"></div>
+          <div class="sk-shimmer" style="height:240px;border-radius:12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function hideSkeleton() {
+      var sk = document.getElementById('page-skeleton');
+      if (sk) {
+        sk.classList.add('sk-hidden');
+        setTimeout(function(){ if(sk.parentNode) sk.parentNode.removeChild(sk); }, 500);
+      }
+    }
+    if (document.readyState === 'complete') { hideSkeleton(); }
+    else { window.addEventListener('load', hideSkeleton); setTimeout(hideSkeleton, 3000); }
+  })();
+</script>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">D</div>
+    <div class="sb-name">DEMBÉNI <span>Administration</span></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <button class="sb-item active" onclick="showSection('dashboard')"><i class="fas fa-th-large"></i> Tableau de bord</button>
+    <button class="sb-item" onclick="showSection('accueil')"><i class="fas fa-home"></i> Page d'accueil</button>
+    <button class="sb-item" onclick="showSection('actualites')"><i class="fas fa-newspaper"></i> Actualités <span class="sb-badge" id="badge-actu">0</span></button>
+    <button class="sb-item" onclick="showSection('collecte')"><i class="fas fa-recycle"></i> Collecte</button>
+    <button class="sb-item" onclick="showSection('services')"><i class="fas fa-th"></i> Services</button>
+    <div class="sb-section">Contenu</div>
+    <button class="sb-item" onclick="showSection('medias')"><i class="fas fa-images"></i> Médiathèque</button>
+    <button class="sb-item" onclick="showSection('contact')"><i class="fas fa-address-card"></i> Coordonnées</button>
+    <div class="sb-section">Système</div>
+    <button class="sb-item" onclick="showSection('parametres')"><i class="fas fa-cog"></i> Paramètres</button>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user"><div class="sb-avatar" id="sbAvatar">A</div> <span id="sbUserName">admin</span></div>
+    <a href="accueil.html" class="sb-item" style="font-size:.78rem;"><i class="fas fa-external-link-alt"></i> Voir le site</a>
+    <button class="sb-item" onclick="logout()" style="font-size:.78rem; color:#f87171;"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-title" id="topbarTitle">Tableau de bord</div>
+    <div class="topbar-actions">
+      <a href="accueil.html" class="btn btn-ghost btn-sm" target="_blank"><i class="fas fa-eye"></i> Voir le site</a>
+      <button class="btn btn-danger btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ══════════════════════════════════
+         SECTION: DASHBOARD
+    ══════════════════════════════════ -->
+    <div class="section-panel active" id="panel-dashboard">
+      <div class="page-title">
+        <h2>👋 Bienvenue sur le panneau admin</h2>
+        <p>Aperçu général du contenu et des activités du portail Dembéni.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-newspaper"></i></div>
+          <div><div class="stat-num" id="stat-actu">0</div><div class="stat-lbl">Actualités publiées</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+          <div><div class="stat-num" id="stat-col">0</div><div class="stat-lbl">Dates de collecte</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber"><i class="fas fa-th"></i></div>
+          <div><div class="stat-num" id="stat-svc">0</div><div class="stat-lbl">Services actifs</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-images"></i></div>
+          <div><div class="stat-num" id="stat-med">0</div><div class="stat-lbl">Médias uploadés</div></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:1.2rem;">
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-clock" style="color:var(--green);margin-right:6px;"></i>Activité récente</h3></div>
+          <div class="card-body"><ul class="activity-list" id="activityList">
+            <li class="activity-item"><div class="activity-dot green"></div><div class="activity-text">Panel admin initialisé</div><div class="activity-time">Maintenant</div></li>
+          </ul></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-bolt" style="color:var(--red);margin-right:6px;"></i>Raccourcis</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+            <button class="btn btn-primary" style="width:100%;justify-content:flex-start;" onclick="showSection('actualites');openModal('modalActu')"><i class="fas fa-plus"></i> Nouvelle actualité</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;" onclick="showSection('collecte');openModal('modalCollecte')"><i class="fas fa-plus"></i> Nouvelle date collecte</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;" onclick="showSection('services');openModal('modalService')"><i class="fas fa-plus"></i> Nouveau service</button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;" onclick="showSection('medias')"><i class="fas fa-upload"></i> Uploader des images</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: ACTUALITÉS
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-actualites">
+      <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><h2>📰 Actualités</h2><p>Gérez les actualités affichées sur la page d'accueil.</p></div>
+        <button class="btn btn-primary" onclick="openModal('modalActu');editingId=null;document.getElementById('formActu').reset();"><i class="fas fa-plus"></i> Nouvelle actualité</button>
+      </div>
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Titre</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="actuTable"><tr><td colspan="5" class="empty-state"><i class="fas fa-newspaper"></i><p>Aucune actualité</p></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: COLLECTE
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-collecte">
+      <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><h2>🗓️ Collecte</h2><p>Gérez le calendrier des collectes décentralisées.</p></div>
+        <button class="btn btn-primary" onclick="openModal('modalCollecte');editingId=null;document.getElementById('formCollecte').reset();"><i class="fas fa-plus"></i> Ajouter une date</button>
+      </div>
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Jour</th><th>Mois</th><th>Quartier</th><th>Horaires</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="collecteTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: SERVICES
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-services">
+      <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><h2>🏛️ Services publics</h2><p>Ajoutez, modifiez ou supprimez les services proposés.</p></div>
+        <button class="btn btn-primary" onclick="openModal('modalService');editingId=null;document.getElementById('formService').reset();"><i class="fas fa-plus"></i> Nouveau service</button>
+      </div>
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Icône</th><th>Titre</th><th>Description</th><th>Lien</th><th>Actions</th></tr></thead>
+            <tbody id="servicesTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: MÉDIAS
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-medias">
+      <div class="page-title"><h2>🖼️ Médiathèque</h2><p>Importez et gérez vos images.</p></div>
+      <div class="card" style="margin-bottom:1.2rem;">
+        <div class="card-body">
+          <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Cliquez pour importer</strong> ou glissez-déposez vos images</p>
+            <p style="font-size:.75rem;margin-top:.3rem;">PNG, JPG, GIF, WebP — Max 5 Mo</p>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" multiple hidden>
+          <div class="media-grid" id="mediaGrid"><div class="empty-state" style="grid-column:1/-1;padding:2rem;"><i class="fas fa-images"></i><p>Aucune image importée</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: CONTACT
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-contact">
+      <div class="page-title"><h2>📞 Coordonnées</h2><p>Modifiez les informations de contact affichées sur le site.</p></div>
+      <div class="card">
+        <div class="card-header"><h3>Informations de la mairie</h3></div>
+        <div class="card-body">
+          <form id="formContact" onsubmit="saveContact(event)">
+            <div class="form-grid" style="margin-bottom:1.2rem;">
+              <div class="fg col2"><label>Adresse physique</label><input type="text" id="c_address" placeholder="Route Nationale 3, 97680 Dembéni"></div>
+              <div class="fg"><label>Téléphone principal</label><input type="tel" id="c_phone" placeholder="+262 269 00 00 00"></div>
+              <div class="fg"><label>Téléphone urgences</label><input type="tel" id="c_phone2" placeholder="+262 269 00 00 01"></div>
+              <div class="fg"><label>Email principal</label><input type="email" id="c_email" placeholder="dembenimairie@gmail.com"></div>
+              <div class="fg"><label>Email secondaire</label><input type="email" id="c_email2" placeholder="contact@dembeni.fr"></div>
+              <div class="fg"><label>Horaires semaine (Lun-Jeu)</label><input type="text" id="c_hours" placeholder="8h00 - 12h00 / 13h30 - 16h30"></div>
+              <div class="fg"><label>Horaires vendredi</label><input type="text" id="c_hours_fri" placeholder="8h00 - 12h00 / 13h30 - 16h00"></div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: PARAMÈTRES
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-parametres">
+      <div class="page-title"><h2>⚙️ Paramètres</h2><p>Configuration générale du portail et du compte admin.</p></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+        <div class="card">
+          <div class="card-header"><h3>Paramètres du site</h3></div>
+          <div class="card-body">
+            <form id="formSettings" onsubmit="saveSettings(event)">
+              <div class="form-grid full-col" style="margin-bottom:1.2rem;">
+                <div class="fg"><label>Nom du site</label><input type="text" id="s_name" value="DEMBÉNI"></div>
+                <div class="fg"><label>Description courte</label><textarea id="s_desc">Portail citoyen officiel de la commune de Dembéni, Mayotte.</textarea></div>
+                <div class="fg"><label>Bannière d'annonce (texte)</label><input type="text" id="s_announce" placeholder="Message d'annonce visible sur toutes les pages"></div>
+                <div class="toggle-row">
+                  <span class="toggle-label">Afficher la bannière d'annonce</span>
+                  <label class="toggle"><input type="checkbox" id="s_announce_active"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <span class="toggle-label">Mode maintenance</span>
+                  <label class="toggle"><input type="checkbox" id="s_maintenance"><span class="toggle-slider"></span></label>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+            </form>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Changer le mot de passe admin</h3></div>
+          <div class="card-body">
+            <form id="formPwd" onsubmit="savePwd(event)">
+              <div class="form-grid full-col" style="margin-bottom:1.2rem;">
+                <div class="fg"><label>Identifiant</label><input type="text" id="p_user" placeholder="admin"></div>
+                <div class="fg"><label>Nouveau mot de passe</label><input type="password" id="p_pass" placeholder="Nouveau mot de passe"></div>
+                <div class="fg"><label>Confirmer le mot de passe</label><input type="password" id="p_pass2" placeholder="Confirmer"></div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-key"></i> Changer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: PAGE D'ACCUEIL
+    ══════════════════════════════════ -->
+    <div class="section-panel" id="panel-accueil">
+      <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><h2>🏠 Page d'accueil</h2><p>Modifiez les statistiques hero, l'alerte info et les cartes services.</p></div>
+        <button class="btn btn-primary" onclick="openModal('modalAccueilSvc');editAccueilId=null;document.getElementById('formAccueilSvc').reset();document.getElementById('accueil-svc-preview-img').style.display='none';"><i class="fas fa-plus"></i> Nouvelle carte service</button>
+      </div>
+
+      <!-- STATS HERO -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header"><h3><i class="fas fa-chart-bar" style="color:var(--green);margin-right:6px;"></i>Statistiques du Hero</h3><button class="btn btn-primary btn-sm" onclick="saveHeroStats()"><i class="fas fa-save"></i> Sauvegarder</button></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;" id="heroStatsGrid"></div>
+        </div>
+      </div>
+
+      <!-- ALERTE INFO -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header"><h3><i class="fas fa-exclamation-circle" style="color:#F59E0B;margin-right:6px;"></i>Bandeau d'information</h3><button class="btn btn-primary btn-sm" onclick="saveInfoAlert()"><i class="fas fa-save"></i> Sauvegarder</button></div>
+        <div class="card-body">
+          <div class="fg" style="margin-bottom:.75rem;"><label>Texte affiché dans la bannière jaune</label><textarea id="infoAlertText" class="fg" style="border:1.5px solid #e2e8f0;border-radius:10px;padding:.7rem .9rem;font-size:.88rem;font-family:Inter,sans-serif;color:var(--text);background:#f8fafc;outline:none;resize:none;width:100%;min-height:60px;"></textarea></div>
+          <div style="background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;border-radius:10px;padding:.75rem 1.2rem;font-size:.85rem;color:#78350F;"><i class="fas fa-info-circle" style="color:#F59E0B;margin-right:8px;"></i><span id="infoAlertPreview">Aperçu...</span></div>
+        </div>
+      </div>
+
+      <!-- CARTES SERVICES -->
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-layer-group" style="color:var(--green);margin-right:6px;"></i>Cartes Services (<span id="svcAccueilCount">0</span>)</h3></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Image</th><th>Titre</th><th>Description</th><th>Stat 1</th><th>Stat 2</th><th>Stat 3</th><th>Lien</th><th>Actions</th></tr></thead>
+            <tbody id="accueilSvcTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══════════════════════════════════
+     MODALS
+══════════════════════════════════ -->
+
+<!-- Modal Carte Service Accueil -->
+<div class="modal-overlay" id="modalAccueilSvc">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalAccueilSvcTitle">Nouvelle carte service</h3>
+      <button class="modal-close" onclick="closeModal('modalAccueilSvc')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="formAccueilSvc" onsubmit="saveAccueilSvc(event)">
+        <div class="form-grid" style="margin-bottom:1rem;">
+          <div class="fg col2"><label>Titre de la carte *</label><input type="text" id="asvc_title" required placeholder="État Civil &amp; Famille"></div>
+          <div class="fg col2"><label>Description *</label><textarea id="asvc_desc" required placeholder="Courte description du service..."></textarea></div>
+          <div class="fg col2">
+            <label>URL de l'image *</label>
+            <input type="url" id="asvc_img" required placeholder="https://images.unsplash.com/..." oninput="previewAccueilImg(this.value)">
+          </div>
+          <div class="fg col2" style="text-align:center;">
+            <img id="accueil-svc-preview-img" src="" alt="Aperçu" style="display:none;max-height:120px;border-radius:10px;margin-top:.5rem;object-fit:cover;width:100%;">
+          </div>
+          <div class="fg"><label>Icône FontAwesome</label><input type="text" id="asvc_icon" placeholder="fas fa-users"></div>
+          <div class="fg"><label>Lien (page)</label><input type="text" id="asvc_link" placeholder="demarches.html"></div>
+          <!-- Stats -->
+          <div class="fg"><label>Stat 1 — Valeur</label><input type="text" id="asvc_s1v" placeholder="1 mois"></div>
+          <div class="fg"><label>Stat 1 — Libellé</label><input type="text" id="asvc_s1l" placeholder="Délai mariage"></div>
+          <div class="fg"><label>Stat 2 — Valeur</label><input type="text" id="asvc_s2v" placeholder="48h"></div>
+          <div class="fg"><label>Stat 2 — Libellé</label><input type="text" id="asvc_s2l" placeholder="Acte naissance"></div>
+          <div class="fg"><label>Stat 3 — Valeur</label><input type="text" id="asvc_s3v" placeholder="Gratuit"></div>
+          <div class="fg"><label>Stat 3 — Libellé</label><input type="text" id="asvc_s3l" placeholder="Livret"></div>
+          <!-- Action buttons -->
+          <div class="fg"><label>Bouton 1 — Texte</label><input type="text" id="asvc_b1t" placeholder="Se marier"></div>
+          <div class="fg"><label>Bouton 1 — Icône</label><input type="text" id="asvc_b1i" placeholder="fas fa-ring"></div>
+          <div class="fg"><label>Bouton 2 — Texte</label><input type="text" id="asvc_b2t" placeholder="Acte naissance"></div>
+          <div class="fg"><label>Bouton 2 — Icône</label><input type="text" id="asvc_b2i" placeholder="fas fa-file-signature"></div>
+          <div class="fg"><label>Bouton 3 — Texte</label><input type="text" id="asvc_b3t" placeholder="Livret famille"></div>
+          <div class="fg"><label>Bouton 3 — Icône</label><input type="text" id="asvc_b3i" placeholder="fas fa-book"></div>
+          <div class="fg col2"><label>Texte du bouton principal</label><input type="text" id="asvc_mainbtn" placeholder="Accéder à l'état civil"></div>
+        </div>
+        <input type="hidden" id="asvc_id">
+        <div class="modal-footer" style="padding:0;border:none;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modalAccueilSvc')">Annuler</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Actualité -->
+<div class="modal-overlay" id="modalActu">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalActuTitle">Nouvelle actualité</h3>
+      <button class="modal-close" onclick="closeModal('modalActu')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="formActu" onsubmit="saveActu(event)">
+        <div class="form-grid" style="margin-bottom:1rem;">
+          <div class="fg col2"><label>Titre *</label><input type="text" id="a_title" required placeholder="Titre de l'actualité"></div>
+          <div class="fg"><label>Date *</label><input type="date" id="a_date" required></div>
+          <div class="fg"><label>Catégorie</label>
+            <select id="a_cat"><option>Annonce</option><option>Événement</option><option>Travaux</option><option>Santé</option><option>Culture</option></select>
+          </div>
+          <div class="fg col2"><label>Résumé *</label><textarea id="a_content" required placeholder="Texte court affiché en vignette..."></textarea></div>
+          <div class="fg col2"><label>Image (URL)</label><input type="url" id="a_img" placeholder="https://... ou laisser vide"></div>
+          <div class="fg col2">
+            <div class="toggle-row">
+              <span class="toggle-label">Publier immédiatement</span>
+              <label class="toggle"><input type="checkbox" id="a_published" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="a_id">
+        <div class="modal-footer" style="padding:0;border:none;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modalActu')">Annuler</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Collecte -->
+<div class="modal-overlay" id="modalCollecte">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalColTitle">Nouvelle date de collecte</h3>
+      <button class="modal-close" onclick="closeModal('modalCollecte')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="formCollecte" onsubmit="saveCollecte(event)">
+        <div class="form-grid" style="margin-bottom:1rem;">
+          <div class="fg"><label>Jour *</label><input type="text" id="col_day" maxlength="2" required placeholder="08"></div>
+          <div class="fg"><label>Mois *</label>
+            <select id="col_month"><option>Janvier</option><option>Février</option><option>Mars</option><option>Avril</option><option>Mai</option><option>Juin</option><option>Juillet</option><option>Août</option><option>Septembre</option><option>Octobre</option><option>Novembre</option><option>Décembre</option></select>
+          </div>
+          <div class="fg col2"><label>Quartier *</label><input type="text" id="col_quartier" required placeholder="Centre-Ville, Quartier Nord..."></div>
+          <div class="fg"><label>Horaires *</label><input type="text" id="col_time" required placeholder="7h00 – 14h00"></div>
+          <div class="fg"><label>Statut</label>
+            <select id="col_status"><option value="available">Places disponibles</option><option value="full">Complet</option><option value="open">Ouverture inscriptions</option></select>
+          </div>
+        </div>
+        <input type="hidden" id="col_id">
+        <div class="modal-footer" style="padding:0;border:none;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modalCollecte')">Annuler</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Service -->
+<div class="modal-overlay" id="modalService">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalSvcTitle">Nouveau service</h3>
+      <button class="modal-close" onclick="closeModal('modalService')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="formService" onsubmit="saveService(event)">
+        <div class="form-grid" style="margin-bottom:1rem;">
+          <div class="fg"><label>Titre *</label><input type="text" id="svc_title" required placeholder="État Civil"></div>
+          <div class="fg"><label>Icône FontAwesome</label><input type="text" id="svc_icon" placeholder="fa-file-alt"></div>
+          <div class="fg col2"><label>Description</label><input type="text" id="svc_desc" placeholder="Courte description du service"></div>
+          <div class="fg col2"><label>Lien (page)</label><input type="text" id="svc_link" placeholder="demarches.html"></div>
+        </div>
+        <input type="hidden" id="svc_id">
+        <div class="modal-footer" style="padding:0;border:none;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modalService')">Annuler</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── AUTH GUARD ──
+if (sessionStorage.getItem('admin_logged') !== 'true') window.location.href = 'admin.html';
+const adminUser = sessionStorage.getItem('admin_user') || 'admin';
+document.getElementById('sbUserName').textContent = adminUser;
+document.getElementById('sbAvatar').textContent = adminUser[0].toUpperCase();
+
+function logout() {
+  sessionStorage.removeItem('admin_logged');
+  sessionStorage.removeItem('admin_user');
+  window.location.href = 'admin.html';
+}
+
+// ── DATA ──
+const KEY = 'dembeni_cms';
+const ACCUEIL_KEY = 'dembeni_accueil';
+
+function getDefaultAccueil() {
+  return {
+    heroStats: [
+      {num:'12+', lbl:'Démarches en ligne', icon:'fas fa-file-alt'},
+      {num:'24/7', lbl:'Portail accessible', icon:'far fa-clock'},
+      {num:'98%', lbl:'Taux de satisfaction', icon:'fas fa-check-double'},
+      {num:'2 500+', lbl:'Citoyens inscrits', icon:'fas fa-users'}
+    ],
+    infoAlert: 'Mairie ouverte du lundi au vendredi de 8h à 16h30. Tél. +262 XXX XXX XXX — dembenimairie@gmail.com',
+    services: [
+      {id:1, img:'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&auto=format&fit=crop&q=60', icon:'fas fa-users', title:'État Civil & Famille', desc:'Naissance, mariage, livret...', stats:[{v:'1 mois',l:'Délai mariage'},{v:'48h',l:'Acte naissance'},{v:'Gratuit',l:'Livret'}], btns:[{t:'Se marier',i:'fas fa-ring'},{t:'Acte naissance',i:'fas fa-file-signature'},{t:'Livret famille',i:'fas fa-book'}], mainbtn:'Accéder à l’état civil', link:'demarches.html'},
+      {id:2, img:'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=60', icon:'fas fa-file-alt', title:'Documents officiels', desc:'CNI, passeport, identité numérique...', stats:[{v:'15j',l:'Délai CNI'},{v:'86€',l:'Passeport'},{v:'Gratuit',l:'CNI'}], btns:[{t:'CNI & Passeport',i:'fas fa-id-card'},{t:'Identité numérique',i:'fas fa-fingerprint'},{t:'Acte de décès',i:'fas fa-file-medical-alt'}], mainbtn:'Accéder aux documents', link:'demarches.html'},
+      {id:3, img:'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&auto=format&fit=crop&q=60', icon:'fas fa-trash-alt', title:'Collecte d’encombrants', desc:'Préservons notre environnement...', stats:[{v:'2/mois',l:'Collectes'},{v:'5',l:'Déchetteries'},{v:'Gratuit',l:'Service'}], btns:[{t:'Calendrier',i:'fas fa-calendar-alt'},{t:'Inscription',i:'fas fa-edit'},{t:'Consignes',i:'fas fa-exclamation-triangle'}], mainbtn:'Voir les collectes', link:'collecte.html'},
+      {id:4, img:'https://images.unsplash.com/photo-1587691592099-24045742c181?w=600&auto=format&fit=crop&q=60', icon:'fas fa-baby', title:'Inscription en crèche', desc:'Accueil des jeunes enfants...', stats:[{v:'120',l:'Places'},{v:'3',l:'Crèches'},{v:'2-8€',l:'Tarif/h'}], btns:[{t:'Documents',i:'fas fa-folder-open'},{t:'Tarifs',i:'fas fa-euro-sign'},{t:'Pré-inscription',i:'fas fa-clipboard-list'}], mainbtn:'Inscrire mon enfant', link:'inscription.html'},
+      {id:5, img:'https://images.unsplash.com/photo-1600109968705-cb63b1451a54?w=600&auto=format&fit=crop&q=60', icon:'fas fa-gamepad', title:'Centre de loisirs', desc:'Activités pour enfants 3-12 ans...', stats:[{v:'30+',l:'Places'},{v:'12',l:'Animateurs'},{v:'5-12€',l:'Tarif/jour'}], btns:[{t:'Activités',i:'fas fa-futbol'},{t:'Calendrier',i:'fas fa-calendar-day'},{t:'Inscription',i:'fas fa-user-plus'}], mainbtn:'Voir les activités', link:'#loisirs'},
+      {id:6, img:'https://images.unsplash.com/photo-1522030299830-16b8d3d049f5?w=600&auto=format&fit=crop&q=60', icon:'fas fa-city', title:'Urbanisme & habitat', desc:'Permis, travaux, cadastre...', stats:[{v:'2 mois',l:'Permis'},{v:'1 mois',l:'Travaux'},{v:'24h',l:'Cadastre'}], btns:[{t:'Permis',i:'fas fa-clipboard-check'},{t:'Travaux',i:'fas fa-tools'},{t:'Cadastre',i:'fas fa-map'}], mainbtn:'Consulter urbanisme', link:'demarches.html'}
+    ]
+  };
+}
+
+function getAccueilData() {
+  return JSON.parse(localStorage.getItem(ACCUEIL_KEY) || JSON.stringify(getDefaultAccueil()));
+}
+function setAccueilData(d) { localStorage.setItem(ACCUEIL_KEY, JSON.stringify(d)); }
+let accueilData = getAccueilData();
+let editAccueilId = null;
+
+function getData() {
+  return JSON.parse(localStorage.getItem(KEY) || JSON.stringify({
+    actualites: [], collecte: [], services: [], medias: [],
+    contact: { address:'Hôtel de Ville de Dembéni, Route Nationale 3, 97680 Dembéni', phone:'+262 269 00 00 00', phone2:'+262 269 00 00 01', email:'dembenimairie@gmail.com', email2:'contact@dembeni.fr', hours:'8h00 - 12h00 / 13h30 - 16h30', hours_fri:'8h00 - 12h00 / 13h30 - 16h00' },
+    settings: { siteName:'DEMBÉNI', desc:'Portail citoyen officiel.', announce:'', announce_active:false, maintenance:false }
+  }));
+}
+function setData(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+let data = getData();
+let editingId = null;
+
+// ── NAVIGATION ──
+function showSection(id) {
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const titles = { dashboard:'Tableau de bord', accueil:"Page d'accueil", actualites:'Actualités', collecte:'Collecte', services:'Services publics', medias:'Médiathèque', contact:'Coordonnées', parametres:'Paramètres' };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+  event.currentTarget && event.currentTarget.classList.add('active');
+  if (id === 'accueil')    loadAccueilPanel();
+  if (id === 'actualites') renderActu();
+  if (id === 'collecte')   renderCollecte();
+  if (id === 'services')   renderServices();
+  if (id === 'medias')     renderMedias();
+  if (id === 'contact')    loadContact();
+  if (id === 'parametres') loadSettings();
+  updateStats();
+}
+
+// ── MODAL ──
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); editingId = null; }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+// ── TOAST ──
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── STATS ──
+function updateStats() {
+  data = getData();
+  document.getElementById('stat-actu').textContent = data.actualites.filter(a=>a.published).length;
+  document.getElementById('stat-col').textContent  = data.collecte.length;
+  document.getElementById('stat-svc').textContent  = data.services.length;
+  document.getElementById('stat-med').textContent  = data.medias.length;
+  document.getElementById('badge-actu').textContent = data.actualites.length;
+}
+
+// ── ACTUALITÉS ──
+function renderActu() {
+  data = getData();
+  const tb = document.getElementById('actuTable');
+  if (!data.actualites.length) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#9ca3af;">Aucune actualité — cliquez sur + pour en créer une.</td></tr>'; return; }
+  tb.innerHTML = data.actualites.map((a,i) => `
+    <tr>
+      <td><span style="font-weight:600;color:var(--muted);">#${i+1}</span></td>
+      <td style="font-weight:600;max-width:200px;">${a.title}</td>
+      <td>${a.date}</td>
+      <td><span class="badge ${a.published?'badge-green':'badge-gray'}">${a.published?'Publié':'Brouillon'}</span></td>
+      <td style="display:flex;gap:.5rem;">
+        <button class="btn btn-ghost btn-sm" onclick="editActu(${a.id})"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteActu(${a.id})"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+function saveActu(e) {
+  e.preventDefault();
+  data = getData();
+  const item = {
+    id: editingId || Date.now(),
+    title: document.getElementById('a_title').value,
+    date: document.getElementById('a_date').value,
+    cat: document.getElementById('a_cat').value,
+    content: document.getElementById('a_content').value,
+    img: document.getElementById('a_img').value,
+    published: document.getElementById('a_published').checked
+  };
+  if (editingId) {
+    const idx = data.actualites.findIndex(a => a.id === editingId);
+    data.actualites[idx] = item;
+  } else {
+    data.actualites.unshift(item);
+  }
+  setData(data); closeModal('modalActu'); renderActu(); updateStats();
+  toast(editingId ? 'Actualité mise à jour !' : 'Actualité créée !');
+  editingId = null;
+}
+
+function editActu(id) {
+  data = getData();
+  const a = data.actualites.find(x => x.id === id);
+  if (!a) return;
+  editingId = id;
+  document.getElementById('a_title').value    = a.title;
+  document.getElementById('a_date').value     = a.date;
+  document.getElementById('a_cat').value      = a.cat;
+  document.getElementById('a_content').value  = a.content;
+  document.getElementById('a_img').value      = a.img || '';
+  document.getElementById('a_published').checked = a.published;
+  document.getElementById('modalActuTitle').textContent = 'Modifier l\'actualité';
+  openModal('modalActu');
+}
+
+function deleteActu(id) {
+  if (!confirm('Supprimer cette actualité ?')) return;
+  data = getData();
+  data.actualites = data.actualites.filter(a => a.id !== id);
+  setData(data); renderActu(); updateStats();
+  toast('Actualité supprimée.', 'error');
+}
+
+// ── COLLECTE ──
+const statusLabels = { available:'badge-green', full:'badge-red', open:'badge-gray' };
+const statusTexts  = { available:'Places disponibles', full:'Complet', open:'Ouverture inscriptions' };
+
+function renderCollecte() {
+  data = getData();
+  const tb = document.getElementById('collecteTable');
+  if (!data.collecte.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#9ca3af;">Aucune date — cliquez sur +.</td></tr>'; return; }
+  tb.innerHTML = data.collecte.map(c => `
+    <tr>
+      <td style="font-weight:800;font-size:1.1rem;color:var(--green);">${c.day}</td>
+      <td>${c.month}</td>
+      <td style="font-weight:600;">${c.quartier}</td>
+      <td>${c.time}</td>
+      <td><span class="badge ${statusLabels[c.status]||'badge-gray'}">${statusTexts[c.status]||c.status}</span></td>
+      <td style="display:flex;gap:.5rem;">
+        <button class="btn btn-ghost btn-sm" onclick="editCollecte(${c.id})"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCollecte(${c.id})"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+function saveCollecte(e) {
+  e.preventDefault();
+  data = getData();
+  const item = {
+    id: editingId || Date.now(),
+    day: document.getElementById('col_day').value.padStart(2,'0'),
+    month: document.getElementById('col_month').value,
+    quartier: document.getElementById('col_quartier').value,
+    time: document.getElementById('col_time').value,
+    status: document.getElementById('col_status').value
+  };
+  if (editingId) { const idx = data.collecte.findIndex(c => c.id === editingId); data.collecte[idx] = item; }
+  else data.collecte.push(item);
+  setData(data); closeModal('modalCollecte'); renderCollecte(); updateStats();
+  toast(editingId ? 'Date mise à jour !' : 'Date ajoutée !'); editingId = null;
+}
+
+function editCollecte(id) {
+  data = getData();
+  const c = data.collecte.find(x => x.id === id);
+  if (!c) return;
+  editingId = id;
+  document.getElementById('col_day').value      = c.day;
+  document.getElementById('col_month').value    = c.month;
+  document.getElementById('col_quartier').value = c.quartier;
+  document.getElementById('col_time').value     = c.time;
+  document.getElementById('col_status').value   = c.status;
+  document.getElementById('modalColTitle').textContent = 'Modifier la date';
+  openModal('modalCollecte');
+}
+
+function deleteCollecte(id) {
+  if (!confirm('Supprimer cette date ?')) return;
+  data = getData();
+  data.collecte = data.collecte.filter(c => c.id !== id);
+  setData(data); renderCollecte(); updateStats();
+  toast('Date supprimée.', 'error');
+}
+
+// ── SERVICES ──
+function renderServices() {
+  data = getData();
+  const tb = document.getElementById('servicesTable');
+  if (!data.services.length) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#9ca3af;">Aucun service.</td></tr>'; return; }
+  tb.innerHTML = data.services.map(s => `
+    <tr>
+      <td><i class="fas ${s.icon}" style="color:var(--green);font-size:1.2rem;"></i></td>
+      <td style="font-weight:600;">${s.title}</td>
+      <td style="color:var(--muted);font-size:.83rem;">${s.desc||'—'}</td>
+      <td><a href="${s.link||'#'}" style="color:var(--green);font-size:.82rem;">${s.link||'—'}</a></td>
+      <td style="display:flex;gap:.5rem;">
+        <button class="btn btn-ghost btn-sm" onclick="editService(${s.id})"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteService(${s.id})"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+function saveService(e) {
+  e.preventDefault();
+  data = getData();
+  const item = {
+    id: editingId || Date.now(),
+    title: document.getElementById('svc_title').value,
+    icon: document.getElementById('svc_icon').value || 'fa-circle',
+    desc: document.getElementById('svc_desc').value,
+    link: document.getElementById('svc_link').value
+  };
+  if (editingId) { const idx = data.services.findIndex(s => s.id === editingId); data.services[idx] = item; }
+  else data.services.push(item);
+  setData(data); closeModal('modalService'); renderServices(); updateStats();
+  toast(editingId ? 'Service mis à jour !' : 'Service créé !'); editingId = null;
+}
+
+function editService(id) {
+  data = getData();
+  const s = data.services.find(x => x.id === id);
+  if (!s) return;
+  editingId = id;
+  document.getElementById('svc_title').value = s.title;
+  document.getElementById('svc_icon').value  = s.icon;
+  document.getElementById('svc_desc').value  = s.desc || '';
+  document.getElementById('svc_link').value  = s.link || '';
+  document.getElementById('modalSvcTitle').textContent = 'Modifier le service';
+  openModal('modalService');
+}
+
+function deleteService(id) {
+  if (!confirm('Supprimer ce service ?')) return;
+  data = getData();
+  data.services = data.services.filter(s => s.id !== id);
+  setData(data); renderServices(); updateStats();
+  toast('Service supprimé.', 'error');
+}
+
+// ── MÉDIAS ──
+function renderMedias() {
+  data = getData();
+  const grid = document.getElementById('mediaGrid');
+  if (!data.medias.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:2rem;"><i class="fas fa-images"></i><p>Aucune image importée</p></div>'; return; }
+  grid.innerHTML = data.medias.map(m => `
+    <div class="media-item">
+      <img src="${m.url}" alt="${m.name}" loading="lazy">
+      <div class="media-item-label">${m.name}</div>
+      <button class="media-item-del" onclick="deleteMedia(${m.id})" title="Supprimer"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+}
+
+function deleteMedia(id) {
+  if (!confirm('Supprimer cette image ?')) return;
+  data = getData();
+  data.medias = data.medias.filter(m => m.id !== id);
+  setData(data); renderMedias(); updateStats();
+  toast('Image supprimée.', 'error');
+}
+
+document.getElementById('fileInput').addEventListener('change', function() {
+  const files = Array.from(this.files);
+  files.forEach(file => {
+    if (file.size > 5242880) { toast(`${file.name} trop volumineux (max 5 Mo)`, 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      data = getData();
+      data.medias.push({ id: Date.now() + Math.random(), name: file.name, url: ev.target.result });
+      setData(data); renderMedias(); updateStats();
+      toast(`${file.name} importée !`);
+    };
+    reader.readAsDataURL(file);
+  });
+  this.value = '';
+});
+
+// Drag & drop
+const zone = document.querySelector('.upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor='var(--green)'; });
+zone.addEventListener('dragleave', () => zone.style.borderColor='');
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.style.borderColor='';
+  const dt = new DataTransfer();
+  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+  document.getElementById('fileInput').files = dt.files;
+  document.getElementById('fileInput').dispatchEvent(new Event('change'));
+});
+
+// ── CONTACT ──
+function loadContact() {
+  data = getData();
+  const c = data.contact;
+  document.getElementById('c_address').value   = c.address || '';
+  document.getElementById('c_phone').value     = c.phone || '';
+  document.getElementById('c_phone2').value    = c.phone2 || '';
+  document.getElementById('c_email').value     = c.email || '';
+  document.getElementById('c_email2').value    = c.email2 || '';
+  document.getElementById('c_hours').value     = c.hours || '';
+  document.getElementById('c_hours_fri').value = c.hours_fri || '';
+}
+
+function saveContact(e) {
+  e.preventDefault();
+  data = getData();
+  data.contact = {
+    address: document.getElementById('c_address').value,
+    phone: document.getElementById('c_phone').value,
+    phone2: document.getElementById('c_phone2').value,
+    email: document.getElementById('c_email').value,
+    email2: document.getElementById('c_email2').value,
+    hours: document.getElementById('c_hours').value,
+    hours_fri: document.getElementById('c_hours_fri').value
+  };
+  setData(data); toast('Coordonnées enregistrées !');
+}
+
+// ── PARAMÈTRES ──
+function loadSettings() {
+  data = getData();
+  const s = data.settings;
+  document.getElementById('s_name').value           = s.siteName || 'DEMBÉNI';
+  document.getElementById('s_desc').value           = s.desc || '';
+  document.getElementById('s_announce').value       = s.announce || '';
+  document.getElementById('s_announce_active').checked = s.announce_active || false;
+  document.getElementById('s_maintenance').checked   = s.maintenance || false;
+  const creds = JSON.parse(localStorage.getItem('dembeni_admin_creds') || '{"user":"admin","pass":"dembeni2026"}');
+  document.getElementById('p_user').value = creds.user || 'admin';
+}
+
+function saveSettings(e) {
+  e.preventDefault();
+  data = getData();
+  data.settings = {
+    siteName: document.getElementById('s_name').value,
+    desc: document.getElementById('s_desc').value,
+    announce: document.getElementById('s_announce').value,
+    announce_active: document.getElementById('s_announce_active').checked,
+    maintenance: document.getElementById('s_maintenance').checked
+  };
+  setData(data); toast('Paramètres enregistrés !');
+}
+
+function savePwd(e) {
+  e.preventDefault();
+  const user  = document.getElementById('p_user').value.trim();
+  const pass  = document.getElementById('p_pass').value;
+  const pass2 = document.getElementById('p_pass2').value;
+  if (!user || !pass) { toast('Renseignez tous les champs.','error'); return; }
+  if (pass !== pass2) { toast('Les mots de passe ne correspondent pas.','error'); return; }
+  localStorage.setItem('dembeni_admin_creds', JSON.stringify({ user, pass }));
+  toast('Mot de passe mis à jour !');
+  document.getElementById('formPwd').reset();
+}
+
+// ── INIT ──
+updateStats();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+/* Documents.css — matches existing Demarches/Contact page design */
+
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.5rem;
+}
+
+.doc-card {
+  background: #fff;
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid #eef2f7;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.doc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(46, 90, 39, 0.1);
+  border-color: var(--vert-300, #86c17a);
+}
+
+.doc-card--skeleton {
+  pointer-events: none;
+}
+
+.doc-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.doc-card__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(46, 90, 39, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vert-600, #2E5A27);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.doc-card__category {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--vert-600, #2E5A27);
+  background: rgba(46, 90, 39, 0.08);
+  padding: 3px 10px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.doc-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a2e1a;
+  line-height: 1.4;
+  margin: 0.25rem 0;
+}
+
+.doc-card__desc {
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.55;
+  flex: 1;
+}
+
+.doc-card__footer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.doc-card__size,
+.doc-card__downloads {
+  font-size: 0.8rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.doc-card__size i,
+.doc-card__downloads i {
+  color: var(--vert-400, #4a8f42);
+}
+
+.doc-card__btn {
+  margin-top: 0.75rem;
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .docs-grid {
+    grid-template-columns: 1fr;
+  }
+}

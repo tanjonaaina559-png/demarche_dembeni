@@ -1,0 +1,68 @@
+﻿
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v8.0.13 [32mbuilding client environment for production...[36m[39m
+[2K
+node.exe : 
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+banner_bg.png referenced in banner_bg.png didn't resolve at build time, it will remain unchanged to be resolved at 
+runtime
+transforming...Γ£ô 2866 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                0.58 kB Γöé gzip:   0.36 kB
+dist/assets/AdminDashboard-YoQ5G24J.css        0.69 kB Γöé gzip:   0.37 kB
+dist/assets/DynamicPdfForm-olHhfyov.css        1.44 kB Γöé gzip:   0.57 kB
+dist/assets/Documents-BJ0I9kk3.css             1.50 kB Γöé gzip:   0.63 kB
+dist/assets/ServicePublic-Bor50wqJ.css         1.98 kB Γöé gzip:   0.74 kB
+dist/assets/Contact-CFxNonXa.css               2.73 kB Γöé gzip:   0.87 kB
+dist/assets/Collecte-uEem172W.css              2.89 kB Γöé gzip:   0.93 kB
+dist/assets/MesDemandes-CUWNr0qj.css           3.38 kB Γöé gzip:   1.07 kB
+dist/assets/RequestTracking-suHYpymn.css       3.74 kB Γöé gzip:   1.18 kB
+dist/assets/NewRequest-BErROnTJ.css            4.14 kB Γöé gzip:   1.24 kB
+dist/assets/CitizenDashboard-DKh5I0QT.css      4.20 kB Γöé gzip:   1.36 kB
+dist/assets/CitizenProfile-DsioG1M5.css        4.27 kB Γöé gzip:   1.32 kB
+dist/assets/Demarches-CpJ0WnT3.css             4.99 kB Γöé gzip:   1.46 kB
+dist/assets/Accueil-DjzuEJ1s.css               9.45 kB Γöé gzip:   2.31 kB
+dist/assets/index-Budx5dx_.css                51.95 kB Γöé gzip:  10.37 kB
+dist/assets/download-bgjOa5mR.js               0.22 kB Γöé gzip:   0.18 kB
+dist/assets/calendar-GoMANyYX.js               0.24 kB Γöé gzip:   0.19 kB
+dist/assets/MesDemandes-DJzFsYzR.js            4.69 kB Γöé gzip:   1.86 kB
+dist/assets/CMSSettings-DJVkTP6x.js            5.96 kB Γöé gzip:   1.65 kB
+dist/assets/CMSFAQManagement-xzL2UyJg.js       6.06 kB Γöé gzip:   1.94 kB
+dist/assets/AdminSettings-CCnxZAys.js          6.35 kB Γöé gzip:   2.00 kB
+dist/assets/RequestTracking-Bc3_y3HL.js        7.52 kB Γöé gzip:   2.48 kB
+dist/assets/Contact-BshX5wgQ.js                7.78 kB Γöé gzip:   2.20 kB
+dist/assets/CitizenDashboard-CLbp0kvd.js       7.96 kB Γöé gzip:   2.55 kB
+dist/assets/Documents-DaaiIJw0.js              8.01 kB Γöé gzip:   2.72 kB
+dist/assets/CMSHeroSection-DZppE8S6.js         8.38 kB Γöé gzip:   2.10 kB
+dist/assets/CMSCollecteSchedule-vuYWf_Gj.js    8.50 kB Γöé gzip:   2.50 kB
+dist/assets/DynamicPdfForm-DV9Nndjv.js         8.58 kB Γöé gzip:   1.86 kB
+dist/assets/AdminDashboard-Jy1wAtoo.js         8.77 kB Γöé gzip:   3.15 kB
+dist/assets/AdminLogin-CYKU319B.js             8.96 kB Γöé gzip:   2.63 kB
+dist/assets/Login-DE7yquC4.js                 10.31 kB Γöé gzip:   2.88 kB
+dist/assets/ServicePublic-FhuKUJOI.js         10.68 kB Γöé gzip:   2.17 kB
+dist/assets/CitizenProfile-DWy0woCw.js        11.07 kB Γöé gzip:   3.51 kB
+dist/assets/Demarches-T0vqz7zd.js             11.46 kB Γöé gzip:   3.20 kB
+dist/assets/Inscription-C7XBdKXy.js           12.15 kB Γöé gzip:   3.14 kB
+dist/assets/Collecte-CvM4wbsi.js              12.91 kB Γöé gzip:   2.80 kB
+dist/assets/NewRequest-Csqim4dY.js            13.93 kB Γöé gzip:   4.08 kB
+dist/assets/DemarcheDetail-CrXlhwIO.js        19.97 kB Γöé gzip:   5.12 kB
+dist/assets/ProcedureCreate-CuFBHePR.js       22.13 kB Γöé gzip:   5.50 kB
+dist/assets/ProcedureEdit-Wgi5SIUV.js         23.20 kB Γöé gzip:   5.91 kB
+dist/assets/Accueil-BxhB9nMZ.js               25.80 kB Γöé gzip:   7.03 kB
+dist/assets/index-gXsp6Fly.js                895.98 kB Γöé gzip: 264.84 kB
+
+[32mΓ£ô built in 3.89s[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: 
+https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
