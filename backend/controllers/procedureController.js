@@ -1,6 +1,5 @@
 const Procedure = require('../models/Procedure');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
 const mongoose = require('mongoose');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -18,29 +17,6 @@ const safeParseJSON = (raw, fallback = []) => {
     return fallback;
   }
 };
-
-const getRelativePath = (absolutePath) => {
-  if (!absolutePath) return '';
-  const normalizedPath = absolutePath.replace(/\\/g, '/');
-  const index = normalizedPath.indexOf('uploads/images/');
-  if (index !== -1) {
-    return normalizedPath.substring(index);
-  }
-  return normalizedPath;
-};
-
-const deleteOldImage = (imagePath) => {
-  if (!imagePath) return;
-  const full = path.join(__dirname, '..', imagePath);
-  if (fs.existsSync(full)) {
-    try {
-      fs.unlinkSync(full);
-    } catch (e) {
-      console.error('Erreur lors de la suppression de l\'ancienne image:', e.message);
-    }
-  }
-};
-
 // ─── GET ALL ────────────────────────────────────────────────────────────────
 
 exports.getAllProcedures = async (req, res) => {
@@ -95,13 +71,13 @@ exports.createProcedure = async (req, res) => {
 
     if (req.files) {
       if (req.files['image'] && req.files['image'][0]) {
-        imagePath = getRelativePath(req.files['image'][0].path);
+       imagePath = req.files['image'][0].path;
       }
       if (req.files['backgroundImage'] && req.files['backgroundImage'][0]) {
-        bgImagePath = getRelativePath(req.files['backgroundImage'][0].path);
+       bgImagePath = req.files['backgroundImage'][0].path;
       }
     } else if (req.file) {
-      imagePath = getRelativePath(req.file.path);
+      imagePath = req.file.path;
     }
 
     const procedure = new Procedure({
@@ -171,20 +147,15 @@ exports.updateProcedure = async (req, res) => {
     // Replace images if uploaded
     if (req.files) {
       if (req.files['image'] && req.files['image'][0]) {
-        deleteOldImage(procedure.image);
-        deleteOldImage(procedure.imageUrl);
-        procedure.image = getRelativePath(req.files['image'][0].path);
-        procedure.imageUrl = getRelativePath(req.files['image'][0].path);
+        procedure.image = req.files['image'][0].path;
+        procedure.imageUrl = req.files['image'][0].path;
       }
       if (req.files['backgroundImage'] && req.files['backgroundImage'][0]) {
-        deleteOldImage(procedure.backgroundImage);
-        procedure.backgroundImage = getRelativePath(req.files['backgroundImage'][0].path);
+        procedure.backgroundImage = req.files['backgroundImage'][0].path;
       }
     } else if (req.file) {
-      deleteOldImage(procedure.image);
-      deleteOldImage(procedure.imageUrl);
-      procedure.image = getRelativePath(req.file.path);
-      procedure.imageUrl = getRelativePath(req.file.path);
+      procedure.image = req.file.path;
+      procedure.imageUrl = req.file.path;
     }
 
     await procedure.save();
@@ -213,13 +184,57 @@ exports.toggleProcedureActive = async (req, res) => {
 
 exports.deleteProcedure = async (req, res) => {
   try {
-    const procedure = await Procedure.findByIdAndDelete(req.params.id);
-    if (!procedure) return res.status(404).json({ message: 'Démarche introuvable' });
-    
-    deleteOldImage(procedure.image);
-    deleteOldImage(procedure.backgroundImage);
-    res.json({ message: 'Démarche supprimée avec succès' });
+    const procedure = await Procedure.findById(req.params.id);
+
+    if (!procedure) {
+      return res.status(404).json({
+        message: "Démarche introuvable"
+      });
+    }
+
+    // Supprimer l'image principale sur Cloudinary
+    if (procedure.image && procedure.image.includes("cloudinary")) {
+      try {
+        const publicId = procedure.image
+          .split("/")
+          .slice(-2)
+          .join("/")
+          .replace(/\.[^/.]+$/, "");
+
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.error("Erreur suppression image :", err.message);
+      }
+    }
+
+    // Supprimer l'image de fond
+    if (
+      procedure.backgroundImage &&
+      procedure.backgroundImage.includes("cloudinary")
+    ) {
+      try {
+        const publicId = procedure.backgroundImage
+          .split("/")
+          .slice(-2)
+          .join("/")
+          .replace(/\.[^/.]+$/, "");
+
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.error("Erreur suppression background :", err.message);
+      }
+    }
+
+    await procedure.deleteOne();
+
+    res.json({
+      message: "Démarche supprimée avec succès"
+    });
+
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    res.status(500).json({
+      message: "Erreur serveur",
+      error: error.message
+    });
   }
 };

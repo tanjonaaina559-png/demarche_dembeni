@@ -4,7 +4,7 @@ const { protect, admin } = require('../middleware/authMiddleware');
 const adminController = require('../controllers/adminController');
 const procedureController = require('../controllers/procedureController');
 const demarchesController = require('../controllers/demarches.controller');
-const procedureUpload = require('../middleware/procedureUpload');
+const cloudinaryUpload = require('../middleware/cloudinaryUpload');
 
 // Toutes les routes ci-dessous nécessitent authentification + rôle admin
 router.use(protect, admin);
@@ -25,12 +25,23 @@ router.put('/citizens/:id/activate',  adminController.activateCitizen);
 // ── Procédures (CRUD complet + upload image) ──────────────────────────────────
 router.route('/procedures')
   .get(procedureController.getAllProcedures)
-  .post(procedureUpload.fields([{ name: 'image', maxCount: 1 }, { name: 'backgroundImage', maxCount: 1 }]), procedureController.createProcedure);
+  .post(
+    cloudinaryUpload.fields([
+      { name: 'image', maxCount: 1 },
+      { name: 'backgroundImage', maxCount: 1 }
+    ]),
+    procedureController.createProcedure
+  );
 
 router.route('/procedures/:id')
-  .put(procedureUpload.fields([{ name: 'image', maxCount: 1 }, { name: 'backgroundImage', maxCount: 1 }]), procedureController.updateProcedure)
+  .put(
+    cloudinaryUpload.fields([
+      { name: 'image', maxCount: 1 },
+      { name: 'backgroundImage', maxCount: 1 }
+    ]),
+    procedureController.updateProcedure
+  )
   .delete(procedureController.deleteProcedure);
-
 // Toggle actif/inactif
 router.put('/procedures/:id/toggle', procedureController.toggleProcedureActive);
 
