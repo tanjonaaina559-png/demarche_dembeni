@@ -195,3 +195,82 @@ module.exports = {
   generateReceiptPdf,
   generateOfficialPdf
 };
+
+const { PDFDocument: PDFLibDocument } = require('pdf-lib');
+
+const generateTemplatePdf = async (request, citizen, referenceNumber, procedure) => {
+  if (!procedure || !procedure.pdfTemplate) {
+    throw new Error('No PDF template found for this procedure.');
+  }
+  
+  let existingPdfBytes;
+  if (procedure.pdfTemplate.startsWith('http')) {
+    const response = await fetch(procedure.pdfTemplate);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch template PDF from ${procedure.pdfTemplate}`);
+    }
+    existingPdfBytes = await response.arrayBuffer();
+  } else {
+    const templatePath = path.resolve(__dirname, '..', procedure.pdfTemplate);
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(`Template file not found at ${templatePath}`);
+    }
+    existingPdfBytes = fs.readFileSync(templatePath);
+  }
+
+  const pdfDoc = await PDFLibDocument.load(existingPdfBytes);
+  const form = pdfDoc.getForm();
+
+  // Mongoose Map or standard object
+  let pdfFields = procedure.pdfFields || {};
+  if (pdfFields instanceof Map) {
+    pdfFields = Object.fromEntries(pdfFields);
+  } else if (typeof pdfFields.toJSON === 'function') {
+    pdfFields = pdfFields.toJSON();
+  }
+
+  const formData = request.formData || {};
+  const data = {
+    ...formData,
+    nom: citizen.lastname || citizen.lastName || citizen.nom || '',
+    prenom: citizen.firstname || citizen.firstName || citizen.prenom || '',
+    email: citizen.email || '',
+    telephone: citizen.phone || citizen.telephone || '',
+    adresse: citizen.address || citizen.adresse || '',
+  };
+
+  // Replace text fields
+  for (const [dataKey, pdfFieldName] of Object.entries(pdfFields)) {
+    if (pdfFieldName && data[dataKey] !== undefined) {
+      try {
+        const field = form.getTextField(pdfFieldName);
+        if (field) {
+          field.setText(String(data[dataKey]));
+        }
+      } catch (e) {
+        console.warn(`Could not fill field ${pdfFieldName}: ${e.message}`);
+      }
+    }
+  }
+
+  // Flatten the form to make it non-editable
+  try {
+    form.flatten();
+  } catch(e) {
+    console.warn(`Could not flatten form: ${e.message}`);
+  }
+
+  const pdfBytes = await pdfDoc.save();
+  const filename = `official-${referenceNumber}.pdf`;
+  const uploadDir = path.join(__dirname, '..', 'uploads', 'documents');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  
+  const filePath = path.join(uploadDir, filename);
+  fs.writeFileSync(filePath, pdfBytes);
+  
+  return `/uploads/documents/${filename}`;
+};
+
+module.exports.generateTemplatePdf = generateTemplatePdf;

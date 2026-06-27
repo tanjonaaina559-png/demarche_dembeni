@@ -70,6 +70,12 @@ const ProcedureEdit = () => {
   const imageInputRef = useRef();
   const bgInputRef = useRef();
 
+  // PDF Template
+  const [pdfTemplateFile, setPdfTemplateFile] = useState(null);
+  const [pdfTemplateName, setPdfTemplateName] = useState('');
+  const [pdfFieldsMap, setPdfFieldsMap] = useState([]);
+  const pdfInputRef = useRef();
+
   // UI state
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
@@ -112,6 +118,15 @@ const ProcedureEdit = () => {
           setDocuments(p.requiredDocs.map(name => ({ name, required: true, fileUrl: '' })));
         } else {
           setDocuments([]);
+        }
+
+        // Set pdf config
+        if (p.pdfTemplate) {
+          setPdfTemplateName(p.pdfTemplate.split('/').pop());
+        }
+        if (p.pdfFields) {
+          const mapArray = Object.entries(p.pdfFields).map(([dataKey, pdfField]) => ({ dataKey, pdfField }));
+          setPdfFieldsMap(mapArray);
         }
 
         // Set image previews
@@ -162,6 +177,16 @@ const ProcedureEdit = () => {
     }
     setBgFile(file);
     setBgPreview(URL.createObjectURL(file));
+  };
+
+  const handlePdfChange = (file) => {
+    if (!file) return;
+    if (!['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+      showToast('Format non supporté (utilisez PDF ou DOCX)', 'error');
+      return;
+    }
+    setPdfTemplateFile(file);
+    setPdfTemplateName(file.name);
   };
 
   // List Management (Statistics)
@@ -247,6 +272,19 @@ const ProcedureEdit = () => {
     setRequiredFields(updated);
   };
 
+  // List Management (PDF Fields Map)
+  const addPdfFieldMap = () => {
+    setPdfFieldsMap([...pdfFieldsMap, { dataKey: '', pdfField: '' }]);
+  };
+  const removePdfFieldMap = (idx) => {
+    setPdfFieldsMap(pdfFieldsMap.filter((_, i) => i !== idx));
+  };
+  const updatePdfFieldMap = (idx, field, val) => {
+    const updated = [...pdfFieldsMap];
+    updated[idx][field] = val;
+    setPdfFieldsMap(updated);
+  };
+
   // Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -299,6 +337,18 @@ const ProcedureEdit = () => {
       if (bgFile) {
         payload.append('backgroundImage', bgFile);
       }
+      if (pdfTemplateFile) {
+        payload.append('pdfTemplate', pdfTemplateFile);
+        payload.append('pdfTemplateType', 'pdf');
+      }
+
+      const pdfFieldsObj = {};
+      pdfFieldsMap.forEach(m => {
+        if (m.dataKey && m.pdfField) {
+          pdfFieldsObj[m.dataKey] = m.pdfField;
+        }
+      });
+      payload.append('pdfFields', JSON.stringify(pdfFieldsObj));
 
       await api.put(`/admin/procedures/${id}`, payload, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -695,6 +745,62 @@ const ProcedureEdit = () => {
                   <label style={labelStyle}>Lien personnalisé (si externe ou redirection)</label>
                   <input type="text" value={buttonLink} onChange={(e) => setButtonLink(e.target.value)} placeholder="Ex: /collecte, /contact... (Ne pas utiliser de liens externes)" style={inputStyle} />
                 </div>
+              </div>
+            </motion.section>
+
+            {/* 9. MODÈLE DE DOCUMENT OFFICIEL (PDF) */}
+            <motion.section 
+              initial={{ opacity: 0, y: 15 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.4 }}
+              style={sectionStyle}
+            >
+              <h3 style={sectionTitleStyle}><i className="fas fa-file-pdf" style={{ color: 'var(--vert-500)' }}></i> Modèle de Document Officiel (PDF)</h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--gris-500)', marginBottom: '15px' }}>
+                Uploadez un modèle PDF officiel contenant des champs de formulaire interactifs (AcroForm). Remplissez le tableau ci-dessous pour faire correspondre les données saisies par le citoyen avec les noms des champs PDF.
+              </p>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <label style={labelStyle}>Fichier Modèle (PDF)</label>
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                  <button type="button" onClick={() => pdfInputRef.current?.click()} className="btn btn-outline" style={{ padding: '8px 15px' }}>
+                    Choisir un fichier
+                  </button>
+                  <span style={{ fontSize: '0.9rem', color: pdfTemplateName ? 'var(--vert-600)' : 'var(--gris-400)' }}>
+                    {pdfTemplateName ? <><i className="fas fa-check-circle"></i> {pdfTemplateName}</> : 'Aucun modèle sélectionné'}
+                  </span>
+                  {pdfTemplateName && (
+                    <button type="button" onClick={() => { setPdfTemplateFile(null); setPdfTemplateName(''); }} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
+                      <FaTimes />
+                    </button>
+                  )}
+                </div>
+                <input ref={pdfInputRef} type="file" accept=".pdf" style={{ display: 'none' }} onChange={e => handlePdfChange(e.target.files[0])} />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <label style={labelStyle}>Mapping des variables (Données ➔ PDF)</label>
+                <button type="button" onClick={addPdfFieldMap} className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <FaPlus /> Ajouter un mapping
+                </button>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {pdfFieldsMap.map((mapItem, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
+                    <div style={{ flex: 1 }}>
+                      <input type="text" value={mapItem.dataKey} onChange={e => updatePdfFieldMap(idx, 'dataKey', e.target.value)} placeholder="Clé de donnée (Ex: nom, referenceParcelle)" style={{ ...inputStyle, marginBottom: 0 }} />
+                    </div>
+                    <div style={{ flex: 0, color: 'var(--gris-400)' }}><i className="fas fa-arrow-right"></i></div>
+                    <div style={{ flex: 1 }}>
+                      <input type="text" value={mapItem.pdfField} onChange={e => updatePdfFieldMap(idx, 'pdfField', e.target.value)} placeholder="Nom du champ PDF (Ex: text_nom)" style={{ ...inputStyle, marginBottom: 0 }} />
+                    </div>
+                    <button type="button" onClick={() => removePdfFieldMap(idx)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
+                ))}
+                {pdfFieldsMap.length === 0 && <p style={emptyTextStyle}>Aucun mapping configuré.</p>}
               </div>
             </motion.section>
 

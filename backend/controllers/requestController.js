@@ -69,24 +69,35 @@ exports.createRequest = async (req, res) => {
     // Populate before PDF generation so citizen + procedure names are available
     const populated = await Request.findById(newRequest._id)
       .populate('citizenId', 'firstname lastname email phone address')
-      .populate('procedureId', 'title category')
+      .populate('procedureId', 'title category pdfTemplate pdfFields')
       .populate('uploadedFiles');
 
-    // Auto-generate official PDF receipt
+    // Auto-generate official PDF receipt or filled template
     try {
-      const pdfPath = await pdfGenerator.generateReceiptPdf(
-        { ...populated.toObject(), procedureType: populated.procedureId?.title },
-        populated.citizenId,
-        populated.referenceNumber
-      );
+      let pdfPath;
+      if (populated.procedureId && populated.procedureId.pdfTemplate) {
+        pdfPath = await pdfGenerator.generateTemplatePdf(
+          populated.toObject(),
+          populated.citizenId,
+          populated.referenceNumber,
+          populated.procedureId
+        );
+      } else {
+        pdfPath = await pdfGenerator.generateReceiptPdf(
+          { ...populated.toObject(), procedureType: populated.procedureId?.title },
+          populated.citizenId,
+          populated.referenceNumber
+        );
+      }
+      
       populated.generatedPdf = pdfPath;
       await Request.findByIdAndUpdate(newRequest._id, { generatedPdf: pdfPath });
 
       await GeneratedDocument.create({
         citizenId: req.user._id,
         requestId: newRequest._id,
-        documentType: 'receipt',
-        referenceNumber: `REC-${populated.referenceNumber}`,
+        documentType: populated.procedureId?.pdfTemplate ? 'official' : 'receipt',
+        referenceNumber: (populated.procedureId?.pdfTemplate ? 'DOC-' : 'REC-') + populated.referenceNumber,
         pdfUrl: pdfPath,
         status: 'available'
       });

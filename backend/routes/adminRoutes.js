@@ -28,7 +28,8 @@ router.route('/procedures')
   .post(
     cloudinaryUpload.fields([
       { name: 'image', maxCount: 1 },
-      { name: 'backgroundImage', maxCount: 1 }
+      { name: 'backgroundImage', maxCount: 1 },
+      { name: 'pdfTemplate', maxCount: 1 }
     ]),
     procedureController.createProcedure
   );
@@ -37,7 +38,8 @@ router.route('/procedures/:id')
   .put(
     cloudinaryUpload.fields([
       { name: 'image', maxCount: 1 },
-      { name: 'backgroundImage', maxCount: 1 }
+      { name: 'backgroundImage', maxCount: 1 },
+      { name: 'pdfTemplate', maxCount: 1 }
     ]),
     procedureController.updateProcedure
   )

@@ -6,7 +6,8 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: 'dembeni/procedures',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'docx'],
+    resource_type: 'auto',
     public_id: `${Date.now()}-${file.originalname.split('.')[0]}`
   }),
 });

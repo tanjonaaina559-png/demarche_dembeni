@@ -63,11 +63,13 @@ exports.createProcedure = async (req, res) => {
     const {
       title, slug, category, description, detailedDescription,
       statistics, features, documents, steps, requiredFields,
-      duration, price, status, buttonText, buttonLink, isActive
+      duration, price, status, buttonText, buttonLink, isActive,
+      pdfTemplateType, pdfFields
     } = req.body;
 
     let imagePath = '';
     let bgImagePath = '';
+    let pdfTemplatePath = '';
 
     if (req.files) {
       if (req.files['image'] && req.files['image'][0]) {
@@ -75,6 +77,9 @@ exports.createProcedure = async (req, res) => {
       }
       if (req.files['backgroundImage'] && req.files['backgroundImage'][0]) {
        bgImagePath = req.files['backgroundImage'][0].path;
+      }
+      if (req.files['pdfTemplate'] && req.files['pdfTemplate'][0]) {
+       pdfTemplatePath = req.files['pdfTemplate'][0].path;
       }
     } else if (req.file) {
       imagePath = req.file.path;
@@ -100,6 +105,9 @@ exports.createProcedure = async (req, res) => {
       buttonText: buttonText || 'Faire la demande',
       buttonLink: buttonLink || '',
       isActive: isActive === 'false' ? false : true,
+      pdfTemplate: pdfTemplatePath,
+      pdfTemplateType: pdfTemplateType || '',
+      pdfFields: safeParseJSON(pdfFields, {}),
       createdBy: req.user?._id
     });
 
@@ -120,7 +128,8 @@ exports.updateProcedure = async (req, res) => {
     const {
       title, slug, category, description, detailedDescription,
       statistics, features, documents, steps, requiredFields,
-      duration, price, status, buttonText, buttonLink, isActive
+      duration, price, status, buttonText, buttonLink, isActive,
+      pdfTemplateType, pdfFields
     } = req.body;
 
     procedure.title = title ?? procedure.title;
@@ -137,6 +146,9 @@ exports.updateProcedure = async (req, res) => {
     if (isActive !== undefined) {
       procedure.isActive = isActive === 'true' || isActive === true;
     }
+    
+    if (pdfTemplateType !== undefined) procedure.pdfTemplateType = pdfTemplateType;
+    if (pdfFields !== undefined) procedure.pdfFields = safeParseJSON(pdfFields, {});
 
     if (statistics !== undefined) procedure.statistics = safeParseJSON(statistics);
     if (features !== undefined) procedure.features = safeParseJSON(features);
@@ -152,6 +164,9 @@ exports.updateProcedure = async (req, res) => {
       }
       if (req.files['backgroundImage'] && req.files['backgroundImage'][0]) {
         procedure.backgroundImage = req.files['backgroundImage'][0].path;
+      }
+      if (req.files['pdfTemplate'] && req.files['pdfTemplate'][0]) {
+        procedure.pdfTemplate = req.files['pdfTemplate'][0].path;
       }
     } else if (req.file) {
       procedure.image = req.file.path;

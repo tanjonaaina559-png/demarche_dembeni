@@ -59,6 +59,9 @@ const procedureSchema = new mongoose.Schema({
   buttonText: { type: String, default: 'Faire la demande' },
   buttonLink: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
+  pdfTemplate: { type: String, default: '' },
+  pdfTemplateType: { type: String, enum: ['pdf', 'docx', 'image', ''], default: '' },
+  pdfFields: { type: Map, of: String, default: {} },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
