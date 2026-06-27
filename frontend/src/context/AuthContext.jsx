@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.clear();
     setUser(null);
     setError(null);
-    navigate('/', { replace: true, state: message ? { logoutMessage: message } : {} });
+    navigate('/login', { replace: true, state: message ? { logoutMessage: message } : {} });
   }, [navigate]);
 
   // ── Écouter l'événement 'auth:expired' émis par api.js ────────────────
@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isCitizen: user?.role === 'citizen',
+    role: user?.role || null,
   };
 
   return (

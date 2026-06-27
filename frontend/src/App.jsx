@@ -3,7 +3,7 @@ import Procedures from './pages/admin/Procedures';
 import Citizens from './pages/admin/Citizens';
 import Requests from './pages/admin/Requests';
 import Statistics from './pages/admin/Statistics';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import CitizenLayout from './layouts/CitizenLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -19,7 +19,7 @@ const Inscription = lazy(() => import('./pages/Inscription'));
 const Login = lazy(() => import('./pages/Login'));
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+// AdminLogin removed — unified /login used instead
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const CitizenDashboard = lazy(() => import('./pages/citizen/CitizenDashboard'));
@@ -47,6 +47,17 @@ const NotFound = () => (
   </div>
 );
 
+const Unauthorized = () => (
+  <div style={{ textAlign: 'center', padding: '80px 40px', fontFamily: '"Inter", sans-serif' }}>
+    <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🚫</div>
+    <h2 style={{ fontSize: '1.8rem', color: '#DC2626', marginBottom: '12px' }}>Accès Refusé</h2>
+    <p style={{ color: '#6B7280', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+      Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    <a href="/" style={{ display: 'inline-block', padding: '10px 24px', background: '#409859', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>Retour à l'accueil</a>
+  </div>
+);
+
 function App() {
   return (
     <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Chargement...</div>}>
@@ -70,9 +81,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/citizen/login" element={<Login />} />
+          {/* Legacy login routes — redirect to unified /login */}
+          <Route path="/citizen/login" element={<Navigate to="/login" replace />} />
+          <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           <Route path="/citizen/register" element={<Inscription />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/403" element={<Unauthorized />} />
           <Route element={<ProtectedRoute allowedRoles={['citizen']} requiredStatus="approved" />}>
             <Route element={<CitizenLayout />}>
               <Route path="/citizen/dashboard" element={<CitizenDashboard />} />

@@ -33,25 +33,23 @@ const Navbar = () => {
   const renderAuthLinks = () => {
     if (!user) {
       return (
-        <>
-          <NavLink to="/citizen/login" className="btn-citoyen" onClick={closeMobileMenu}>
-            <i className="fas fa-user-circle"></i> Citoyen
-          </NavLink>
-          <NavLink to="/admin/login" className="btn-admin" onClick={closeMobileMenu}>
-            <i className="fas fa-shield-alt"></i> Administrateur
-          </NavLink>
-        </>
+        <NavLink to="/login" className="btn-citoyen" onClick={closeMobileMenu}>
+          <i className="fas fa-sign-in-alt"></i> Se connecter
+        </NavLink>
       );
     }
 
     const isCitizen = user.role === 'citizen';
-    const name = isCitizen ? `${user.firstname || user.prenom || ''} ${user.lastname || user.nom || ''}`.trim() : 'Admin Dembeni';
-    const iconClass = isCitizen ? 'fas fa-user-circle' : 'fas fa-shield-alt';
+    const displayName = isCitizen
+      ? `${user.firstname || user.prenom || ''} ${user.lastname || user.nom || ''}`.trim() || 'Citoyen'
+      : `${user.firstname || user.prenom || ''} ${user.lastname || user.nom || ''}`.trim() || 'Administrateur';
+    const avatarLetter = displayName.charAt(0).toUpperCase();
+    const roleBadge = isCitizen ? 'Citoyen' : 'Admin';
 
     return (
       <div className="nav-dropdown" ref={dropdownRef} style={{ position: 'relative' }}>
-        <button 
-          className="nav-dropdown-btn" 
+        <button
+          className="nav-dropdown-btn"
           onClick={() => setDropdownOpen(!dropdownOpen)}
           style={{
             background: 'none', border: 'none', color: '#164022', fontWeight: 600,
@@ -59,34 +57,43 @@ const Navbar = () => {
             fontSize: '1rem', padding: '0.5rem'
           }}
         >
-          <i className={iconClass}></i> {name} <i className="fas fa-chevron-down" style={{ fontSize: '0.8rem' }}></i>
+          <span style={{
+            width: '32px', height: '32px', borderRadius: '50%',
+            background: isCitizen ? '#409859' : '#1a5c9e',
+            color: '#fff', display: 'inline-flex', alignItems: 'center',
+            justifyContent: 'center', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0
+          }}>{avatarLetter}</span>
+          <span>{displayName}</span>
+          <span style={{
+            fontSize: '0.65rem', padding: '2px 6px', borderRadius: '10px',
+            background: isCitizen ? 'rgba(64,152,89,0.12)' : 'rgba(26,92,158,0.12)',
+            color: isCitizen ? '#409859' : '#1a5c9e', fontWeight: 700, letterSpacing: '0.02em'
+          }}>{roleBadge}</span>
+          <i className="fas fa-chevron-down" style={{ fontSize: '0.75rem', opacity: 0.6 }}></i>
         </button>
 
         {dropdownOpen && (
           <div className="nav-dropdown-menu" style={{
-            position: 'absolute', top: '100%', right: 0, background: 'white',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px',
-            minWidth: '220px', zIndex: 1000, overflow: 'hidden',
-            display: 'flex', flexDirection: 'column'
+            position: 'absolute', top: '110%', right: 0, background: 'white',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)', borderRadius: '12px',
+            minWidth: '230px', zIndex: 1000, overflow: 'hidden',
+            display: 'flex', flexDirection: 'column', border: '1px solid rgba(0,0,0,0.06)'
           }}>
             {isCitizen ? (
               <>
-                <NavLink to="/citizen/profile" className="dropdown-item" onClick={closeMobileMenu}>Mon profil</NavLink>
+                <NavLink to="/citizen/profile" className="dropdown-item" onClick={closeMobileMenu}>Mon Profil</NavLink>
                 <NavLink to="/mes-demandes" className="dropdown-item" onClick={closeMobileMenu}>Mes demandes</NavLink>
                 <NavLink to="/citizen/documents" className="dropdown-item" onClick={closeMobileMenu}>Mes documents numériques</NavLink>
-                <NavLink to="/citizen/settings" className="dropdown-item" onClick={closeMobileMenu}>Paramètres</NavLink>
               </>
             ) : (
               <>
                 <NavLink to="/admin/dashboard" className="dropdown-item" onClick={closeMobileMenu}>Tableau de bord</NavLink>
-                <NavLink to="/admin/requests" className="dropdown-item" onClick={closeMobileMenu}>Gestion des demandes</NavLink>
-                <NavLink to="/admin/procedures" className="dropdown-item" onClick={closeMobileMenu}>Gestion des démarches</NavLink>
-                <NavLink to="/admin/cms" className="dropdown-item" onClick={closeMobileMenu}>CMS</NavLink>
-                <NavLink to="/admin/statistics" className="dropdown-item" onClick={closeMobileMenu}>Statistiques</NavLink>
-                <NavLink to="/admin/settings" className="dropdown-item" onClick={closeMobileMenu}>Paramètres</NavLink>
+                <NavLink to="/admin/citizens" className="dropdown-item" onClick={closeMobileMenu}>Administration</NavLink>
+                <NavLink to="/admin/settings" className="dropdown-item" onClick={closeMobileMenu}>Mon Profil</NavLink>
               </>
             )}
-            <button onClick={handleLogout} className="dropdown-item text-danger" style={{ textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 15px', width: '100%' }}>
+            <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }}></div>
+            <button onClick={handleLogout} className="dropdown-item text-danger" style={{ textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 15px', width: '100%', color: '#DC2626' }}>
               Déconnexion
             </button>
           </div>
@@ -132,32 +139,23 @@ const Navbar = () => {
               <>
                 {user.role === 'citizen' ? (
                   <>
-                    <NavLink to="/citizen/profile" className="mt-2" onClick={closeMobileMenu}>Mon profil</NavLink>
+                    <NavLink to="/citizen/profile" className="mt-2" onClick={closeMobileMenu}>Mon Profil</NavLink>
                     <NavLink to="/mes-demandes" onClick={closeMobileMenu}>Mes demandes</NavLink>
                     <NavLink to="/citizen/documents" onClick={closeMobileMenu}>Mes documents numériques</NavLink>
-                    <NavLink to="/citizen/settings" onClick={closeMobileMenu}>Paramètres</NavLink>
                   </>
                 ) : (
                   <>
                     <NavLink to="/admin/dashboard" className="mt-2" onClick={closeMobileMenu}>Tableau de bord</NavLink>
-                    <NavLink to="/admin/requests" onClick={closeMobileMenu}>Gestion des demandes</NavLink>
-                    <NavLink to="/admin/procedures" onClick={closeMobileMenu}>Gestion des démarches</NavLink>
-                    <NavLink to="/admin/cms" onClick={closeMobileMenu}>CMS</NavLink>
-                    <NavLink to="/admin/statistics" onClick={closeMobileMenu}>Statistiques</NavLink>
-                    <NavLink to="/admin/settings" onClick={closeMobileMenu}>Paramètres</NavLink>
+                    <NavLink to="/admin/citizens" onClick={closeMobileMenu}>Administration</NavLink>
+                    <NavLink to="/admin/settings" onClick={closeMobileMenu}>Mon Profil</NavLink>
                   </>
                 )}
                 <button onClick={handleLogout} className="btn-admin mt-2">Déconnexion</button>
               </>
             ) : (
-              <>
-                <NavLink to="/citizen/login" className="btn-citoyen mt-2" onClick={closeMobileMenu}>
-                  <i className="fas fa-user-circle"></i> Citoyen
-                </NavLink>
-                <NavLink to="/admin/login" className="btn-admin mt-1" onClick={closeMobileMenu}>
-                  <i className="fas fa-shield-alt"></i> Administrateur
-                </NavLink>
-              </>
+              <NavLink to="/login" className="btn-citoyen mt-2" onClick={closeMobileMenu}>
+                <i className="fas fa-sign-in-alt"></i> Se connecter
+              </NavLink>
             )}
           </div>
         </div>

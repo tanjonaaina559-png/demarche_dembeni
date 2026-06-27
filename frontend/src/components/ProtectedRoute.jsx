@@ -5,9 +5,10 @@ import Loader from './ui/Loader';
 
 /**
  * ProtectedRoute — Vérifie authentification, rôle et statut.
- * Non authentifié → redirige vers "/" (Accueil)
- * Mauvais rôle    → redirige vers le bon dashboard
- * Pending/Rejected→ affiche un écran dédié
+ * Non authentifié   → redirige vers "/login"
+ * Citoyen sur route admin → 403
+ * Admin sur route citizen → /admin/dashboard
+ * Pending/Rejected → affiche un écran dédié
  */
 const ProtectedRoute = ({ allowedRoles, requiredStatus }) => {
   const { user, loading, isAuthenticated } = useAuth();
@@ -22,15 +23,19 @@ const ProtectedRoute = ({ allowedRoles, requiredStatus }) => {
     );
   }
 
-  // ① Non authentifié → Accueil (pas /login)
+  // ① Non authentifié → /login
   if (!isAuthenticated || !user) {
-    return <Navigate to="/" replace state={{ from: location, authRequired: true }} />;
+    return <Navigate to="/login" replace state={{ from: location, authRequired: true }} />;
   }
 
-  // ② Rôle incorrect → redirection vers le bon espace
+  // ② Rôle incorrect
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/citizen/dashboard';
-    return <Navigate to={redirectPath} replace />;
+    // Citoyen qui essaie d'accéder à l'espace admin → 403
+    if (user.role === 'citizen') {
+      return <Navigate to="/403" replace />;
+    }
+    // Admin qui essaie d'accéder à l'espace citoyen → tableau de bord admin
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   // ③ Citoyen avec statut non approuvé
