@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.clear();
     setUser(null);
     setError(null);
-    navigate('/login', { replace: true, state: message ? { logoutMessage: message } : {} });
+    navigate('/', { replace: true, state: message ? { logoutMessage: message } : {} });
   }, [navigate]);
 
   // ── Écouter l'événement 'auth:expired' émis par api.js ────────────────

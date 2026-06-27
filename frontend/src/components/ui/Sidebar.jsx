@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 import classNames from 'classnames';
+import LogoutConfirmModal from './LogoutConfirmModal';
 
 const navItems = [
   { to: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
@@ -34,6 +35,7 @@ const Sidebar = ({ isOpen, toggle, collapsed, setCollapsed }) => {
   const { logout } = useAuth();
   const location = useLocation();
   const [openSubmenu, setOpenSubmenu] = useState(true);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleCollapse = () => setCollapsed(!collapsed);
 
@@ -103,7 +105,12 @@ const Sidebar = ({ isOpen, toggle, collapsed, setCollapsed }) => {
       </nav>
 
       <div className={styles.sidebarFooter}>
-        <button className={styles.logoutBtn} onClick={() => logout('Vous avez été déconnecté avec succès (Admin).')}>
+        <LogoutConfirmModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={async () => { await logout(); }}
+        />
+        <button className={styles.logoutBtn} onClick={() => setShowLogoutModal(true)}>
           <LogOut size={20} />
           {!collapsed && <span>Déconnexion</span>}
         </button>

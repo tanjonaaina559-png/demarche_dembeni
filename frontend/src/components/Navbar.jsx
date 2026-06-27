@@ -1,10 +1,12 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import LogoutConfirmModal from './ui/LogoutConfirmModal';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -15,9 +17,15 @@ const Navbar = () => {
     setDropdownOpen(false);
   };
 
-  const handleLogout = async () => {
-    await logout();
+  // Open the confirmation modal — do NOT call logout directly
+  const handleLogoutRequest = () => {
     closeMobileMenu();
+    setShowLogoutModal(true);
+  };
+
+  // Called only when user confirms inside the modal
+  const handleLogoutConfirm = async () => {
+    await logout(); // clears token + storage, then redirects to /
   };
 
   useEffect(() => {
@@ -93,7 +101,7 @@ const Navbar = () => {
               </>
             )}
             <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }}></div>
-            <button onClick={handleLogout} className="dropdown-item text-danger" style={{ textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 15px', width: '100%', color: '#DC2626' }}>
+            <button onClick={handleLogoutRequest} className="dropdown-item text-danger" style={{ textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 15px', width: '100%', color: '#DC2626' }}>
               Déconnexion
             </button>
           </div>
@@ -104,6 +112,11 @@ const Navbar = () => {
 
   return (
     <>
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
       <nav className="navbar-green">
         <div className="nav-left">
           <NavLink to="/" onClick={closeMobileMenu}>Accueil</NavLink>
@@ -150,7 +163,7 @@ const Navbar = () => {
                     <NavLink to="/admin/settings" onClick={closeMobileMenu}>Mon Profil</NavLink>
                   </>
                 )}
-                <button onClick={handleLogout} className="btn-admin mt-2">Déconnexion</button>
+                <button onClick={handleLogoutRequest} className="btn-admin mt-2">Déconnexion</button>
               </>
             ) : (
               <NavLink to="/login" className="btn-citoyen mt-2" onClick={closeMobileMenu}>

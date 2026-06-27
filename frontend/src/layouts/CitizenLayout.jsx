@@ -9,6 +9,7 @@ import {
   ChevronLeft, ChevronRight, ClipboardList, Home, FileText
 } from 'lucide-react';
 import getImageUrl from '../utils/imageUrl';
+import LogoutConfirmModal from '../components/ui/LogoutConfirmModal';
 import './CitizenLayout.css';
 
 const CitizenLayout = ({ onLogout }) => {
@@ -19,6 +20,7 @@ const CitizenLayout = ({ onLogout }) => {
   const [scrolled, setScrolled] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const notifRef = useRef(null);
 
   useEffect(() => {
@@ -48,9 +50,14 @@ const CitizenLayout = ({ onLogout }) => {
     } catch { /* ignore */ }
   };
 
-  const handleLogout = () => {
+  const handleLogoutRequest = () => {
+    setMobileOpen(false);
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = async () => {
     if (onLogout) onLogout();
-    else logout('Vous avez été déconnecté de votre espace citoyen.');
+    else await logout();
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -67,6 +74,11 @@ const CitizenLayout = ({ onLogout }) => {
 
   return (
     <div className={`citizen-layout ${collapsed ? 'collapsed' : ''}`}>
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
       {/* SIDEBAR */}
       <aside className={`citizen-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
@@ -121,7 +133,7 @@ const CitizenLayout = ({ onLogout }) => {
             <span className="sidebar-icon"><Home size={20} /></span>
             {!collapsed && <span className="sidebar-label">Retour au site</span>}
           </Link>
-          <button className="sidebar-link logout-btn" onClick={handleLogout}>
+          <button className="sidebar-link logout-btn" onClick={handleLogoutRequest}>
             <span className="sidebar-icon"><LogOut size={20} /></span>
             {!collapsed && <span className="sidebar-label">Déconnexion</span>}
           </button>

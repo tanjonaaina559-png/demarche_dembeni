@@ -149,4 +149,41 @@
   .name {
     display: none;
   }
+  .viewSiteLabel {
+    display: none;
+  }
+}
+
+/* ── Voir le site button ─────────────────────────────────────── */
+.viewSiteBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+
+.viewSiteBtn:hover {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.viewSiteIcon {
+  flex-shrink: 0;
+}
+
+.viewSiteLabel {
+  /* visible on desktop, hidden on mobile via media query above */
 }
