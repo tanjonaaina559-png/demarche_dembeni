@@ -98,8 +98,37 @@
   background: var(--gris-100); display: flex; align-items: center; justify-content: center;
 }
 
-@media (max-width: 900px) {
+.map-section {
+  margin-top: 4rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--gris-200);
+  box-shadow: var(--shadow-md);
+}
+
+/* Override InteractiveMap height per breakpoint via wrapper overrides */
+@media (max-width: 1023px) {
+  .map-section > div {
+    height: 350px !important;
+  }
+  .map-section > div > div {
+    height: 350px !important;
+  }
+}
+
+@media (max-width: 767px) {
   .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
   .contact-form-panel { padding: 2rem 1.5rem; }
   .form-row { grid-template-columns: 1fr; }
+  .map-section > div {
+    height: 280px !important;
+  }
+  .map-section > div > div {
+    height: 280px !important;
+  }
+  .map-section {
+    margin-top: 2.5rem;
+    width: 100%;
+  }
 }
+

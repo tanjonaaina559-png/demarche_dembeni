@@ -27,7 +27,8 @@ exports.updateSettings = async (req, res) => {
     const { 
       siteName, siteDescription, contactEmail, contactPhone, contactPhone2, 
       address, openingHours, socialNetworks, footerText, footerLinks, 
-      maintenanceMode, maintenanceMessage, emailNotificationsEnabled 
+      maintenanceMode, maintenanceMessage, emailNotificationsEnabled,
+      mapLatitude, mapLongitude, mapUrl, mapMarkerTitle, mapMarkerDescription
     } = req.body;
 
     let settings = await Settings.findOne();
@@ -49,6 +50,13 @@ exports.updateSettings = async (req, res) => {
     if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
     if (maintenanceMessage !== undefined) settings.maintenanceMessage = maintenanceMessage;
     if (emailNotificationsEnabled !== undefined) settings.emailNotificationsEnabled = emailNotificationsEnabled;
+    
+    // Map fields
+    if (mapLatitude !== undefined) settings.mapLatitude = mapLatitude;
+    if (mapLongitude !== undefined) settings.mapLongitude = mapLongitude;
+    if (mapUrl !== undefined) settings.mapUrl = mapUrl;
+    if (mapMarkerTitle !== undefined) settings.mapMarkerTitle = mapMarkerTitle;
+    if (mapMarkerDescription !== undefined) settings.mapMarkerDescription = mapMarkerDescription;
 
     settings.lastUpdatedBy = req.user._id;
     await settings.save();

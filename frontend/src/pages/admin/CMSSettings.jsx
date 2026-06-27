@@ -25,7 +25,12 @@ const CMSSettings = () => {
     footerLinks: [],
     maintenanceMode: false,
     maintenanceMessage: '',
-    emailNotificationsEnabled: true
+    emailNotificationsEnabled: true,
+    mapLatitude: -12.8427,
+    mapLongitude: 45.1970,
+    mapUrl: '',
+    mapMarkerTitle: '',
+    mapMarkerDescription: ''
   });
 
   const fetchSettings = async () => {
@@ -180,6 +185,67 @@ const CMSSettings = () => {
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     rows="3"
                     style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                  />
+                </div>
+                
+                <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '2rem 0' }} />
+                <h3 style={{ color: '#164022', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FaMapMarkerAlt /> Carte Interactive Google Maps
+                </h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Latitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={settings.mapLatitude ?? -12.8427}
+                      onChange={(e) => handleInputChange('mapLatitude', e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Longitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={settings.mapLongitude ?? 45.1970}
+                      onChange={(e) => handleInputChange('mapLongitude', e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Google Maps URL (Itinéraire)</label>
+                  <input
+                    type="text"
+                    value={settings.mapUrl || ''}
+                    onChange={(e) => handleInputChange('mapUrl', e.target.value)}
+                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                    placeholder="https://maps.google.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Titre du marqueur</label>
+                  <input
+                    type="text"
+                    value={settings.mapMarkerTitle || ''}
+                    onChange={(e) => handleInputChange('mapMarkerTitle', e.target.value)}
+                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                    placeholder="Mairie de Dembéni"
+                  />
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Description du marqueur</label>
+                  <textarea
+                    value={settings.mapMarkerDescription || ''}
+                    onChange={(e) => handleInputChange('mapMarkerDescription', e.target.value)}
+                    rows="3"
+                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                    placeholder="Adresse, Téléphone et Horaires..."
                   />
                 </div>
               </div>

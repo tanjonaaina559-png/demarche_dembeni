@@ -14,6 +14,13 @@ const settingsSchema = new mongoose.Schema({
   address: { type: String, default: 'Dembéni, Île de Mayotte' },
   mapLocation: { type: String, default: '' }, // Google Maps embed URL
   
+  // Interactive Google Maps fields
+  mapLatitude: { type: Number, default: -12.8427 },
+  mapLongitude: { type: Number, default: 45.1970 },
+  mapUrl: { type: String, default: 'https://maps.google.com/?q=-12.8427,45.1970' },
+  mapMarkerTitle: { type: String, default: 'Commune de Dembéni' },
+  mapMarkerDescription: { type: String, default: 'Hôtel de Ville de Dembéni, Route Nationale 3, 97680 Dembéni' },
+  
   // Opening Hours
   openingHours: [{
     day: { type: String, enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },

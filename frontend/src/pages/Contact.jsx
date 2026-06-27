@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import InteractiveMap from '../components/ui/InteractiveMap';
 import './Contact.css';
 
 const Contact = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState(null);
+  const [siteSettings, setSiteSettings] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -18,10 +20,18 @@ const Contact = () => {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        const res = await api.get('/public-cms/settings');
+        setSiteSettings(res.data);
+      } catch (e) {
+        // Non-blocking: map will use defaults
+        console.warn('Could not load CMS settings for map', e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const handleChange = (e) => {
@@ -206,13 +216,19 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* MAP PLACEHOLDER */}
-          <div className="map-container">
-            <div style={{ textAlign: 'center', color: 'var(--gris-500)' }}>
-              <i className="fas fa-map-marked-alt" style={{ fontSize: '3rem', marginBottom: '1rem', color: 'var(--vert-300)' }}></i>
-              <h3 style={{ fontFamily: 'var(--font-head)', color: 'var(--vert-800)', marginBottom: '.5rem' }}>Carte interactive</h3>
-              <p>L'intégration Google Maps n'est pas activée (clé API requise).</p>
-            </div>
+          {/* INTERACTIVE GOOGLE MAP */}
+          <div className="map-section">
+            <InteractiveMap
+              latitude={siteSettings?.mapLatitude}
+              longitude={siteSettings?.mapLongitude}
+              markerTitle={siteSettings?.mapMarkerTitle || 'Commune de Dembéni'}
+              markerDesc={siteSettings?.mapMarkerDescription || 'Hôtel de Ville de Dembéni, Route Nationale 3, 97680 Dembéni, Mayotte'}
+              contactPhone={siteSettings?.contactPhone || '+262 269 00 00 00'}
+              contactEmail={siteSettings?.contactEmail || 'contact@dembeni.fr'}
+              openingHours="Lun–Jeu : 8h00–12h / 13h30–16h30 · Ven : 8h00–12h / 13h30–16h00"
+              mapsUrl={siteSettings?.mapUrl}
+              height="450px"
+            />
           </div>
         </section>
       </div>
