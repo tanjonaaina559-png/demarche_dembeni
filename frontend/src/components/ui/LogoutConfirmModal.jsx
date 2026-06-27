@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LogOut } from 'lucide-react';
 
 /**
  * LogoutConfirmModal
@@ -81,7 +82,7 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.25 }}
               onClick={onClose}
               style={{
                 position: 'fixed', inset: 0, zIndex: 9000,
@@ -111,7 +112,7 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
               <div style={{
                 pointerEvents: 'auto',
                 background: '#ffffff',
-                borderRadius: '20px',
+                borderRadius: '18px',
                 padding: '2.25rem 2rem 2rem',
                 maxWidth: '420px',
                 width: '100%',
@@ -122,12 +123,12 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
                 {/* Icon */}
                 <div style={{
                   width: '60px', height: '60px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                  background: '#fee2e2',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 1.25rem',
-                  fontSize: '1.6rem',
+                  color: '#dc2626'
                 }}>
-                  🚪
+                  <LogOut size={28} />
                 </div>
 
                 {/* Title */}
@@ -144,7 +145,8 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
                   fontSize: '0.9rem', color: '#6b7280',
                   lineHeight: 1.6, marginBottom: '1.75rem',
                 }}>
-                  Êtes-vous sûr de vouloir vous déconnecter&nbsp;?
+                  Êtes-vous sûr de vouloir vous déconnecter&nbsp;?<br />
+                  Votre session sera fermée et vous serez redirigé vers la page d'accueil.
                 </p>
 
                 {/* Hint */}
@@ -164,15 +166,15 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
                     style={{
                       flex: 1, padding: '0.8rem',
                       border: '1.5px solid #e4e4e7',
-                      borderRadius: '12px', background: '#fff',
+                      borderRadius: '12px', background: '#f9fafb',
                       fontSize: '0.9rem', fontWeight: 600,
                       color: '#374151', cursor: 'pointer',
                       fontFamily: '"Inter", sans-serif',
                       transition: 'all 0.2s',
                       opacity: loading ? 0.5 : 1,
                     }}
-                    onMouseEnter={e => { if (!loading) e.target.style.background = '#f9fafb'; }}
-                    onMouseLeave={e => { e.target.style.background = '#fff'; }}
+                    onMouseEnter={e => { if (!loading) e.target.style.background = '#f3f4f6'; }}
+                    onMouseLeave={e => { e.target.style.background = '#f9fafb'; }}
                   >
                     ❌ Non
                   </button>
