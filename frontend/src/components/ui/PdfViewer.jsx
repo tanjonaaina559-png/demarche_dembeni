@@ -14,8 +14,6 @@ const PdfViewer = ({ url, title }) => {
         <object 
           data={`${url}#toolbar=0`} 
           type="application/pdf"
-          width="100%"
-          height="800px"
           className="pdf-iframe"
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '2rem' }}>

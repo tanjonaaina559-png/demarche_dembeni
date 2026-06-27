@@ -30,15 +30,19 @@
 
 .pdf-iframe-wrapper {
   width: 100%;
-  height: 500px;
+  height: 65vh;
+  min-height: 400px;
   background: #f8f9fa;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pdf-iframe {
   width: 100%;
+  min-width: 700px; /* Force overflow on small screens for better readability */
   height: 100%;
   border: none;
 }

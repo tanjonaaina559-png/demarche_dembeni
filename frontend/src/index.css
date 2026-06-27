@@ -68,13 +68,22 @@ body {
   background: var(--ivoire);
   color: var(--gris-700);
   line-height: 1.65;
-  overflow-x: clip;
+  overflow-x: clip; /* Empêche le défilement horizontal */
   -webkit-font-smoothing: antialiased;
 }
-img { max-width:100%; display:block; }
+img { 
+  max-width: 100%; 
+  height: auto; 
+  display: block; 
+  object-fit: cover; 
+}
 a { color: inherit; }
-button { font-family: var(--font-body); }
-h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-height:1.25; }
+button { 
+  font-family: var(--font-body); 
+  /* Taille cible tactile minimum par défaut */
+  min-height: 44px;
+}
+h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-height:1.25; word-wrap: break-word; overflow-wrap: break-word; }
 
 /* ======== NAVBAR ======== */
 .navbar-green {
@@ -414,7 +423,7 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
   gap: 8px;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: .9rem;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
   padding: .75rem 1.7rem;
   border-radius: var(--radius-pill);
   border: none;
@@ -423,6 +432,8 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
   transition: var(--transition);
   white-space: nowrap;
   letter-spacing: .1px;
+  min-height: 48px;
+  min-width: 44px;
 }
 
 .btn-primary {
@@ -1227,5 +1238,46 @@ table.pro-table {
   .mobile-menu-content a.active {
     font-weight: 700;
   }
+  
+  /* Tables Responsiveness */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Scroll plus fluide sur iOS */
+  }
+  
+  /* Forms Responsiveness */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-field {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Stack buttons on mobile */
+  .btn-group-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .btn-group-mobile .btn {
+    width: 100%;
+  }
+  
+  /* Modals Responsiveness */
+  .modal-content-mobile {
+    width: 95% !important;
+    max-height: 90vh !important;
+    overflow-y: auto;
+    margin: 0 auto;
+  }
+  
+  .sk-hero { padding: 3rem 1.25rem; }
+}
+
+@media (max-width: 425px) {
+  .stats-strip { grid-template-columns: 1fr; }
+  .section-title { font-size: clamp(1.3rem, 5vw, 1.6rem); }
 }
 

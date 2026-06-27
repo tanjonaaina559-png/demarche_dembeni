@@ -21,7 +21,15 @@
   max-width: 900px;
   width: 90vw;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .modal {
+    width: 95vw;
+  }
 }
 
 .header {
@@ -58,6 +66,8 @@
 
 .content {
   padding: 1.5rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .footer {

@@ -1,5 +1,6 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import LogoutConfirmModal from './ui/LogoutConfirmModal';
 
@@ -34,8 +35,17 @@ const Navbar = () => {
         setDropdownOpen(false);
       }
     };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [dropdownRef]);
 
   const renderAuthLinks = () => {
@@ -140,39 +150,47 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay">
-          <div className="mobile-menu-content">
-            <NavLink to="/" onClick={closeMobileMenu}>Accueil</NavLink>
-            <NavLink to="/demarches" onClick={closeMobileMenu}>Démarches</NavLink>
-            <NavLink to="/documents" onClick={closeMobileMenu}>Documents</NavLink>
-            <NavLink to="/services" onClick={closeMobileMenu}>Services</NavLink>
-            <NavLink to="/contact" onClick={closeMobileMenu}>Contact</NavLink>
-            {user ? (
-              <>
-                {user.role === 'citizen' ? (
-                  <>
-                    <NavLink to="/citizen/profile" className="mt-2" onClick={closeMobileMenu}>Mon Profil</NavLink>
-                    <NavLink to="/mes-demandes" onClick={closeMobileMenu}>Mes demandes</NavLink>
-                    <NavLink to="/citizen/documents" onClick={closeMobileMenu}>Mes documents numériques</NavLink>
-                  </>
-                ) : (
-                  <>
-                    <NavLink to="/admin/dashboard" className="mt-2" onClick={closeMobileMenu}>Tableau de bord</NavLink>
-                    <NavLink to="/admin/citizens" onClick={closeMobileMenu}>Administration</NavLink>
-                    <NavLink to="/admin/settings" onClick={closeMobileMenu}>Mon Profil</NavLink>
-                  </>
-                )}
-                <button onClick={handleLogoutRequest} className="btn-admin mt-2">Déconnexion</button>
-              </>
-            ) : (
-              <NavLink to="/login" className="btn-citoyen mt-2" onClick={closeMobileMenu}>
-                <i className="fas fa-sign-in-alt"></i> Se connecter
-              </NavLink>
-            )}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            className="mobile-menu-overlay"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          >
+            <div className="mobile-menu-content">
+              <NavLink to="/" onClick={closeMobileMenu}>Accueil</NavLink>
+              <NavLink to="/demarches" onClick={closeMobileMenu}>Démarches</NavLink>
+              <NavLink to="/documents" onClick={closeMobileMenu}>Documents</NavLink>
+              <NavLink to="/services" onClick={closeMobileMenu}>Services</NavLink>
+              <NavLink to="/contact" onClick={closeMobileMenu}>Contact</NavLink>
+              {user ? (
+                <>
+                  {user.role === 'citizen' ? (
+                    <>
+                      <NavLink to="/citizen/profile" className="mt-2" onClick={closeMobileMenu}>Mon Profil</NavLink>
+                      <NavLink to="/mes-demandes" onClick={closeMobileMenu}>Mes demandes</NavLink>
+                      <NavLink to="/citizen/documents" onClick={closeMobileMenu}>Mes documents numériques</NavLink>
+                    </>
+                  ) : (
+                    <>
+                      <NavLink to="/admin/dashboard" className="mt-2" onClick={closeMobileMenu}>Tableau de bord</NavLink>
+                      <NavLink to="/admin/citizens" onClick={closeMobileMenu}>Administration</NavLink>
+                      <NavLink to="/admin/settings" onClick={closeMobileMenu}>Mon Profil</NavLink>
+                    </>
+                  )}
+                  <button onClick={handleLogoutRequest} className="btn-admin mt-2">Déconnexion</button>
+                </>
+              ) : (
+                <NavLink to="/login" className="btn-citoyen mt-2" onClick={closeMobileMenu}>
+                  <i className="fas fa-sign-in-alt"></i> Se connecter
+                </NavLink>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
