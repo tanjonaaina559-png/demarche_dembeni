@@ -504,7 +504,7 @@ const Accueil = () => {
             <div className="divider"></div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2.5rem' }}>
+          <div className="passport-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2.5rem' }}>
             {passportData.steps.map((step, idx) => (
               <div key={idx} style={{ textAlign: 'center', padding: '2rem 1.5rem', background: 'white', borderRadius: 'var(--radius-lg)', border: '1px solid var(--gris-200)' }}>
                 <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, var(--vert-800), var(--vert-600))', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: 'white', fontSize: '1.5rem' }}>

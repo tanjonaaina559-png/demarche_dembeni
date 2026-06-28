@@ -638,25 +638,234 @@
   margin: 0 auto 2rem;
 }
 
-@media (max-width: 900px) {
+/* ================================================================
+   RESPONSIVE — TABLET (≤1023px)
+   Desktop layout kept intact above this breakpoint.
+================================================================ */
+@media (max-width: 1023px) {
+  /* Hero: tighten horizontal padding on tablet */
+  .hero-inner {
+    padding: 5rem 2rem 4rem;
+    gap: 2.5rem;
+  }
+
+  /* Services grid: relax minimum card width on tablet */
+  .services-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  /* Passport steps: 2-column on tablet */
+  .passport-steps-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE — MOBILE (≤767px)
+   All multi-column grids collapse to single column.
+================================================================ */
+@media (max-width: 767px) {
+  /* ── Hero ── */
+  .hero {
+    min-height: auto;
+  }
+
   .hero-inner {
     flex-direction: column;
     gap: 2rem;
-    padding: 4rem 1.25rem 3rem;
+    padding: 5rem 1.25rem 3rem;
+    text-align: center;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero p {
+    max-width: 100%;
+    margin-bottom: 1.8rem;
+  }
+
+  .hero-actions {
+    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-ghost {
+    justify-content: center;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
   }
 
   .hero-stats {
     width: 100%;
+    box-sizing: border-box;
   }
 
+  /* ── Services / Procedures grid ── */
+  /* minmax(340px) causes overflow on 320-360px screens → force 1 col */
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* ── Highlight rows (Collecte, Service Public) ── */
   .highlight-row,
   .highlight-row.reverse {
     grid-template-columns: 1fr;
     direction: ltr;
   }
 
+  /* Image first on mobile, then content */
+  .highlight-img {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* ── Loisirs section (inline grid '1fr 1fr' → 1 col) ── */
+  .loisirs-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  /* ── Tarif grid (inline '1fr 1fr 1fr' → 1 col) ── */
+  .tarif-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Passport steps (inline 'repeat(4,1fr)' → 1 col) ── */
+  .passport-steps-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* ── FAQ grid ── */
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── CTA band ── */
   .cta-band {
-    margin: 0 1.25rem;
-    padding: 2rem 1.5rem;
+    margin: 0 1rem;
+    padding: 2.5rem 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .cta-band h2 {
+    font-size: 1.4rem;
+  }
+
+  .cta-band p {
+    font-size: 0.9rem;
+  }
+
+  /* ── Citizen welcome card (inline styles need specificity override) ── */
+  .citizen-welcome-card {
+    padding: 1.5rem !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1.25rem !important;
+  }
+
+  /* Button group inside citizen card */
+  .citizen-welcome-card > div:last-child {
+    width: 100%;
+    flex-direction: column !important;
+  }
+
+  .citizen-welcome-card > div:last-child a {
+    width: 100%;
+    justify-content: center !important;
+  }
+
+  /* ── Info alert ── */
+  .info-alert {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  /* ── Section header center ── */
+  .section-header.center {
+    text-align: center;
+    padding: 0 1rem;
   }
 }
+
+/* ================================================================
+   RESPONSIVE — SMALL PHONES (≤480px)
+   Extra adjustments for 320–480px range.
+================================================================ */
+@media (max-width: 480px) {
+  .hero-inner {
+    padding: 4.5rem 1rem 2.5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+  }
+
+  .hero p {
+    font-size: 0.9rem;
+  }
+
+  /* Ensure service cards don't overflow at 320px */
+  .services-grid {
+    gap: 1rem;
+  }
+
+  .service-card-new {
+    border-radius: var(--radius-lg);
+  }
+
+  .scn-body {
+    padding: 1.25rem;
+  }
+
+  .scn-body h3 {
+    font-size: 1.15rem;
+  }
+
+  /* CTA band on very small screens */
+  .cta-band {
+    margin: 0 0.75rem;
+    padding: 2rem 1rem;
+  }
+
+  /* Stats strip forces 1 col on small phones (already in index.css
+     but repeated here scoped to Accueil context for safety) */
+  .stats-strip {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Checklist items */
+  .checklist li {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* FAQ cards */
+  .faq-card {
+    padding: 1.25rem;
+  }
+
+  /* Activity cards grid — 2 columns on small phones */
+  .activities-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+
+  /* Tarif cards: smaller padding */
+  .tarif-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .tarif-price {
+    font-size: 2rem;
+  }
+}
+
