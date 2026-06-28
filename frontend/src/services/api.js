@@ -4,35 +4,50 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 60000, // 60s — needed for Cloudinary image uploads
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // NOTE: Do NOT set a global Content-Type header here.
+  // When sending FormData, axios must auto-detect and set
+  // 'multipart/form-data; boundary=...' — manually overriding
+  // it destroys the boundary and breaks Multer parsing.
 });
 
-// Request interceptor: Add JWT token to all requests
+// Request interceptor: Add JWT token + correct Content-Type
 api.interceptors.request.use(
   (config) => {
     console.log('[API Request]', config.method.toUpperCase(), config.url);
-    
-    // Check both localStorage formats for token as requested
+
+    // ── Auth token ──────────────────────────────────────────────────────
     const tokenStr = localStorage.getItem('token');
     const userInfoStr = localStorage.getItem('userInfo');
-    
+
     let activeToken = tokenStr;
     if (!activeToken && userInfoStr) {
       try {
         const parsed = JSON.parse(userInfoStr);
-        if (parsed?.token) {
-          activeToken = parsed.token;
-        }
+        if (parsed?.token) activeToken = parsed.token;
       } catch (err) {}
     }
-    
+
     if (activeToken) {
       config.headers.Authorization = `Bearer ${activeToken}`;
     }
+
+    // ── Content-Type ────────────────────────────────────────────────────
+    // If the body is a FormData (file upload), do NOT set Content-Type.
+    // axios + the browser will set it automatically to
+    //   multipart/form-data; boundary=----WebKitFormBoundaryXXX
+    // which Multer NEEDS to parse files.
+    // For all other requests, default to application/json.
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    // If it IS FormData, delete any previously-set Content-Type so the
+    // browser boundary is not overwritten.
+    else {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

@@ -285,9 +285,11 @@ const ProcedureCreate = () => {
       });
       payload.append('pdfFields', JSON.stringify(pdfFieldsObj));
 
-      await api.post('/admin/procedures', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // The Content-Type + boundary is set automatically by the api
+      // interceptor when it detects a FormData payload.
+      // Do NOT pass { headers: { 'Content-Type': 'multipart/form-data' } }
+      // manually — that would destroy the boundary Multer needs.
+      await api.post('/admin/procedures', payload);
 
       showToast('Démarche administrative créée avec succès !', 'success');
       setTimeout(() => navigate('/admin/procedures'), 1500);

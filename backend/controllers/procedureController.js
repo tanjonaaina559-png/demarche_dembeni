@@ -60,6 +60,20 @@ exports.getProcedureDetails = async (req, res) => {
 
 exports.createProcedure = async (req, res) => {
   try {
+    // ── STEP 1: Log incoming request ───────────────────────────────────
+    console.log('\n========== BACKEND: createProcedure ==========');
+    console.log('req.body fields:', Object.keys(req.body));
+    console.log('req.files:', req.files
+      ? Object.entries(req.files).map(([k, v]) => ({
+          field: k,
+          filename: v[0]?.originalname,
+          mimetype: v[0]?.mimetype,
+          size: v[0]?.size,
+          path: v[0]?.path,         // <-- This is the Cloudinary secure_url
+          filename_cloud: v[0]?.filename,
+        }))
+      : 'AUCUN FICHIER REÇU — Vérifier Content-Type / boundary');
+
     const {
       title, slug, category, description, detailedDescription,
       statistics, features, documents, steps, requiredFields,
@@ -67,24 +81,34 @@ exports.createProcedure = async (req, res) => {
       pdfTemplateType, pdfFields
     } = req.body;
 
+    // ── STEP 2: Extract image paths ────────────────────────────────────
     let imagePath = '';
     let bgImagePath = '';
     let pdfTemplatePath = '';
 
     if (req.files) {
       if (req.files['image'] && req.files['image'][0]) {
-       imagePath = req.files['image'][0].path;
+        imagePath = req.files['image'][0].path;
+        console.log('✅ image secure_url:', imagePath);
       }
       if (req.files['backgroundImage'] && req.files['backgroundImage'][0]) {
-       bgImagePath = req.files['backgroundImage'][0].path;
+        bgImagePath = req.files['backgroundImage'][0].path;
+        console.log('✅ backgroundImage secure_url:', bgImagePath);
       }
       if (req.files['pdfTemplate'] && req.files['pdfTemplate'][0]) {
-       pdfTemplatePath = req.files['pdfTemplate'][0].path;
+        pdfTemplatePath = req.files['pdfTemplate'][0].path;
+        console.log('✅ pdfTemplate secure_url:', pdfTemplatePath);
       }
     } else if (req.file) {
       imagePath = req.file.path;
+      console.log('✅ image (single) secure_url:', imagePath);
     }
 
+    if (!imagePath) {
+      console.warn('⚠️  No image path resolved. req.files was:', req.files);
+    }
+
+    // ── STEP 3: Build document ─────────────────────────────────────────
     const procedure = new Procedure({
       title,
       slug: slug || undefined,
@@ -111,12 +135,26 @@ exports.createProcedure = async (req, res) => {
       createdBy: req.user?._id
     });
 
+    // ── STEP 4: Save to MongoDB ────────────────────────────────────────
+    console.log('\n========== DATABASE: before save ==========');
+    console.log('image field:', procedure.image);
+    console.log('imageUrl field:', procedure.imageUrl);
+
     await procedure.save();
+
+    console.log('\n========== DATABASE: after save ==========');
+    console.log('_id:', procedure._id);
+    console.log('image stored:', procedure.image);
+    console.log('imageUrl stored:', procedure.imageUrl);
+    console.log('==========================================\n');
+
     res.status(201).json({ message: 'Démarche créée avec succès', procedure });
   } catch (error) {
+    console.error('[createProcedure] ERROR:', error.message);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
+
 
 // ─── UPDATE ─────────────────────────────────────────────────────────────────
 

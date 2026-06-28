@@ -350,9 +350,9 @@ const ProcedureEdit = () => {
       });
       payload.append('pdfFields', JSON.stringify(pdfFieldsObj));
 
-      await api.put(`/admin/procedures/${id}`, payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // Content-Type + boundary auto-set by api interceptor when FormData detected.
+      // Do NOT override manually — it would break Multer's boundary parsing.
+      await api.put(`/admin/procedures/${id}`, payload);
 
       showToast('Démarche administrative mise à jour avec succès !', 'success');
       setTimeout(() => navigate('/admin/procedures'), 1500);
