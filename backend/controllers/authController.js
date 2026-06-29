@@ -110,22 +110,29 @@ const getMe = async (req, res) => {
 // Forgot Password
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  console.log(`\n---------------------------------`);
+  console.log(`[Forgot Password] ROUTE CALLED: /api/auth/forgot-password`);
+  console.log(`[Forgot Password] EMAIL RECU: ${email}`);
+  
   try {
+    console.log(`[Forgot Password] Recherche de l'utilisateur dans la base de données...`);
     const user = await User.findOne({ email });
     
-    // Security: Never reveal whether an email exists
     if (!user) {
       console.log(`[Forgot Password] User not found for email: ${email}`);
-      return res.status(200).json({ message: 'Si cette adresse correspond à un compte, un lien de réinitialisation a été envoyé.' });
+      return res.status(404).json({ message: 'Aucun compte associé à cette adresse e-mail.' });
     }
 
+    console.log(`[Forgot Password] Génération du token de réinitialisation...`);
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
 
+    console.log(`[Forgot Password] Sauvegarde du token en base de données...`);
     await user.save();
+    console.log(`[Forgot Password] Token sauvegardé avec succès.`);
 
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
     const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
@@ -154,6 +161,7 @@ const forgotPassword = async (req, res) => {
     `;
 
     try {
+      console.log(`[Forgot Password] Tentative d'envoi de l'e-mail via emailService...`);
       await emailService.sendEmail({
         email: user.email,
         subject: 'Réinitialisation de votre mot de passe - Commune de Dembéni',
@@ -162,13 +170,13 @@ const forgotPassword = async (req, res) => {
       });
       
       console.log(`[Forgot Password] Email sent successfully to: ${email}`);
-      res.status(200).json({ message: 'Si cette adresse correspond à un compte, un lien de réinitialisation a été envoyé.' });
+      res.status(200).json({ message: 'Un lien de réinitialisation a été envoyé à votre adresse e-mail.' });
     } catch (err) {
       console.error(`[Forgot Password] Email sending failure for: ${email}`, err);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save();
-      return res.status(500).json({ message: "L'e-mail n'a pas pu être envoyé" });
+      return res.status(500).json({ message: "L'e-mail n'a pas pu être envoyé. Veuillez vérifier la configuration SMTP." });
     }
   } catch (error) {
     console.error(`[Forgot Password] Error: ${error.message}`);

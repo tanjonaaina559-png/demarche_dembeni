@@ -32,11 +32,9 @@ const ForgotPassword = () => {
     try {
       const { data } = await api.post('/auth/forgot-password', { email });
       setSuccess(true);
-      showToast(data.message || 'Si cette adresse correspond à un compte, un lien de réinitialisation a été envoyé.', 'success');
+      showToast(data.message || 'Un lien de réinitialisation a été envoyé.', 'success');
     } catch (err) {
-      // Pour des raisons de sécurité, nous traitons les erreurs 404 comme des succès côté client
-      setSuccess(true);
-      showToast('Si cette adresse correspond à un compte, un lien de réinitialisation a été envoyé.', 'success');
+      showToast(err.response?.data?.message || 'Erreur lors de l\'envoi', 'error');
     } finally {
       setLoading(false);
     }
@@ -101,9 +99,9 @@ const ForgotPassword = () => {
               style={{ textAlign: 'center', padding: '1rem 0' }}
             >
               <CheckCircle size={48} color="#16A34A" style={{ marginBottom: '1rem' }} />
-              <h3 style={{ color: '#164022', marginBottom: '0.5rem' }}>Demande envoyée</h3>
+              <h3 style={{ color: '#164022', marginBottom: '0.5rem' }}>Email envoyé !</h3>
               <p style={{ color: '#4B5563', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                Si un compte est associé à <strong>{email}</strong>, un lien de réinitialisation y a été envoyé. 
+                Un lien de réinitialisation a été envoyé à <strong>{email}</strong>. 
                 Veuillez vérifier votre boîte de réception. Ce lien expire dans 15 minutes.
               </p>
             </motion.div>
