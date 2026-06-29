@@ -43,12 +43,21 @@ const ImageUpload = ({ value, onChange, label = "Image", placeholder = "URL de l
     formData.append('file', file);
     formData.append('category', 'cms');
 
+    console.log('========== FRONTEND: UPLOAD START ==========');
+    console.log('Sending FormData to /cms/media');
+    for (let [key, val] of formData.entries()) {
+      console.log(`FormData [${key}]:`, val instanceof File ? `File Object (${val.name})` : val);
+    }
+    
     try {
-      const response = await api.post('/cms/media', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await api.post('/cms/media', formData);
+      console.log('========== FRONTEND: UPLOAD SUCCESS ==========');
+      console.log('API Response:', response.data);
+      console.log('Cloudinary URL returned:', response.data.media.url);
+      
       onChange(response.data.media.url);
     } catch (err) {
+      console.error('========== FRONTEND: UPLOAD FAILED ==========', err);
       setError("Erreur lors de l'upload: " + err.message);
     } finally {
       setUploading(false);

@@ -285,11 +285,31 @@ const ProcedureCreate = () => {
       });
       payload.append('pdfFields', JSON.stringify(pdfFieldsObj));
 
+      // DEBUG: log all FormData entries before sending
+      console.log('[ProcedureCreate] === FormData entries ===')
+      for (const [key, val] of payload.entries()) {
+        console.log(`  ${key}:`, val instanceof File ? `File(${val.name}, ${val.size}B)` : val);
+      }
+
       // The Content-Type + boundary is set automatically by the api
       // interceptor when it detects a FormData payload.
       // Do NOT pass { headers: { 'Content-Type': 'multipart/form-data' } }
       // manually — that would destroy the boundary Multer needs.
-      await api.post('/admin/procedures', payload);
+      const res = await api.post('/admin/procedures', payload);
+
+      // DEBUG: log the full server response
+      console.log('[ProcedureCreate] === Server response ===', res.data);
+
+      // Update preview with the real Cloudinary URL returned by the server
+      // so the local blob: URL (which expires on navigation) is replaced.
+      const savedProc = res.data?.procedure;
+      const cloudinaryUrl = savedProc?.image || savedProc?.imageUrl;
+      if (cloudinaryUrl) {
+        console.log('[ProcedureCreate] ✅ Cloudinary URL received:', cloudinaryUrl);
+        setImagePreview(cloudinaryUrl);
+      } else {
+        console.warn('[ProcedureCreate] ⚠️  No Cloudinary URL in response. Check req.files on backend.');
+      }
 
       showToast('Démarche administrative créée avec succès !', 'success');
       setTimeout(() => navigate('/admin/procedures'), 1500);

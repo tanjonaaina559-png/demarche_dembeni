@@ -3,12 +3,18 @@ const HomeCard = require('../models/HomeCard');
 const multer = require('multer');
 const path = require('path');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `home-${Date.now()}${path.extname(file.originalname)}`);
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: 'dembeni/home',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+      resource_type: 'auto',
+      public_id: `home-${Date.now()}-${file.originalname.split('.')[0]}`,
+    };
   }
 });
 const upload = multer({ storage });
@@ -39,7 +45,7 @@ exports.createHomeContent = async (req, res) => {
   try {
     const data = { ...req.body };
     if (req.file) {
-      data[req.body.imageField || 'imageUrl'] = `/uploads/${req.file.filename}`;
+      data[req.body.imageField || 'imageUrl'] = req.file.path; // Cloudinary secure_url
     }
     // Handle JSON parsed arrays/objects if sent as string
     ['statistics', 'activities', 'tarifs', 'advantages', 'steps', 'schedule', 'socialLinks', 'informations'].forEach(field => {
@@ -67,7 +73,7 @@ exports.updateHomeContent = async (req, res) => {
     const { id } = req.params;
     const data = { ...req.body };
     if (req.file) {
-      data[req.body.imageField || 'imageUrl'] = `/uploads/${req.file.filename}`;
+      data[req.body.imageField || 'imageUrl'] = req.file.path; // Cloudinary secure_url
     }
     
     ['statistics', 'activities', 'tarifs', 'advantages', 'steps', 'schedule', 'socialLinks', 'informations'].forEach(field => {

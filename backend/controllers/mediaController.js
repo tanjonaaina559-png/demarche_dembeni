@@ -4,18 +4,20 @@ const Media = require('../models/Media');
 const multer = require('multer');
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '..', 'uploads', 'media');
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
+
+// Configure multer for file uploads to Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: 'dembeni/media',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+      resource_type: 'auto',
+      public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
+    };
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
 });
 
 const fileFilter = (req, file, cb) => {
@@ -38,15 +40,24 @@ const upload = multer({
 // ────────────────────────────────────────────────────────────────────────────
 
 exports.uploadMedia = async (req, res) => {
+  console.log('\n========== BACKEND: uploadMedia ROUTE HIT ==========');
+  console.log('req.file exists?', !!req.file);
+  
   try {
     if (!req.file) {
+      console.log('Error: req.file is missing!');
       return res.status(400).json({ message: 'Aucun fichier fourni' });
     }
 
+    console.log('--- CLOUDINARY FILE DATA ---');
+    console.log('req.file.path (secure_url):', req.file.path);
+    console.log('req.file.filename (public_id):', req.file.filename);
+    console.log('req.file.mimetype:', req.file.mimetype);
+
     const { category, alt, title, tags } = req.body;
 
-    const filePath = `uploads/media/${req.file.filename}`;
-    const fileUrl = `/uploads/media/${req.file.filename}`;
+    const fileUrl = req.file.path; // Cloudinary secure_url
+    const filePath = req.file.filename; // Cloudinary public_id
 
     const media = await Media.create({
       filename: req.file.filename,
@@ -68,12 +79,12 @@ exports.uploadMedia = async (req, res) => {
       media
     });
   } catch (error) {
-    // Clean up file if error occurs
-    if (req.file) {
+    // Clean up file if error occurs (on Cloudinary, we'd need to use uploader.destroy, but file might not be saved if err here)
+    if (req.file && req.file.filename) {
       try {
-        fs.unlinkSync(req.file.path);
+        await cloudinary.uploader.destroy(req.file.filename);
       } catch (e) {
-        console.error('Error deleting file:', e);
+        console.error('Error deleting file from Cloudinary:', e);
       }
     }
     res.status(500).json({ message: 'Erreur lors de l\'upload', error: error.message });
@@ -95,8 +106,8 @@ exports.bulkUploadMedia = async (req, res) => {
 
     for (const file of req.files) {
       try {
-        const filePath = `uploads/media/${file.filename}`;
-        const fileUrl = `/uploads/media/${file.filename}`;
+        const fileUrl = file.path; // Cloudinary secure_url
+        const filePath = file.filename; // Cloudinary public_id
 
         const media = await Media.create({
           filename: file.filename,
@@ -139,13 +150,12 @@ exports.deleteMediaFile = async (req, res) => {
     const media = await Media.findById(req.params.id);
     if (!media) return res.status(404).json({ message: 'Média introuvable' });
 
-    // Delete file from disk
-    const filePath = path.join(__dirname, '..', media.filePath);
-    if (fs.existsSync(filePath)) {
+    // Delete file from Cloudinary
+    if (media.filePath) {
       try {
-        fs.unlinkSync(filePath);
+        await cloudinary.uploader.destroy(media.filePath);
       } catch (err) {
-        console.error('Error deleting file:', err);
+        console.error('Error deleting file from Cloudinary:', err);
       }
     }
 

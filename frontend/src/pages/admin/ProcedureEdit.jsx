@@ -350,9 +350,33 @@ const ProcedureEdit = () => {
       });
       payload.append('pdfFields', JSON.stringify(pdfFieldsObj));
 
+      // DEBUG: log all FormData entries before sending
+      console.log('[ProcedureEdit] === FormData entries ===');
+      for (const [key, val] of payload.entries()) {
+        console.log(`  ${key}:`, val instanceof File ? `File(${val.name}, ${val.size}B)` : val);
+      }
+
       // Content-Type + boundary auto-set by api interceptor when FormData detected.
       // Do NOT override manually — it would break Multer's boundary parsing.
-      await api.put(`/admin/procedures/${id}`, payload);
+      const res = await api.put(`/admin/procedures/${id}`, payload);
+
+      // DEBUG: log the full server response
+      console.log('[ProcedureEdit] === Server response ===', res.data);
+
+      // Update preview with the real Cloudinary URL returned by the server
+      // so the local blob: URL (which expires on navigation) is replaced.
+      const savedProc = res.data?.procedure;
+      const cloudinaryUrl = savedProc?.image || savedProc?.imageUrl;
+      if (cloudinaryUrl) {
+        console.log('[ProcedureEdit] ✅ Cloudinary URL received:', cloudinaryUrl);
+        setImagePreview(cloudinaryUrl);
+        setImageFile(null); // clear the file — preview is now the persisted Cloudinary URL
+      } else if (!imageFile) {
+        // No new file uploaded — imagePreview already holds the existing Cloudinary URL
+        console.log('[ProcedureEdit] No new image uploaded, existing preview kept.');
+      } else {
+        console.warn('[ProcedureEdit] ⚠️  No Cloudinary URL in response. Check req.files on backend.');
+      }
 
       showToast('Démarche administrative mise à jour avec succès !', 'success');
       setTimeout(() => navigate('/admin/procedures'), 1500);

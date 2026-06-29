@@ -3,7 +3,8 @@ const router = express.Router();
 const { protect, admin } = require('../middleware/authMiddleware');
 const cmsController = require('../controllers/cmsController');
 const homepageCmsController = require('../controllers/homepageCmsController');
-const { upload, uploadMedia, bulkUploadMedia, deleteMediaFile } = require('../controllers/mediaController');
+const { uploadMedia, bulkUploadMedia, deleteMediaFile } = require('../controllers/mediaController');
+const cloudinaryUpload = require('../middleware/cloudinaryUpload');
 
 // All routes below require authentication + admin role
 router.use(protect, admin);
@@ -79,10 +80,10 @@ router.route('/footer')
 // ────────────────────────────────────────────────────────────────────────────
 router.route('/media')
   .get(cmsController.getMediaLibrary)
-  .post(upload.single('file'), uploadMedia);
+  .post(cloudinaryUpload.single('file'), uploadMedia);
 
 router.route('/media/bulk')
-  .post(upload.array('files', 10), bulkUploadMedia);
+  .post(cloudinaryUpload.array('files', 10), bulkUploadMedia);
 
 router.route('/media/:id')
   .get(cmsController.getMedia)

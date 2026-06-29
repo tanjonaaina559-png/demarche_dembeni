@@ -135,15 +135,14 @@ const Procedures = () => {
       });
       if (imageFile) payload.append('image', imageFile);
 
+      // NOTE: Do NOT pass headers here — the api.js interceptor detects FormData
+      // and lets the browser generate 'multipart/form-data; boundary=...' automatically.
+      // Manually setting Content-Type destroys the boundary and breaks Multer parsing.
       if (selected) {
-        await api.put(`/admin/procedures/${selected._id}`, payload, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await api.put(`/admin/procedures/${selected._id}`, payload);
         showToast('Démarche mise à jour avec succès');
       } else {
-        await api.post('/admin/procedures', payload, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await api.post('/admin/procedures', payload);
         showToast('Démarche créée avec succès');
       }
       closeModal();
