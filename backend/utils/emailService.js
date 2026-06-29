@@ -19,15 +19,10 @@ exports.sendEmail = async (options) => {
       html: options.html || `<p>${options.message}</p>`
     };
 
-    if (process.env.NODE_ENV === 'production') {
-      await transporter.sendMail(mailOptions);
-    } else {
-      console.log('EMAIL SIMULATOR:');
-      console.log(`To: ${options.email}`);
-      console.log(`Subject: ${options.subject}`);
-      console.log(`Message: ${options.message}`);
-    }
+    await transporter.sendMail(mailOptions);
+    console.log(`Email sent successfully to: ${options.email}`);
   } catch (error) {
     console.error('Erreur lors de l\'envoi de l\'email:', error);
+    throw error;
   }
 };
