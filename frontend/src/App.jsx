@@ -39,6 +39,7 @@ const CMSFAQManagement = lazy(() => import('./pages/admin/CMSFAQManagement'));
 const CMSCollecteSchedule = lazy(() => import('./pages/admin/CMSCollecteSchedule'));
 const AdminDocuments = lazy(() => import('./pages/admin/AdminDocuments'));
 const AdminHomePage = lazy(() => import('./pages/admin/AdminHomePage'));
+const AdminPdfTemplates = lazy(() => import('./pages/admin/AdminPdfTemplates'));
 
 const NotFound = () => (
   <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -118,6 +119,7 @@ function App() {
             <Route path="/admin/documents" element={<AdminDocuments />} />
             <Route path="/admin/statistics" element={<Statistics />} />
             <Route path="/admin/home-cms" element={<AdminHomePage />} />
+            <Route path="/admin/pdf-templates" element={<AdminPdfTemplates />} />
           </Route>
 
           {/* 404 Route */}

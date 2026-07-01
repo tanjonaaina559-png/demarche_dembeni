@@ -1281,3 +1281,159 @@ table.pro-table {
   .section-title { font-size: clamp(1.3rem, 5vw, 1.6rem); }
 }
 
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE PATCH — Admin + Citizen Layouts
+   Breakpoints: 320 / 375 / 425 / 768 / 1024 / 1440
+═══════════════════════════════════════════════════════ */
+
+/* ── Admin Layout responsive ───────────────────────── */
+@media (max-width: 1024px) {
+  /* Prevent admin content from going under the sidebar */
+  .admin-main-content {
+    margin-left: 72px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Admin main content takes full width when sidebar overlays */
+  .admin-main-content {
+    margin-left: 0 !important;
+    padding: 16px !important;
+  }
+
+  /* Admin grids: single column on mobile */
+  section[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Procedure / Document cards grid */
+  div[style*="repeat(auto-fill, minmax(300px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Admin header flex: stack on mobile */
+  div[style*="justifyContent: 'space-between'"][style*="alignItems: 'center'"] {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  /* Filters row: stack */
+  div[style*="display: 'flex'"][style*="gap: 12"] {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Tables in admin become horizontally scrollable */
+  table {
+    min-width: 600px;
+  }
+
+  .table-wrap,
+  div[style*="overflow-x: auto"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Modals stay centered and don't overflow */
+  div[style*="position: 'fixed'"][style*="inset: 0"] > div {
+    width: 95% !important;
+    max-width: 95vw !important;
+    max-height: 92vh !important;
+    overflow-y: auto;
+    margin: 0 auto;
+  }
+
+  /* Prevent button overflow */
+  button {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ── Citizen pages responsive ──────────────────────── */
+@media (max-width: 768px) {
+  /* NewRequest step grid */
+  div[style*="gridTemplateColumns: 'repeat(auto-fill, minmax(350px"] {
+    grid-template-columns: 1fr !important;
+  }
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(300px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Confirmation step PDF preview */
+  div[style*="height: 400"] {
+    height: 250px !important;
+  }
+
+  /* Step navigation buttons */
+  div[style*="justifyContent: 'space-between'"][style*="borderTop"] {
+    gap: 10px;
+  }
+
+  /* NewRequest main container */
+  div[style*="maxWidth: '850px'"] {
+    padding: 0 10px 30px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Citizen form layout */
+  div[style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Procedure selection grid */
+  div[style*="minmax(350px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Quick creator modal form */
+  form[id="quick-create-form"] {
+    grid-template-columns: 1fr !important;
+  }
+  form[id="quick-create-form"] > div[style*="gridColumn: '1 / -1'"] {
+    grid-column: auto !important;
+  }
+}
+
+/* ── Demarches / ServicePublic responsive ─────────── */
+@media (max-width: 768px) {
+  .Demarches_grid__,
+  div[class*="grid"][style*="auto-fill"],
+  div[class*="grid"][style*="auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── No horizontal scroll guarantee ───────────────── */
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure no fixed-width elements break layout */
+  img, video, iframe, object {
+    max-width: 100% !important;
+  }
+
+  /* Dialog centering fix */
+  [role="dialog"] {
+    max-width: calc(100vw - 32px) !important;
+    margin: 0 16px;
+  }
+}
+
+/* ── btn-outline (used in citizen flow) ────────────── */
+.btn-outline {
+  background: transparent;
+  color: var(--vert-600);
+  border: 2px solid var(--vert-300);
+  transition: var(--transition);
+}
+.btn-outline:hover {
+  background: var(--vert-50);
+  border-color: var(--vert-500);
+  color: var(--vert-700);
+}

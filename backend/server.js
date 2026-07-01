@@ -62,6 +62,7 @@ app.use('/api', require('./routes/demarches.routes'));
 app.use('/api/pdf', require('./routes/pdfRoutes'));
 app.use('/api/home', require('./routes/homeRoutes'));
 app.use('/api/official-documents', require('./routes/officialDocumentRoutes'));
+app.use('/api/pdf-templates', require('./routes/officialPdfTemplateRoutes'));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

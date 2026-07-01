@@ -17,6 +17,7 @@ const navItems = [
   { to: '/admin/procedures', icon: <FileText size={20} />, label: 'Démarches' },
   { to: '/admin/requests', icon: <Inbox size={20} />, label: 'Demandes' },
   { to: '/admin/documents', icon: <Files size={20} />, label: 'Documents officiels' },
+  { to: '/admin/pdf-templates', icon: <FileText size={20} />, label: '📄 Templates PDF' },
   { 
     label: 'CMS', icon: <LayoutTemplate size={20} />, isSubmenu: true,
     children: [

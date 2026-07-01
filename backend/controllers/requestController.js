@@ -2,6 +2,7 @@ const Request = require('../models/Request');
 const UploadedDocument = require('../models/UploadedDocument');
 const Notification = require('../models/Notification');
 const Procedure = require('../models/Procedure');
+const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
 const mongoose = require('mongoose');
 const pdfGenerator = require('../utils/pdfGenerator');
 const GeneratedDocument = require('../models/GeneratedDocument');
@@ -72,10 +73,24 @@ exports.createRequest = async (req, res) => {
       .populate('procedureId', 'title category pdfTemplate pdfFields')
       .populate('uploadedFiles');
 
-    // Auto-generate official PDF receipt or filled template
+    // Auto-generate official PDF: check OfficialPdfTemplate first
     try {
       let pdfPath;
-      if (populated.procedureId && populated.procedureId.pdfTemplate) {
+
+      // 1. Look for an OfficialPdfTemplate linked to this procedure
+      const officialTemplate = procedureRef
+        ? await OfficialPdfTemplate.findOne({ procedureId: procedureRef, status: 'active' })
+        : null;
+
+      if (officialTemplate) {
+        pdfPath = await pdfGenerator.generateFromOfficialTemplate(
+          populated.toObject(),
+          populated.citizenId,
+          populated.referenceNumber,
+          officialTemplate
+        );
+      } else if (populated.procedureId && populated.procedureId.pdfTemplate) {
+        // 2. Legacy: procedure has a pdfTemplate field
         pdfPath = await pdfGenerator.generateTemplatePdf(
           populated.toObject(),
           populated.citizenId,
@@ -83,21 +98,22 @@ exports.createRequest = async (req, res) => {
           populated.procedureId
         );
       } else {
+        // 3. Generic professional receipt
         pdfPath = await pdfGenerator.generateReceiptPdf(
           { ...populated.toObject(), procedureType: populated.procedureId?.title },
           populated.citizenId,
           populated.referenceNumber
         );
       }
-      
+
       populated.generatedPdf = pdfPath;
       await Request.findByIdAndUpdate(newRequest._id, { generatedPdf: pdfPath });
 
       await GeneratedDocument.create({
         citizenId: req.user._id,
         requestId: newRequest._id,
-        documentType: populated.procedureId?.pdfTemplate ? 'official' : 'receipt',
-        referenceNumber: (populated.procedureId?.pdfTemplate ? 'DOC-' : 'REC-') + populated.referenceNumber,
+        documentType: (officialTemplate || populated.procedureId?.pdfTemplate) ? 'official' : 'receipt',
+        referenceNumber: ((officialTemplate || populated.procedureId?.pdfTemplate) ? 'DOC-' : 'REC-') + populated.referenceNumber,
         pdfUrl: pdfPath,
         status: 'available'
       });

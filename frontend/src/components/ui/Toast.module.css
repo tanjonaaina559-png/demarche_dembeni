@@ -1,75 +1,155 @@
-/* Toast.module.css */
-.toast {
+/* ═══════════════════════════════════════════════════════
+   Toast.module.css — Professional top-right notification
+═══════════════════════════════════════════════════════ */
+
+.toastWrapper {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 99999;
+
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  z-index: 2000;
-  max-width: 400px;
-  font-size: 0.95rem;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1rem 1rem 1.5rem; /* extra bottom padding for the progress bar */
+  border-radius: 12px;
+  min-width: 320px;
+  max-width: 420px;
+  width: max-content;
+
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.15),
+    0 10px 10px -5px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  overflow: hidden;
+  pointer-events: all;
+  will-change: transform, opacity;
 }
 
+/* ── Type colours ─────────────────────────────────────── */
 .success {
-  background-color: #dcfce7;
-  color: #166534;
+  background: #f0fdf4;
   border-left: 4px solid #16a34a;
+  color: #14532d;
 }
+.success .iconWrapper { background: #dcfce7; color: #16a34a; }
+.success .progressFill { background: #16a34a; }
+.success .typeLabel { color: #15803d; }
 
 .error {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background: #fef2f2;
   border-left: 4px solid #dc2626;
+  color: #7f1d1d;
 }
+.error .iconWrapper { background: #fee2e2; color: #dc2626; }
+.error .progressFill { background: #dc2626; }
+.error .typeLabel { color: #b91c1c; }
 
 .warning {
-  background-color: #fef3c7;
-  color: #92400e;
-  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+  border-left: 4px solid #d97706;
+  color: #78350f;
 }
+.warning .iconWrapper { background: #fef3c7; color: #d97706; }
+.warning .progressFill { background: #d97706; }
+.warning .typeLabel { color: #b45309; }
 
 .info {
-  background-color: #dbeafe;
-  color: #0c4a6e;
-  border-left: 4px solid #3b82f6;
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+  color: #1e3a5f;
+}
+.info .iconWrapper { background: #dbeafe; color: #2563eb; }
+.info .progressFill { background: #2563eb; }
+.info .typeLabel { color: #1d4ed8; }
+
+/* ── Icon ─────────────────────────────────────────────── */
+.iconWrapper {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
 }
 
-.icon {
-  flex-shrink: 0;
-  font-size: 1.25rem;
+/* ── Content ──────────────────────────────────────────── */
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.typeLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
 }
 
 .message {
   margin: 0;
-  flex-grow: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
+/* ── Close button ─────────────────────────────────────── */
 .closeBtn {
   flex-shrink: 0;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
-  padding: 0;
+  padding: 4px;
   display: flex;
   align-items: center;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  justify-content: center;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  color: inherit;
+  margin-top: 1px;
 }
-
 .closeBtn:hover {
   opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
 }
 
-@media (max-width: 640px) {
-  .toast {
+/* ── Progress bar ─────────────────────────────────────── */
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 0 0 12px 12px;
+  transition: width 0.03s linear;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 480px) {
+  .toastWrapper {
+    top: auto;
     bottom: 1rem;
-    right: 1rem;
-    left: 1rem;
-    max-width: none;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+    min-width: unset;
+    max-width: unset;
   }
 }

@@ -600,31 +600,67 @@ const NewRequestComponent = () => {
             )}
 
             {/* STEP 4 : Confirmation */}
-            {currentStep === 4 && (
-              <div style={{ textAlign: 'center', padding: '30px 10px' }}>
-                <div style={{ width: '80px', height: '80px', background: '#10B981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: 'white' }}>
-                  <CheckCircle size={40} />
-                </div>
-                <h2 style={{ color: '#111827', fontSize: '1.8rem', marginBottom: '10px' }}>Demande envoy\u00e9e avec succ\u00e8s !</h2>
-                <p style={{ color: '#6B7280', fontSize: '1.1rem', marginBottom: '30px' }}>Votre dossier a bien \u00e9t\u00e9 transmis aux services de la mairie.</p>
-                <div style={{ background: '#F9FAFB', border: '1px dashed #D1D5DB', borderRadius: '12px', padding: '20px', maxWidth: '400px', margin: '0 auto 30px' }}>
-                  <p style={{ fontSize: '0.9rem', color: '#6B7280', margin: '0 0 5px' }}>Num\u00e9ro de suivi</p>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '1px' }}>
-                    {successData?.referenceNumber || successData?._id || '---'}
+            {currentStep === 4 && (() => {
+              const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+              const pdfUrl = successData?.generatedPdf
+                ? `${API_BASE}${successData.generatedPdf.replace(/\\/g, '/')}`
+                : null;
+              return (
+                <div style={{ textAlign: 'center', padding: '20px 10px' }}>
+                  <div style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white', boxShadow: '0 8px 20px rgba(16,185,129,0.35)' }}>
+                    <CheckCircle size={36} />
+                  </div>
+                  <h2 style={{ color: '#111827', fontSize: '1.7rem', marginBottom: '8px' }}>Demande envoyée avec succès&nbsp;!</h2>
+                  <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '24px' }}>Votre dossier a bien été transmis aux services de la mairie.</p>
+
+                  {/* Reference box */}
+                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 24px', maxWidth: '380px', margin: '0 auto 28px' }}>
+                    <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Numéro de suivi</p>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '2px', fontFamily: 'monospace' }}>
+                      {successData?.referenceNumber || successData?._id || '---'}
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: '#9CA3AF', margin: '4px 0 0' }}>Conservez ce numéro pour le suivi de votre demande</p>
+                  </div>
+
+                  {/* PDF Preview */}
+                  {pdfUrl ? (
+                    <div style={{ marginBottom: 24 }}>
+                      <h4 style={{ fontSize: '1rem', color: '#1F2937', marginBottom: 12 }}>📄 Votre document généré</h4>
+                      <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', maxWidth: 700, margin: '0 auto 16px', height: 400, background: '#F9FAFB' }}>
+                        <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 20 }}>
+                            <FileText size={40} color="#D1D5DB" />
+                            <p style={{ color: '#6B7280', margin: 0 }}>Aperçu non disponible dans ce navigateur.</p>
+                            <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                              style={{ background: '#3B82F6', color: 'white', padding: '8px 18px', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                              Ouvrir dans un nouvel onglet
+                            </a>
+                          </div>
+                        </object>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 20px', maxWidth: 480, margin: '0 auto 24px', fontSize: '0.9rem', color: '#78350F' }}>
+                      ℹ️ Aucun template PDF officiel disponible pour cette procédure. Un récépissé standard sera généré par la mairie.
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      Suivre ma demande <ArrowRight size={18} />
+                    </Link>
+                    {pdfUrl && (
+                      <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download
+                        className="btn btn-outline"
+                        style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FileText size={18} /> Télécharger le PDF
+                      </a>
+                    )}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-                  <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    Suivre ma demande <ArrowRight size={18} />
-                  </Link>
-                  {successData?.generatedPdf && (
-                    <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}/${successData.generatedPdf.replace(/\\/g, '/')}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <FileText size={18} /> R\u00e9c\u00e9piss\u00e9 PDF
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </motion.div>
         </AnimatePresence>
 

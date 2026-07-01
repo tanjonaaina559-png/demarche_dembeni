@@ -4,6 +4,7 @@
   min-height: 100vh;
   background: #fafafa;
   font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 .admin-main {
@@ -13,6 +14,7 @@
   margin-left: 260px;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
+  min-width: 0; /* Prevent flex child overflow */
 }
 
 .admin-main.collapsed {
@@ -26,18 +28,38 @@
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .admin-content {
+    padding: 24px 28px;
+  }
 }
 
 @media (max-width: 768px) {
   .admin-main {
     margin-left: 0;
   }
-  
+
   .admin-main.collapsed {
     margin-left: 0;
   }
-  
+
   .admin-content {
-    padding: 24px 20px;
+    padding: 20px 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .admin-content {
+    padding: 12px 10px;
+  }
+}
+
