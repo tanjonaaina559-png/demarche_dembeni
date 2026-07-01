@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import { useAuth } from '../../hooks/useAuth';
@@ -31,6 +31,12 @@ const ICONS_SUGGESTIONS = [
 const ProcedureCreate = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  // Guard: prevent any setState after the component unmounts (avoids insertBefore crash)
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   // Basic fields
   const [title, setTitle] = useState('');
@@ -297,27 +303,24 @@ const ProcedureCreate = () => {
       // manually — that would destroy the boundary Multer needs.
       const res = await api.post('/admin/procedures', payload);
 
-      // DEBUG: log the full server response
       console.log('[ProcedureCreate] === Server response ===', res.data);
 
-      // Update preview with the real Cloudinary URL returned by the server
-      // so the local blob: URL (which expires on navigation) is replaced.
-      const savedProc = res.data?.procedure;
-      const cloudinaryUrl = savedProc?.image || savedProc?.imageUrl;
-      if (cloudinaryUrl) {
-        console.log('[ProcedureCreate] ✅ Cloudinary URL received:', cloudinaryUrl);
-        setImagePreview(cloudinaryUrl);
-      } else {
-        console.warn('[ProcedureCreate] ⚠️  No Cloudinary URL in response. Check req.files on backend.');
-      }
-
-      showToast('Démarche administrative créée avec succès !', 'success');
-      setTimeout(() => navigate('/admin/procedures'), 1500);
+      // Navigate immediately — no setTimeout.
+      // A setTimeout causes navigate() to fire after React has already
+      // started unmounting the page, which triggers Framer Motion to run
+      // an exit animation on a detached DOM node → insertBefore crash.
+      // By navigating first and resetting state only if still mounted,
+      // we avoid any post-unmount setState or animation.
+      navigate('/admin/procedures', { replace: true, state: { successMessage: 'Démarche créée avec succès !' } });
     } catch (err) {
       console.error(err);
-      showToast(err.response?.data?.message || 'Erreur lors de la création de la démarche.', 'error');
+      if (mountedRef.current) {
+        showToast(err.response?.data?.message || 'Erreur lors de la création de la démarche.', 'error');
+      }
     } finally {
-      setSubmitting(false);
+      if (mountedRef.current) {
+        setSubmitting(false);
+      }
     }
   };
 

@@ -210,9 +210,15 @@ const MesDemandes = () => {
                   <button onClick={() => navigate('/citizen/requests')} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#fff', color: '#374151', fontWeight: '500', cursor: 'pointer' }}>
                     <Eye size={16} /> Voir les détails
                   </button>
-                  <button onClick={() => downloadPdf(demande._id)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'var(--vert-600)', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
-                    <Download size={16} /> Télécharger le récépissé
-                  </button>
+                  {['validée', 'terminée'].includes(demande.status?.toLowerCase()) ? (
+                    <button onClick={() => downloadPdf(demande._id)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'var(--vert-600)', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
+                      <Download size={16} /> Télécharger le document
+                    </button>
+                  ) : (
+                    <div style={{ padding: '8px 12px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock size={14} /> Le document sera disponible après validation.
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );

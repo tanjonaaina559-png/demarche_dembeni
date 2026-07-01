@@ -3,6 +3,8 @@ import { Bell, Search, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
 import styles from './TopNavbar.module.css';
 import { useLocation } from 'react-router-dom';
+import api from '../../services/api';
+import NotificationPanel from './NotificationPanel';
 
 const getPageTitle = (pathname) => {
   if (pathname.includes('/dashboard')) return 'Tableau de bord';
@@ -23,6 +25,46 @@ const TopNavbar = ({ adminName, onLogout }) => {
   const handleViewSite = () => {
     window.open('/', '_blank', 'noopener,noreferrer');
   };
+
+  const [notifications, setNotifications] = React.useState([]);
+  const [isNotifOpen, setIsNotifOpen] = React.useState(false);
+  const bellRef = React.useRef(null);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('Failed to fetch notifications', err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchNotifications();
+    // Optional: poll every 30s
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.put('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <motion.header
@@ -52,10 +94,24 @@ const TopNavbar = ({ adminName, onLogout }) => {
           <span className={styles.viewSiteLabel}>Voir le site</span>
         </button>
         
-        <button className={styles.iconBtn} aria-label="Notifications">
+        <button 
+          className={styles.iconBtn} 
+          aria-label="Notifications"
+          ref={bellRef}
+          onClick={() => setIsNotifOpen(!isNotifOpen)}
+        >
           <Bell size={20} />
-          <span className={styles.badge}>3</span>
+          {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
         </button>
+        
+        <NotificationPanel 
+          isOpen={isNotifOpen}
+          onClose={() => setIsNotifOpen(false)}
+          notifications={notifications}
+          onMarkAsRead={handleMarkAsRead}
+          onMarkAllAsRead={handleMarkAllAsRead}
+          btnRef={bellRef}
+        />
         
         <div className={styles.divider}></div>
         

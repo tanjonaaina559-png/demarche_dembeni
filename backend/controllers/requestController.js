@@ -248,6 +248,10 @@ exports.downloadPdfReceipt = async (req, res) => {
       return res.status(404).json({ message: 'Demande introuvable' });
     }
 
+    if (!['Validée', 'Terminée'].includes(request.status)) {
+      return res.status(403).json({ message: 'Le document sera disponible après validation par l\'administration.' });
+    }
+
     // Ensure user owns the request or is admin
     if (
       request.citizenId._id.toString() !== req.user._id.toString() &&
@@ -282,6 +286,35 @@ exports.getCitizenDocuments = async (req, res) => {
     res.json(documents);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// ─── Verify document by reference ────────────────────────────────────────────
+exports.verifyDocument = async (req, res) => {
+  try {
+    const { reference } = req.params;
+    const request = await Request.findOne({ referenceNumber: reference })
+      .populate('citizenId', 'firstname lastname email')
+      .populate('procedureId', 'title category');
+
+    if (!request) {
+      return res.status(404).json({ message: 'Document introuvable ou invalide.' });
+    }
+
+    if (request.status !== 'Validée' && request.status !== 'Terminée') {
+      return res.status(403).json({ message: 'Ce document n\'est pas encore validé par l\'administration.' });
+    }
+
+    res.json({
+      authenticity: 'VALIDE',
+      reference: request.referenceNumber,
+      type: request.procedureId?.title || request.procedureType,
+      citizen: `${request.citizenId?.firstname || ''} ${request.citizenId?.lastname || ''}`.trim(),
+      date: request.updatedAt || request.createdAt,
+      status: request.status
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la vérification', error: error.message });
   }
 };
 

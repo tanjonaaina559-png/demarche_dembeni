@@ -1,38 +1,13 @@
 const express = require('express');
 const { protect } = require('../middleware/authMiddleware.js');
 const User = require('../models/User.js');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinaryUpload = require('../middleware/cloudinaryUpload.js');
 const bcrypt = require('bcryptjs');
 
 const router = express.Router();
 
-// Configuration Multer pour les images de profil
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    const dir = 'uploads/profiles/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename(req, file, cb) {
-    cb(null, `profile-${req.user._id}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({
-  storage,
-  fileFilter: function (req, file, cb) {
-    const filetypes = /jpg|jpeg|png|webp/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-    if (extname && mimetype) return cb(null, true);
-    cb(new Error('Images uniquement!'));
-  }
-});
-
 // Update profile route
-router.put('/profile', protect, upload.single('profilePicture'), async (req, res) => {
+router.put('/profile', protect, cloudinaryUpload.single('profilePicture'), async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
@@ -43,7 +18,7 @@ router.put('/profile', protect, upload.single('profilePicture'), async (req, res
     user.address = req.body.address || user.address;
     
     if (req.file) {
-      user.profilePicture = req.file.path.replace(/\\/g, '/');
+      user.profilePicture = req.file.path; // Cloudinary URL
     }
 
     const updatedUser = await user.save();

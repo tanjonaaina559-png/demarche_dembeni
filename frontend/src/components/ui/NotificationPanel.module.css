@@ -1,0 +1,128 @@
+.panel {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 350px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gris-200);
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 100px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gris-200);
+  background: #f9fafb;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.markAllBtn {
+  background: none;
+  border: none;
+  color: var(--vert-600);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.markAllBtn:hover {
+  text-decoration: underline;
+}
+
+.list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--gris-400);
+}
+
+.empty svg {
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+
+.item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gris-100);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.item:hover {
+  background: #f9fafb;
+}
+
+.item.unread {
+  background: #f0fdf4;
+}
+
+.itemIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--gris-200);
+}
+
+.iconBlue { color: #3b82f6; width: 18px; }
+.iconGreen { color: #10b981; width: 18px; }
+.iconRed { color: #ef4444; width: 18px; }
+.iconGray { color: #6b7280; width: 18px; }
+
+.itemContent {
+  flex: 1;
+}
+
+.itemContent h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.itemContent p {
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.unreadDot {
+  position: absolute;
+  top: 24px;
+  right: 20px;
+  width: 8px;
+  height: 8px;
+  background: var(--vert-500);
+  border-radius: 50%;
+}

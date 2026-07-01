@@ -4,6 +4,9 @@ const requestController = require('../controllers/requestController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const uploadPdf = require('../middleware/uploadPdfMiddleware');
 
+// Public verification route
+router.get('/verify/:reference', requestController.verifyDocument);
+
 // Citizen routes
 router.post('/', protect, uploadPdf.array('documents', 5), requestController.createRequest);
 router.get('/my-requests', protect, requestController.getCitizenRequests);

@@ -72,9 +72,7 @@ const CitizenProfile = () => {
       if (profilePicture instanceof File) {
         formData.append('profilePicture', profilePicture);
       }
-      const { data } = await api.put('/users/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const { data } = await api.put('/users/profile', formData);
       setUser(data);
       localStorage.setItem('userInfo', JSON.stringify(data));
       showToast('Profil mis à jour avec succès ✓');

@@ -210,11 +210,16 @@ const RequestTracking = () => {
                       </div>
                     )}
 
-                    {/* Actions */}
                     <div className="tracking-card__footer-actions">
-                      <button className="btn btn-outline" onClick={() => handleDownloadReceipt(req._id)}>
-                        <i className="fas fa-file-download"></i> Télécharger le récépissé
-                      </button>
+                      {['validée', 'terminée'].includes(req.status?.toLowerCase()) ? (
+                        <button className="btn btn-outline" onClick={() => handleDownloadReceipt(req._id)}>
+                          <i className="fas fa-file-download"></i> Télécharger le document
+                        </button>
+                      ) : (
+                        <div style={{ padding: '8px 12px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <i className="fas fa-clock"></i> Le document sera disponible après validation par l'administration.
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

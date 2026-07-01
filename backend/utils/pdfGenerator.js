@@ -147,6 +147,25 @@ const fillTemplatePdf = async (templatePath, citizenData, referenceNumber, mappi
         color: rgb(0.4, 0.4, 0.4),
       });
     }
+
+    // Embed QR Code for verification
+    try {
+      // Use standard verification URL
+      const verifyUrl = `https://portail-dembeni.yt/verify-document/${referenceNumber}`;
+      const qrBuf = await QRCode.toBuffer(verifyUrl, { margin: 1 });
+      const qrImage = await pdfDoc.embedPng(qrBuf);
+      
+      // Draw QR Code on the bottom left or right (adjust based on template)
+      // Let's place it at bottom right
+      firstPage.drawImage(qrImage, {
+        x: width - 80,
+        y: 10,
+        width: 60,
+        height: 60,
+      });
+    } catch (qrErr) {
+      console.error('Erreur génération QR Code:', qrErr);
+    }
   }
 
   return await pdfDoc.save();

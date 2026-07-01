@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import AdminLayout from '../../layouts/AdminLayout';
 // ... (omitting intermediate imports for brevity)
@@ -30,6 +30,7 @@ const CATEGORIES = [
 const Procedures = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [procedures, setProcedures]     = useState([]);
   const [loading, setLoading]           = useState(true);
   const [searchTerm, setSearchTerm]     = useState('');
@@ -72,6 +73,16 @@ const Procedures = () => {
   };
 
   useEffect(() => { fetchProcedures(); }, []);
+
+  // Show success toast passed from ProcedureCreate via router state
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      showToast(location.state.successMessage, 'success');
+      // Clear the state so it doesn't re-show on refresh
+      window.history.replaceState({}, document.title);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ── Image helpers ── */
   const handleImageFile = (file) => {
