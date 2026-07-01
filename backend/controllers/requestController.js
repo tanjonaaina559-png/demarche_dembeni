@@ -185,20 +185,10 @@ exports.updateRequestStatus = async (req, res) => {
 
     // Regenerate PDF when status changes to reflect updated status
     if (status === 'Validée' && !request.finalDocument) {
-      try {
-        const populated = await Request.findById(request._id)
-          .populate('citizenId', 'firstname lastname email phone address')
-          .populate('procedureId', 'title category')
-          .populate('uploadedFiles');
-        
-        const pdfPath = await pdfGenerator.generateOfficialPdf(
-          { ...populated.toObject(), procedureType: populated.procedureId?.title },
-          populated.citizenId,
-          populated.referenceNumber,
-          { addStamp: true, addSignature: true }
-        );
-        
-        request.finalDocument = pdfPath;
+      // In the new system, generatedPdf is the official filled template.
+      // We will just use it as the final document, avoiding the generic pdfkit generation.
+      if (request.generatedPdf) {
+        request.finalDocument = request.generatedPdf;
         await request.save();
 
         await GeneratedDocument.create({
@@ -206,11 +196,9 @@ exports.updateRequestStatus = async (req, res) => {
           requestId: request._id,
           documentType: 'official',
           referenceNumber: `DOC-${request.referenceNumber}`,
-          pdfUrl: pdfPath,
+          pdfUrl: request.generatedPdf,
           status: 'available'
         });
-      } catch (pdfErr) {
-        console.warn('PDF official generation failed (non-blocking):', pdfErr.message);
       }
     }
 

@@ -61,7 +61,8 @@ const Unauthorized = () => (
 
 function App() {
   return (
-    <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Chargement...</div>}>
+    <ErrorBoundary>
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Loader /></div>}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<MainLayout />}>
@@ -101,11 +102,7 @@ function App() {
 
           {/* Protected Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="/admin/dashboard" element={
-              <ErrorBoundary>
-                <AdminDashboard />
-              </ErrorBoundary>
-            } />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/cms/settings" element={<CMSSettings />} />
             <Route path="/admin/cms/hero" element={<CMSHeroSection />} />
@@ -126,6 +123,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+    </ErrorBoundary>
   );
 }
 

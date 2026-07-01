@@ -66,6 +66,5 @@ requestSchema.pre('save', async function () {
 requestSchema.index({ citizenId: 1, createdAt: -1 });
 requestSchema.index({ status: 1 });
 requestSchema.index({ procedureId: 1 });
-requestSchema.index({ referenceNumber: 1 });
 
 module.exports = mongoose.model('Request', requestSchema);
