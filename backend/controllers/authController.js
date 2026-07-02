@@ -216,4 +216,23 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getMe, forgotPassword, resetPassword };
+// Demo Reset Password (No Email / Token)
+const demoResetPassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Aucun compte associé à cette adresse e-mail.' });
+    }
+
+    user.password = password;
+    await user.save();
+
+    res.json({ message: 'Mot de passe modifié avec succès.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getMe, forgotPassword, resetPassword, demoResetPassword };

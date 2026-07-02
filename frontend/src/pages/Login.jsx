@@ -248,47 +248,6 @@ const Login = () => {
           background: #f0f9f4;
         }
 
-        .divider {
-          text-align: center;
-          margin: 1.2rem 0;
-          position: relative;
-        }
-        .divider::before, .divider::after {
-          content: '';
-          position: absolute;
-          top: 50%; width: 20%; height: 1px;
-          background: rgba(0,0,0,0.1);
-        }
-        .divider::before { left: 10%; }
-        .divider::after { right: 10%; }
-        .divider span {
-          font-size: 0.72rem; color: #555; font-weight: 500; padding: 0 10px;
-        }
-
-        .btn-google {
-          width: 100%;
-          padding: 0.85rem;
-          background: #ffffff;
-          color: #333;
-          border: 1px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          font-family: 'Inter', sans-serif;
-          font-size: 0.85rem;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .btn-google:hover {
-          background: #fdfdfd;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-        }
-
         @media(max-width: 900px) {
           .auth-wrapper { flex-direction: column; height: auto; min-height: 100vh; margin: 0; border-radius: 0; box-shadow: none; }
           .left-panel { padding: 3rem 2rem; flex: none; text-align: center; border-radius: 0; min-height: 30vh; }
@@ -350,15 +309,6 @@ const Login = () => {
               
               <button type="button" className="btn-secondary" onClick={() => navigate('/inscription')}>
                 CRÉER UN COMPTE
-              </button>
-
-              <div className="divider">
-                <span>Ou continuer avec</span>
-              </div>
-
-              <button type="button" className="btn-google">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ width: '18px', height: '18px' }} />
-                S'identifier avec Google
               </button>
             </form>
           </div>
