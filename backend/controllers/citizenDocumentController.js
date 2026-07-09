@@ -9,6 +9,7 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
 const { createAdminNotification } = require('../utils/notificationHelper');
+const cloudinary = require('../config/cloudinary');
 
 // ── Output dir ─────────────────────────────────────────────────────────────────
 const OUTPUT_DIR = path.join(__dirname, '..', 'uploads', 'demo-documents');
@@ -57,9 +58,15 @@ async function buildPDF(doc, citizenDoc) {
 
   return new Promise((resolve, reject) => {
     const filename = `doc-${citizenDoc._id}.pdf`;
-    const filepath = path.join(OUTPUT_DIR, filename);
     const pdfDoc   = new PDFDocument({ size: 'A4', margin: 0 });
-    const stream   = fs.createWriteStream(filepath);
+    
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: 'raw', folder: 'dembeni/demo-documents', public_id: filename },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
 
     pdfDoc.pipe(stream);
 
@@ -217,8 +224,6 @@ async function buildPDF(doc, citizenDoc) {
     drawWatermark(pdfDoc);
 
     pdfDoc.end();
-    stream.on('finish', () => resolve(`uploads/demo-documents/${filename}`));
-    stream.on('error', reject);
   });
 }
 
@@ -315,10 +320,16 @@ exports.deleteDocument = async (req, res) => {
     const doc = await CitizenDocument.findOneAndDelete({ _id: req.params.id, citizenId: req.user._id });
     if (!doc) return res.status(404).json({ message: 'Document introuvable' });
 
-    // Remove PDF file
-    if (doc.pdfUrl) {
-      const fp = path.join(__dirname, '..', doc.pdfUrl);
-      if (fs.existsSync(fp)) fs.unlinkSync(fp);
+    // Remove PDF file from cloudinary
+    if (doc.pdfUrl && doc.pdfUrl.includes('cloudinary')) {
+      const publicIdMatch = doc.pdfUrl.match(/\/v\d+\/(.+)$/);
+      if (publicIdMatch) {
+        let publicId = publicIdMatch[1];
+        if (publicId.includes('.')) {
+          publicId = publicId.substring(0, publicId.lastIndexOf('.'));
+        }
+        await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+      }
     }
 
     res.json({ message: 'Document supprimé' });
@@ -338,7 +349,12 @@ exports.downloadDocument = async (req, res) => {
     doc.pdfUrl = pdfPath;
     await doc.save();
 
-    const fullPath = path.join(__dirname, '..', pdfPath);
+    if (doc.pdfUrl.startsWith('http')) {
+      return res.redirect(doc.pdfUrl);
+    }
+
+    // fallback for local (should not happen anymore)
+    const fullPath = path.join(__dirname, '..', doc.pdfUrl);
     res.download(fullPath, `${doc.documentType}-${doc.referenceNumber}.pdf`);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });

@@ -280,7 +280,11 @@ exports.downloadPdfReceipt = async (req, res) => {
       return res.status(404).json({ message: 'PDF non disponible' });
     }
 
-    // Since we're storing the relative URL (/uploads/documents/...), let's construct path
+    if (pdfUrl.startsWith('http')) {
+      return res.redirect(pdfUrl);
+    }
+
+    // fallback for legacy local files
     const path = require('path');
     const fullPath = path.join(__dirname, '..', pdfUrl);
     
