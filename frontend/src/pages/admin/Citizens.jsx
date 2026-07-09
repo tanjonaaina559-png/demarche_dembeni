@@ -157,21 +157,32 @@ const Citizens = () => {
             title="Voir/Modifier" onClick={() => openModal(row)}>
             <FaEye />
           </button>
-          {/* Valider si pending */}
+          
+          {/* Si status est pending: Approuver / Refuser */}
           {row.status === 'pending' && (
+            <>
+              <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: 12 }}
+                title="Approuver" onClick={() => handleValidate(row._id)}>
+                <FaCheckCircle color="#10B981" />
+              </button>
+              <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: 12 }}
+                title="Refuser" onClick={() => handleToggleStatus(row._id, 'active')}>
+                <FaBan color="#EF4444" />
+              </button>
+            </>
+          )}
+
+          {/* Suspendre / Réactiver (pour les statuts autres que pending) */}
+          {row.status !== 'pending' && (
             <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: 12 }}
-              title="Valider" onClick={() => handleValidate(row._id)}>
-              <FaCheckCircle color="#10B981" />
+              title={row.status === 'active' || row.status === 'approved' ? 'Suspendre' : 'Réactiver'}
+              onClick={() => handleToggleStatus(row._id, row.status)}>
+              {row.status === 'active' || row.status === 'approved'
+                ? <FaBan color="#EF4444" />
+                : <FaCheckCircle color="#10B981" />}
             </button>
           )}
-          {/* Suspendre / Réactiver */}
-          <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: 12 }}
-            title={row.status === 'active' || row.status === 'approved' ? 'Suspendre' : 'Réactiver'}
-            onClick={() => handleToggleStatus(row._id, row.status)}>
-            {row.status === 'active' || row.status === 'approved'
-              ? <FaBan color="#EF4444" />
-              : <FaCheckCircle color="#10B981" />}
-          </button>
+          
           {/* Supprimer */}
           <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: 12 }}
             title="Supprimer" onClick={() => setConfirm({ open: true, id: row._id })}>

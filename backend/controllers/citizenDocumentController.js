@@ -8,6 +8,7 @@ const CitizenDocument = require('../models/CitizenDocument');
 const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
+const { createAdminNotification } = require('../utils/notificationHelper');
 
 // ── Output dir ─────────────────────────────────────────────────────────────────
 const OUTPUT_DIR = path.join(__dirname, '..', 'uploads', 'demo-documents');
@@ -262,6 +263,17 @@ exports.createDocument = async (req, res) => {
       doc.pdfUrl = null;
       await doc.save();
       pdfGenerationFailed = true;
+    }
+
+    try {
+      await createAdminNotification(
+        'Documents ajoutés',
+        `Le citoyen ${req.user.firstname || 'un citoyen'} a ajouté un nouveau document de type ${documentType}.`,
+        'system',
+        doc._id
+      );
+    } catch (err) {
+      console.error('Error sending admin notification on document create', err);
     }
 
     res.status(201).json({ 

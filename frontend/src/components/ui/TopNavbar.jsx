@@ -64,6 +64,15 @@ const TopNavbar = ({ adminName, onLogout }) => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
@@ -110,6 +119,7 @@ const TopNavbar = ({ adminName, onLogout }) => {
           notifications={notifications}
           onMarkAsRead={handleMarkAsRead}
           onMarkAllAsRead={handleMarkAllAsRead}
+          onDelete={handleDelete}
           btnRef={bellRef}
         />
         

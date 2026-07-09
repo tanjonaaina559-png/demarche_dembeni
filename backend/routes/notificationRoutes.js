@@ -7,5 +7,6 @@ router.get('/', protect, notificationController.getNotifications);
 // IMPORTANT: /read-all must come BEFORE /:id/read to avoid route conflict
 router.put('/read-all', protect, notificationController.markAllAsRead);
 router.put('/:id/read', protect, notificationController.markAsRead);
+router.delete('/:id', protect, notificationController.deleteNotification);
 
 module.exports = router;

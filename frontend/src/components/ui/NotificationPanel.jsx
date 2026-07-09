@@ -1,11 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Check, X, BellDot, ExternalLink } from 'lucide-react';
+import { Bell, Check, X, BellDot, ExternalLink, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import styles from './NotificationPanel.module.css';
 
-const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMarkAllAsRead, btnRef }) => {
+const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMarkAllAsRead, onDelete, btnRef }) => {
   const navigate = useNavigate();
   const panelRef = useRef();
 
@@ -82,7 +82,7 @@ const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMar
                   <div className={styles.itemIcon}>
                     {getIcon(notif.type)}
                   </div>
-                  <div className={styles.itemContent}>
+                  <div className={styles.itemContent} onClick={() => handleNotificationClick(notif)} style={{ cursor: 'pointer', flex: 1 }}>
                     <h4>{notif.title}</h4>
                     <p>{notif.message}</p>
                     <span className={styles.time}>
@@ -91,7 +91,24 @@ const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMar
                       })}
                     </span>
                   </div>
-                  {!notif.isRead && <div className={styles.unreadDot}></div>}
+                  <div className={styles.itemActions} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    {!notif.isRead && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onMarkAsRead(notif._id); }} 
+                        style={{ background: 'none', border: 'none', color: '#10B981', cursor: 'pointer' }}
+                        title="Marquer comme lu"
+                      >
+                        <Check size={16} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDelete(notif._id); }} 
+                      style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                      title="Supprimer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

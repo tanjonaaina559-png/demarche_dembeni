@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Request = require('../models/Request');
 const Procedure = require('../models/Procedure');
 const emailService = require('../utils/emailService');
+const { createNotification } = require('../utils/notificationHelper');
 
 // ── Citoyens ──────────────────────────────────────────────────────────────────
 
@@ -41,6 +42,8 @@ const validateCitizen = async (req, res) => {
     user.status = 'approved';
     await user.save();
 
+    await createNotification(user._id, 'Compte validé', 'Votre compte citoyen a été validé par l\'administration.', 'validation');
+
     await emailService.sendEmail({
       email: user.email,
       subject: 'Compte validé - Mairie de Dembéni',
@@ -60,6 +63,8 @@ const rejectCitizen = async (req, res) => {
 
     user.status = 'rejected';
     await user.save();
+
+    await createNotification(user._id, 'Compte refusé', 'Votre demande d\'inscription a été refusée.', 'rejection');
 
     await emailService.sendEmail({
       email: user.email,
@@ -92,6 +97,9 @@ const suspendCitizen = async (req, res) => {
 
     user.status = 'rejected';
     await user.save();
+
+    await createNotification(user._id, 'Compte suspendu', 'Votre compte a été suspendu par l\'administration.', 'rejection');
+
     res.json({ message: 'Citoyen suspendu', user });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -105,6 +113,9 @@ const activateCitizen = async (req, res) => {
 
     user.status = 'approved';
     await user.save();
+
+    await createNotification(user._id, 'Compte réactivé', 'Votre compte a été réactivé par l\'administration.', 'validation');
+
     res.json({ message: 'Citoyen activé', user });
   } catch (error) {
     res.status(500).json({ message: error.message });

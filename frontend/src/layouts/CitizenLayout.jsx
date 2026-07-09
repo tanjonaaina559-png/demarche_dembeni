@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, LayoutDashboard, FolderOpen, PlusCircle,
   User, Settings, LogOut, Bell, Search, UserCircle,
-  ChevronLeft, ChevronRight, ClipboardList, Home, FileText
+  ChevronLeft, ChevronRight, ClipboardList, Home, FileText,
+  Check, Trash2
 } from 'lucide-react';
 import getImageUrl from '../utils/imageUrl';
 import LogoutConfirmModal from '../components/ui/LogoutConfirmModal';
@@ -47,6 +48,20 @@ const CitizenLayout = ({ onLogout }) => {
     try {
       await api.put(`/notifications/${id}/read`).catch(() => {});
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch { /* ignore */ }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await api.put('/notifications/read-all');
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+    } catch { /* ignore */ }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(notifications.filter(n => n._id !== id));
     } catch { /* ignore */ }
   };
 
@@ -173,9 +188,16 @@ const CitizenLayout = ({ onLogout }) => {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="notif-dropdown"
                   >
-                    <div className="notif-header">
-                      <h4>Notifications</h4>
-                      <span>{unreadCount} non lues</span>
+                    <div className="notif-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <h4>Notifications</h4>
+                        <span style={{ fontSize: '12px', color: 'var(--gris-500)' }}>{unreadCount} non lues</span>
+                      </div>
+                      {unreadCount > 0 && (
+                        <button onClick={markAllAsRead} style={{ fontSize: '12px', color: 'var(--vert-600)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                          Tout marquer lu
+                        </button>
+                      )}
                     </div>
                     <div className="notif-list">
                       {notifications.length === 0 ? (
@@ -185,10 +207,22 @@ const CitizenLayout = ({ onLogout }) => {
                         </div>
                       ) : (
                         notifications.map(n => (
-                          <div key={n._id} onClick={() => markAsRead(n._id)} className={`notif-item ${!n.isRead ? 'unread' : ''}`}>
-                            <p className="notif-title">{n.title || n.message}</p>
-                            {n.title && <p className="notif-desc">{n.message}</p>}
-                            <span className="notif-time">{new Date(n.createdAt).toLocaleDateString('fr-FR')}</span>
+                          <div key={n._id} className={`notif-item ${!n.isRead ? 'unread' : ''}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div onClick={() => markAsRead(n._id)} style={{ cursor: 'pointer', flex: 1 }}>
+                              <p className="notif-title">{n.title || n.message}</p>
+                              {n.title && <p className="notif-desc">{n.message}</p>}
+                              <span className="notif-time">{new Date(n.createdAt).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {!n.isRead && (
+                                <button onClick={(e) => { e.stopPropagation(); markAsRead(n._id); }} style={{ background: 'none', border: 'none', color: '#10B981', cursor: 'pointer' }} title="Marquer comme lu">
+                                  <Check size={16} />
+                                </button>
+                              )}
+                              <button onClick={(e) => { e.stopPropagation(); deleteNotification(n._id); }} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }} title="Supprimer">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         ))
                       )}

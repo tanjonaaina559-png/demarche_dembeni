@@ -1,6 +1,7 @@
 const Request = require('../models/Request');
 const UploadedDocument = require('../models/UploadedDocument');
 const Notification = require('../models/Notification');
+const { createAdminNotification } = require('../utils/notificationHelper');
 const Procedure = require('../models/Procedure');
 const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
 const mongoose = require('mongoose');
@@ -129,6 +130,18 @@ exports.createRequest = async (req, res) => {
       type: 'request_update',
       relatedId: newRequest._id
     });
+
+    // Admin notification
+    try {
+      await createAdminNotification(
+        'Nouvelle demande reçue',
+        `Une nouvelle demande "${procedureTitle || 'Démarche administrative'}" a été soumise par ${req.user.firstname || 'un citoyen'}.`,
+        'system',
+        newRequest._id
+      );
+    } catch (err) {
+      console.error('Error sending admin notification on createRequest', err);
+    }
 
     res.status(201).json({
       message: 'Demande soumise avec succès',

@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { createAdminNotification } = require('../utils/notificationHelper');
 const crypto = require('crypto');
 const emailService = require('../utils/emailService');
 
@@ -28,6 +29,17 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      try {
+        await createAdminNotification(
+          'Nouvelle inscription citoyen',
+          `Le citoyen ${firstname} ${lastname} s'est inscrit et est en attente de validation.`,
+          'system',
+          user._id
+        );
+      } catch (err) {
+        console.error('Error sending admin notification on register', err);
+      }
+
       res.status(201).json({
         _id: user._id,
         firstname: user.firstname,
