@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import getImageUrl from '../utils/imageUrl';
 import LogoutConfirmModal from '../components/ui/LogoutConfirmModal';
+import LogoDembeni from '../components/ui/LogoDembeni';
 import './CitizenLayout.css';
 
 const CitizenLayout = ({ onLogout }) => {
@@ -98,10 +99,9 @@ const CitizenLayout = ({ onLogout }) => {
       <aside className={`citizen-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           {!collapsed && (
-            <Link to="/" className="sidebar-brand">
-              <div className="sidebar-logo-badge">D</div>
-              <span className="sidebar-brand-name">Dembéni</span>
-            </Link>
+            <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '10px 0', textDecoration: 'none' }}>
+              <LogoDembeni size="sm" theme="dark" withText={true} />
+            </div>
           )}
           <button className="collapse-btn desktop-only" onClick={() => setCollapsed(!collapsed)} title={collapsed ? 'Agrandir' : 'Réduire'}>
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}

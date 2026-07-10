@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import LogoDembeni from './ui/LogoDembeni';
 
 const Footer = () => {
   const [footer, setFooter] = useState(null);
@@ -53,11 +54,8 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-top">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo">
-            <div className="logo-icon">D</div>
-            <span className="logo-name">DEMBÉNI<em>.</em></span>
-          </Link>
-          <p>{footerData.brandDescription}</p>
+          <LogoDembeni size="md" theme="light" withText={true} />
+          <p style={{ marginTop: '1rem' }}>{footerData.brandDescription}</p>
           <div className="footer-socials">
             {footerData.socialLinks.map((link, i) => (
               <a key={i} href={link.url} title={link.title}><i className={link.icon}></i></a>

@@ -6,6 +6,7 @@ import api from '../services/api';
 import { getImageUrl } from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 import { UserCircle, FileText, Bell, LogOut, ChevronRight } from 'lucide-react';
+import LogoDembeni from '../components/ui/LogoDembeni';
 
 
 
@@ -213,6 +214,9 @@ const Accueil = () => {
           ></div>
           <div className="hero-inner">
             <div className="hero-content">
+              <div style={{ marginBottom: '1.5rem' }}>
+                <LogoDembeni size="xl" theme="light" withText={true} isLink={false} />
+              </div>
               <span className="hero-tag"><i className="fas fa-map-marker-alt"></i> Commune de Dembéni — Mayotte</span>
               <h1>
                 {heroData.title}<br />

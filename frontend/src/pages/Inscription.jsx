@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Eye, EyeOff } from 'lucide-react';
+import LogoDembeni from '../components/ui/LogoDembeni';
 
 const Inscription = () => {
   const navigate = useNavigate();
@@ -327,9 +328,9 @@ const Inscription = () => {
       <div className="auth-wrapper">
         {/* LEFT PANEL */}
         <div className="left-panel">
-          <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
-            <span>DEMBENI</span>
-          </Link>
+          <div className="logo" style={{ textDecoration: 'none' }}>
+            <LogoDembeni size="md" theme="dark" withText={true} />
+          </div>
           
           <div className="left-content">
             <h1>Créer un<br/>compte</h1>

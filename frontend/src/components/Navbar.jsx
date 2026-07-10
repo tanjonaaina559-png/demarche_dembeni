@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import LogoutConfirmModal from './ui/LogoutConfirmModal';
+import LogoDembeni from './ui/LogoDembeni';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -135,7 +136,9 @@ const Navbar = () => {
           <NavLink to="/services" onClick={closeMobileMenu}>Services</NavLink>
         </div>
         
-        <NavLink to="/" className="nav-logo-center" onClick={closeMobileMenu}>DEMBENI</NavLink>
+        <div className="nav-logo-center" onClick={closeMobileMenu}>
+          <LogoDembeni size="md" theme="dark" withText={true} />
+        </div>
         
         <div className="nav-right">
           <NavLink to="/contact" onClick={closeMobileMenu}>Contact</NavLink>

@@ -36,9 +36,15 @@ const createDocument = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez télécharger un fichier PDF.' });
     }
 
-    // req.file.path = Cloudinary secure_url (via cloudinaryPdfUpload middleware)
+    console.log('REQ.FILE', req.file);
+    console.log('CLOUDINARY URL', req.file?.path);
+
     const cloudinaryUrl = req.file.path;
-    console.log('Cloudinary URL:', cloudinaryUrl);
+    console.log('PDF URL SAVED', cloudinaryUrl);
+
+    if (cloudinaryUrl && !cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+      throw new Error('Local URL detected: ' + cloudinaryUrl);
+    }
 
     const document = await OfficialDocument.create({
       title,
@@ -94,9 +100,15 @@ const updateDocument = async (req, res) => {
         }
       }
 
-      // req.file.path = Cloudinary secure_url (via cloudinaryPdfUpload middleware)
+      console.log('REQ.FILE', req.file);
+      console.log('CLOUDINARY URL', req.file?.path);
+
       const cloudinaryUrl = req.file.path;
-      console.log('Cloudinary URL (mise à jour):', cloudinaryUrl);
+      console.log('PDF URL SAVED', cloudinaryUrl);
+
+      if (cloudinaryUrl && !cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+        throw new Error('Local URL detected: ' + cloudinaryUrl);
+      }
 
       document.fileName = req.file.originalname;
       document.pdfUrl = cloudinaryUrl;

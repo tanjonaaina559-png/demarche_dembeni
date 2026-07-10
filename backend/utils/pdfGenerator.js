@@ -211,20 +211,37 @@ const generateReceiptPdf = (request, citizen, referenceNumber) =>
         .text('MAIRIE DE DEMBÉNI', 40, doc.page.height / 2 - 25, { width: PW - 80, align: 'center' })
         .restore();
 
+      // Header logo
+      const logoX = M;
+      const logoY = M;
+      doc.save()
+         .translate(logoX, logoY)
+         .scale(0.12)
+         .path('M 0 0 L 300 0 C 300 0, 300 150, 300 200 C 300 300, 150 360, 150 360 C 150 360, 0 300, 0 200 C 0 150, 0 0, 0 0 Z').fill('#d9d9d9')
+         .path('M 5 80 L 295 80 L 295 180 L 150 355 L 5 180 Z').fill('#da2128')
+         .path('M 5 180 L 145 350 L 5 280 Z').fill('#4ea52e')
+         .path('M 295 180 L 155 350 L 295 280 Z').fill('#4ea52e')
+         .restore();
+      
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('#000000').text('DEMB', logoX + 45, logoY + 5, { continued: true }).fillColor('#d31010').text('É', { continued: true }).fillColor('#000000').text('NI');
+      doc.fontSize(7).font('Helvetica-Bold').fillColor('#da2128').text('Ville Universitaire', logoX + 45, logoY + 22);
+
+      const headerY = M + 45;
+
       // Header band
-      doc.rect(M, M, IW, 34).fill(NAVY);
+      doc.rect(M, headerY, IW, 34).fill(NAVY);
       doc.fontSize(13).font('Helvetica-Bold').fillColor('white')
-        .text('MAIRIE DE DEMBÉNI — RÉCÉPISSÉ DE DÉPÔT', M + 8, M + 10, { width: IW - 80, lineBreak: false });
+        .text('MAIRIE DE DEMBÉNI — RÉCÉPISSÉ DE DÉPÔT', M + 8, headerY + 10, { width: IW - 80, lineBreak: false });
 
       // QR Code pointing to Cloudinary URL
       const qrUrl = getCloudinaryUrl(filename);
       const qrBuf = await QRCode.toBuffer(qrUrl);
-      doc.image(qrBuf, PW - M - 70, M + 2, { width: 70 });
+      doc.image(qrBuf, PW - M - 70, headerY + 2, { width: 70 });
 
       console.log('Uploading PDF to Cloudinary');
       console.log('  filename:', filename);
 
-      let y = M + 50;
+      let y = headerY + 50;
 
       // Subtitle
       doc.fontSize(10).font('Helvetica').fillColor('#444')
@@ -347,20 +364,37 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
         .text('DOCUMENT OFFICIEL — VALIDÉ', 40, doc.page.height / 2 - 25, { width: PW - 80, align: 'center' })
         .restore();
 
+      // Header logo
+      const logoX = M;
+      const logoY = M;
+      doc.save()
+         .translate(logoX, logoY)
+         .scale(0.12)
+         .path('M 0 0 L 300 0 C 300 0, 300 150, 300 200 C 300 300, 150 360, 150 360 C 150 360, 0 300, 0 200 C 0 150, 0 0, 0 0 Z').fill('#d9d9d9')
+         .path('M 5 80 L 295 80 L 295 180 L 150 355 L 5 180 Z').fill('#da2128')
+         .path('M 5 180 L 145 350 L 5 280 Z').fill('#4ea52e')
+         .path('M 295 180 L 155 350 L 295 280 Z').fill('#4ea52e')
+         .restore();
+      
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('#000000').text('DEMB', logoX + 45, logoY + 5, { continued: true }).fillColor('#d31010').text('É', { continued: true }).fillColor('#000000').text('NI');
+      doc.fontSize(7).font('Helvetica-Bold').fillColor('#da2128').text('Ville Universitaire', logoX + 45, logoY + 22);
+
+      const headerY = M + 45;
+
       // Header
-      doc.rect(M, M, IW, 34).fill(NAVY);
+      doc.rect(M, headerY, IW, 34).fill(NAVY);
       doc.fontSize(12).font('Helvetica-Bold').fillColor('white')
-        .text('MAIRIE DE DEMBÉNI — DOCUMENT OFFICIEL VALIDÉ', M + 8, M + 10, { width: IW - 80, lineBreak: false });
+        .text('MAIRIE DE DEMBÉNI — DOCUMENT OFFICIEL VALIDÉ', M + 8, headerY + 10, { width: IW - 80, lineBreak: false });
 
       // QR Code pointing to Cloudinary URL
       const qrUrl = getCloudinaryUrl(filename);
       const qrBuf = await QRCode.toBuffer(qrUrl);
-      doc.image(qrBuf, PW - M - 70, M + 2, { width: 70 });
+      doc.image(qrBuf, PW - M - 70, headerY + 2, { width: 70 });
 
       console.log('Uploading PDF to Cloudinary');
       console.log('  filename:', filename);
 
-      let y = M + 50;
+      let y = headerY + 50;
       doc.fontSize(10).font('Helvetica').fillColor('#444')
         .text('République Française  |  Commune de Dembéni  |  Mayotte', M, y, { width: IW, align: 'center' });
       y += 24;

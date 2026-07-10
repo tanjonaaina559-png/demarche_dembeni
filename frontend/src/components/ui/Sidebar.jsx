@@ -10,6 +10,7 @@ import {
 import styles from './Sidebar.module.css';
 import classNames from 'classnames';
 import LogoutConfirmModal from './LogoutConfirmModal';
+import LogoDembeni from './LogoDembeni';
 
 const navItems = [
   { to: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
@@ -44,9 +45,8 @@ const Sidebar = ({ isOpen, toggle, collapsed, setCollapsed }) => {
     <aside className={classNames(styles.sidebar, { [styles.collapsed]: collapsed })}>
       <div className={styles.sidebarHeader}>
         {!collapsed && (
-          <div className={styles.brandWrapper}>
-            <div className={styles.logoBadge}>D</div>
-            <h2 className={styles.brand}>Dembéni</h2>
+          <div className={styles.brandWrapper} style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '10px 0' }}>
+            <LogoDembeni size="sm" theme="dark" withText={true} />
           </div>
         )}
         <button className={styles.collapseBtn} onClick={handleCollapse}>

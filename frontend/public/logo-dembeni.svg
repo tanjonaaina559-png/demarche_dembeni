@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 450" width="400" height="450">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5f5f5" />
+      <stop offset="100%" stop-color="#e0e0e0" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Text "DEMBÉNI" at the top -->
+  <g transform="translate(200, 50)" text-anchor="middle" font-family="'Inter', Arial, sans-serif" font-weight="900" font-size="64" letter-spacing="2">
+    <text x="-120" fill="#000000">D</text>
+    <text x="-70" fill="#000000">E</text>
+    <text x="-20" fill="#000000">M</text>
+    <text x="30" fill="#000000">B</text>
+    <text x="75" fill="#d31010">É</text>
+    <text x="120" fill="#000000">N</text>
+    <text x="160" fill="#000000">I</text>
+  </g>
+
+  <!-- Shield Base -->
+  <g transform="translate(50, 70)" filter="url(#shadow)">
+    <!-- Shield Outline -->
+    <path d="M 0 0 L 300 0 C 300 0, 300 150, 300 200 C 300 300, 150 360, 150 360 C 150 360, 0 300, 0 200 C 0 150, 0 0, 0 0 Z" fill="url(#shieldGrad)" stroke="#c4c4c4" stroke-width="4" />
+    
+    <!-- Top Gray section -->
+    <path d="M 5 5 L 295 5 L 295 80 L 5 80 Z" fill="#d9d9d9" />
+    
+    <!-- République Française Text -->
+    <text x="150" y="30" font-family="'Times New Roman', serif" font-size="16" fill="#333" text-anchor="middle" letter-spacing="4">R é p u b l i q u e</text>
+    <text x="150" y="60" font-family="'Times New Roman', serif" font-size="16" fill="#333" text-anchor="middle" letter-spacing="4">F r a n ç a i s e</text>
+    
+    <!-- Green dots -->
+    <g fill="#429e24" transform="translate(0, -15)">
+      <circle cx="80" cy="55" r="3" />
+      <circle cx="95" cy="55" r="3" />
+      <circle cx="110" cy="55" r="3" />
+      <circle cx="125" cy="55" r="3" />
+      <circle cx="140" cy="55" r="3" />
+      <circle cx="155" cy="55" r="3" />
+      <circle cx="170" cy="55" r="3" />
+      <circle cx="185" cy="55" r="3" />
+      <circle cx="200" cy="55" r="3" />
+      <circle cx="215" cy="55" r="3" />
+    </g>
+
+    <!-- Red V Section -->
+    <path d="M 5 80 L 295 80 L 295 180 L 150 355 L 5 180 Z" fill="#da2128" />
+
+    <!-- Green side wedges -->
+    <path d="M 5 180 L 145 350 L 5 280 Z" fill="#4ea52e" stroke="white" stroke-width="2" />
+    <path d="M 295 180 L 155 350 L 295 280 Z" fill="#4ea52e" stroke="white" stroke-width="2" />
+
+    <!-- Sugarcane Plant (Simplified vector representation) -->
+    <g stroke="#35c10a" stroke-width="4" stroke-linecap="round" fill="none">
+      <path d="M 150 350 Q 140 250 110 120" />
+      <path d="M 150 350 Q 160 250 190 120" />
+      <path d="M 150 350 L 150 100" />
+      <path d="M 150 350 Q 180 250 220 150" />
+      <path d="M 150 350 Q 120 250 80 150" />
+      <path d="M 140 250 Q 120 200 90 200" />
+      <path d="M 160 250 Q 180 200 210 200" />
+      <path d="M 150 200 Q 120 150 100 130" />
+      <path d="M 150 200 Q 180 150 200 130" />
+      <path d="M 145 280 Q 90 260 70 230" />
+      <path d="M 155 280 Q 210 260 230 230" />
+    </g>
+    <!-- Add some leaf shapes -->
+    <g fill="#4ea52e">
+      <path d="M 110 120 Q 130 110 140 130 Q 120 140 110 120 Z" />
+      <path d="M 190 120 Q 170 110 160 130 Q 180 140 190 120 Z" />
+      <path d="M 150 100 Q 160 90 170 110 Q 150 120 150 100 Z" />
+      <path d="M 220 150 Q 200 130 190 150 Q 210 170 220 150 Z" />
+      <path d="M 80 150 Q 100 130 110 150 Q 90 170 80 150 Z" />
+      <path d="M 90 200 Q 100 180 110 200 Q 90 220 90 200 Z" />
+      <path d="M 210 200 Q 200 180 190 200 Q 210 220 210 200 Z" />
+    </g>
+
+    <!-- Left icon circle (Graduation Cap) -->
+    <g transform="translate(50, 240)">
+      <circle cx="0" cy="0" r="22" fill="#da2128" stroke="white" stroke-width="2" />
+      <path d="M -12 -2 L 0 -8 L 12 -2 L 0 4 Z" fill="none" stroke="white" stroke-width="2" />
+      <path d="M -6 1 L -6 6 C -6 8, 6 8, 6 6 L 6 1" fill="none" stroke="white" stroke-width="2" />
+      <path d="M 12 -2 L 12 5" fill="none" stroke="white" stroke-width="2" />
+    </g>
+
+    <!-- Right icon circle (Gear) -->
+    <g transform="translate(250, 240)">
+      <circle cx="0" cy="0" r="22" fill="#da2128" stroke="white" stroke-width="2" />
+      <path d="M 0 -12 A 12 12 0 1 0 0 12 A 12 12 0 1 0 0 -12 M 0 -5 A 5 5 0 1 1 0 5 A 5 5 0 1 1 0 -5" fill="none" stroke="white" stroke-width="2" />
+      <!-- Teeth -->
+      <path d="M -2 -12 L 2 -12 L 3 -15 L -3 -15 Z" fill="white" />
+      <path d="M -2 12 L 2 12 L 3 15 L -3 15 Z" fill="white" />
+      <path d="M -12 -2 L -12 2 L -15 3 L -15 -3 Z" fill="white" />
+      <path d="M 12 -2 L 12 2 L 15 3 L 15 -3 Z" fill="white" />
+      <path d="M -9 -9 L -6 -12 L -9 -14 L -12 -11 Z" fill="white" />
+      <path d="M 9 9 L 6 12 L 9 14 L 12 11 Z" fill="white" />
+      <path d="M 9 -9 L 6 -12 L 9 -14 L 12 -11 Z" fill="white" />
+      <path d="M -9 9 L -6 12 L -9 14 L -12 11 Z" fill="white" />
+    </g>
+  </g>
+
+  <!-- Bottom text "- Ville Universitaire -" -->
+  <g transform="translate(200, 445)" text-anchor="middle" font-family="'Inter', Arial, sans-serif" font-weight="800" font-size="22" fill="#da2128">
+    <path d="M -120 -5 L -80 -5" stroke="black" stroke-width="2" />
+    <text x="0" y="2">Ville Universitaire</text>
+    <path d="M 80 -5 L 120 -5" stroke="black" stroke-width="2" />
+  </g>
+</svg>
