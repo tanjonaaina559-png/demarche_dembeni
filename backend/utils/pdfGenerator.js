@@ -187,8 +187,13 @@ const generateReceiptPdf = (request, citizen, referenceNumber) =>
       const stream = cloudinary.uploader.upload_stream(
         { resource_type: 'raw', folder: 'dembeni/documents', public_id: filename },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result.secure_url);
+          if (error) {
+            console.error('Cloudinary Upload Error:', error);
+            reject(error);
+          } else {
+            console.log('Cloudinary URL:', result.secure_url);
+            resolve(result.secure_url);
+          }
         }
       );
       
@@ -215,6 +220,9 @@ const generateReceiptPdf = (request, citizen, referenceNumber) =>
       const qrUrl = getCloudinaryUrl(filename);
       const qrBuf = await QRCode.toBuffer(qrUrl);
       doc.image(qrBuf, PW - M - 70, M + 2, { width: 70 });
+
+      console.log('Uploading PDF to Cloudinary');
+      console.log('  filename:', filename);
 
       let y = M + 50;
 
@@ -314,8 +322,13 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
       const stream = cloudinary.uploader.upload_stream(
         { resource_type: 'raw', folder: 'dembeni/documents', public_id: filename },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result.secure_url);
+          if (error) {
+            console.error('Cloudinary Upload Error:', error);
+            reject(error);
+          } else {
+            console.log('Cloudinary URL:', result.secure_url);
+            resolve(result.secure_url);
+          }
         }
       );
       
@@ -343,6 +356,9 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
       const qrUrl = getCloudinaryUrl(filename);
       const qrBuf = await QRCode.toBuffer(qrUrl);
       doc.image(qrBuf, PW - M - 70, M + 2, { width: 70 });
+
+      console.log('Uploading PDF to Cloudinary');
+      console.log('  filename:', filename);
 
       let y = M + 50;
       doc.fontSize(10).font('Helvetica').fillColor('#444')
@@ -437,6 +453,7 @@ const generateTemplatePdf = async (request, citizen, referenceNumber, procedure)
   const filePath = path.join(uploadDir, filename);
   fs.writeFileSync(filePath, pdfBytes);
 
+  console.log('Uploading PDF to Cloudinary');
   const result = await cloudinary.uploader.upload(filePath, {
     resource_type: 'raw',
     folder: 'dembeni/documents',
@@ -444,8 +461,10 @@ const generateTemplatePdf = async (request, citizen, referenceNumber, procedure)
   });
 
   fs.unlinkSync(filePath);
+  console.log('Cloudinary URL:', result.secure_url);
   return result.secure_url;
 };
+
 
 // ─── 5. Generate from OfficialPdfTemplate model (new system) ──────────────────
 const generateFromOfficialTemplate = async (request, citizen, referenceNumber, template) => {
@@ -486,11 +505,17 @@ const generateFromOfficialTemplate = async (request, citizen, referenceNumber, t
   const filePath = path.join(uploadDir, filename);
   fs.writeFileSync(filePath, pdfBytes);
 
+  console.log('Uploading PDF to Cloudinary');
   const result = await cloudinary.uploader.upload(filePath, {
     resource_type: 'raw',
     folder: 'dembeni/documents',
     public_id: filename
   });
+
+  fs.unlinkSync(filePath);
+  console.log('Cloudinary URL:', result.secure_url);
+  return result.secure_url;
+};
 
   fs.unlinkSync(filePath);
   return result.secure_url;

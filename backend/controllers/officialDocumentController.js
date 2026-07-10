@@ -1,6 +1,5 @@
 const OfficialDocument = require('../models/OfficialDocument');
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require('../config/cloudinary');
 
 // @desc    Get all official documents (Admin)
 // @route   GET /api/official-documents
@@ -37,18 +36,24 @@ const createDocument = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez télécharger un fichier PDF.' });
     }
 
+    // req.file.path = Cloudinary secure_url (via cloudinaryPdfUpload middleware)
+    const cloudinaryUrl = req.file.path;
+    console.log('Cloudinary URL:', cloudinaryUrl);
+
     const document = await OfficialDocument.create({
       title,
       description,
       category,
       fileName: req.file.originalname,
-      pdfUrl: `/uploads/documents/${req.file.filename}`,
+      pdfUrl: cloudinaryUrl,
       size: req.file.size,
       active: active === 'true' || active === true,
     });
 
+    console.log('Document officiel créé avec URL Cloudinary:', cloudinaryUrl);
     res.status(201).json(document);
   } catch (error) {
+    console.error('Cloudinary Upload Error:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
@@ -68,26 +73,40 @@ const updateDocument = async (req, res) => {
     document.title = title || document.title;
     document.description = description !== undefined ? description : document.description;
     document.category = category || document.category;
-    
+
     if (active !== undefined) {
       document.active = active === 'true' || active === true;
     }
 
     if (req.file) {
-      // Remove old file
-      const oldFilePath = path.join(__dirname, '..', document.pdfUrl);
-      if (fs.existsSync(oldFilePath)) {
-        try { fs.unlinkSync(oldFilePath); } catch (e) { console.error('Error deleting old file', e); }
+      // Supprimer l'ancien fichier Cloudinary si l'URL est Cloudinary
+      if (document.pdfUrl && document.pdfUrl.includes('cloudinary')) {
+        try {
+          const publicIdMatch = document.pdfUrl.match(/\/v\d+\/(.+)$/);
+          if (publicIdMatch) {
+            let publicId = publicIdMatch[1];
+            if (publicId.includes('.')) publicId = publicId.substring(0, publicId.lastIndexOf('.'));
+            await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+            console.log('Ancien fichier Cloudinary supprimé:', publicId);
+          }
+        } catch (e) {
+          console.error('Erreur suppression ancien Cloudinary:', e);
+        }
       }
 
+      // req.file.path = Cloudinary secure_url (via cloudinaryPdfUpload middleware)
+      const cloudinaryUrl = req.file.path;
+      console.log('Cloudinary URL (mise à jour):', cloudinaryUrl);
+
       document.fileName = req.file.originalname;
-      document.pdfUrl = `/uploads/documents/${req.file.filename}`;
+      document.pdfUrl = cloudinaryUrl;
       document.size = req.file.size;
     }
 
     const updatedDocument = await document.save();
     res.json(updatedDocument);
   } catch (error) {
+    console.error('Cloudinary Upload Error:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
@@ -103,10 +122,19 @@ const deleteDocument = async (req, res) => {
       return res.status(404).json({ message: 'Document introuvable' });
     }
 
-    // Delete file from disk
-    const filePath = path.join(__dirname, '..', document.pdfUrl);
-    if (fs.existsSync(filePath)) {
-      try { fs.unlinkSync(filePath); } catch (e) { console.error('Error deleting file', e); }
+    // Supprimer le fichier Cloudinary
+    if (document.pdfUrl && document.pdfUrl.includes('cloudinary')) {
+      try {
+        const publicIdMatch = document.pdfUrl.match(/\/v\d+\/(.+)$/);
+        if (publicIdMatch) {
+          let publicId = publicIdMatch[1];
+          if (publicId.includes('.')) publicId = publicId.substring(0, publicId.lastIndexOf('.'));
+          await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+          console.log('Fichier Cloudinary supprimé lors de la suppression du document:', publicId);
+        }
+      } catch (e) {
+        console.error('Erreur suppression Cloudinary:', e);
+      }
     }
 
     await document.deleteOne();

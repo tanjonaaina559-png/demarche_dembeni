@@ -602,8 +602,11 @@ const NewRequestComponent = () => {
             {/* STEP 4 : Confirmation */}
             {currentStep === 4 && (() => {
               const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-              const pdfUrl = successData?.generatedPdf
-                ? `${API_BASE}${successData.generatedPdf.replace(/\\/g, '/')}`
+              const rawPdf = successData?.generatedPdf;
+              // Si l'URL commence par http (Cloudinary), on l'utilise directement.
+              // Sinon c'est un chemin local legacy → on préfixe l'API base.
+              const pdfUrl = rawPdf
+                ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.replace(/\\/g, '/')}`)
                 : null;
               return (
                 <div style={{ textAlign: 'center', padding: '20px 10px' }}>
