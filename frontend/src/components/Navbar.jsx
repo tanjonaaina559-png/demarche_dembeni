@@ -137,7 +137,14 @@ const Navbar = () => {
         </div>
         
         <div className="nav-logo-center" onClick={closeMobileMenu}>
-          <LogoDembeni size="md" theme="dark" withText={true} />
+          <span className="nav-logo-line" aria-hidden="true"></span>
+          <div className="nav-logo-identity">
+            <LogoDembeni size="sm" theme="light" withText={false} />
+            <span className="nav-logo-wordmark">
+              <span className="nav-logo-demb">DEMB</span><span className="nav-logo-e">E</span><span className="nav-logo-ni">NI</span>
+            </span>
+          </div>
+          <span className="nav-logo-line" aria-hidden="true"></span>
         </div>
         
         <div className="nav-right">

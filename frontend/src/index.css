@@ -87,17 +87,15 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
 
 /* ======== NAVBAR ======== */
 .navbar-green {
-  background: linear-gradient(90deg, rgba(6, 64, 43, 0.85) 0%, rgba(9, 89, 59, 0.85) 60%, rgba(13, 115, 76, 0.85) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: #0F4D2F;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  height: 68px;
+  height: 62px;
   width: 100%;
-  box-shadow: 0 4px 24px rgba(9, 89, 59, 0.25);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.20);
   position: fixed;
   top: 0;
   left: 0;
@@ -116,28 +114,30 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
 .nav-right { flex: 1; justify-content: flex-end; }
 
 .nav-left a, .nav-right a {
-  color: rgba(255,255,255,.80);
+  color: rgba(255,255,255,.78);
   text-decoration: none;
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  transition: all 0.2s ease;
-  letter-spacing: 0.3px;
-  padding: .3rem .5rem;
-  border-radius: 6px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.4px;
+  padding: .28rem .6rem;
+  border-radius: 5px;
+  white-space: nowrap;
 }
 
 .nav-left a:hover, .nav-right a:hover {
-  color: var(--blanc);
+  color: #FFFFFF;
   background: rgba(255,255,255,.10);
+  transform: translateY(-1px);
 }
 
 .nav-left a.active, .nav-right a.active:not(.btn-citoyen):not(.btn-admin) {
-  color: var(--blanc);
-  background: var(--rouge-600);
+  color: #FFFFFF;
+  background: #D32F2F;
   font-weight: 600;
-  padding: .3rem .8rem;
-  border-radius: 6px;
+  padding: .28rem .8rem;
+  border-radius: 5px;
 }
 
 .btn-citoyen, .btn-admin {
@@ -172,50 +172,75 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
 
 
 .nav-logo-center {
-  /* Centrage absolu parfait — au-dessus de tout */
+  /* Centrage absolu parfait */
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  /* Fond opaque pour cacher ce qui se trouve derrière */
-  background: rgba(9, 89, 59, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: .35rem 1.2rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,.20);
-  /* Typographie */
-  color: var(--blanc);
-  font-family: var(--font-head);
-  font-weight: 800;
-  font-size: 1.25rem;
-  text-decoration: none;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  /* Séparateurs décoratifs */
+  /* Fond bloc central institutionnel */
+  background: #145A32;
+  padding: .3rem 1.1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+  /* Layout */
   display: flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
   pointer-events: auto;
-  transition: var(--transition);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .nav-logo-center:hover {
-  background: rgba(13, 115, 76, 0.9);
-  border-color: rgba(255,255,255,.30);
+  background: #1a6b3c;
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 4px 18px rgba(0,0,0,.25);
 }
 
-.nav-logo-center::before,
-.nav-logo-center::after {
-  content: '';
+/* Lignes décoratives rouges de part et d'autre */
+.nav-logo-line {
   display: block;
-  width: 20px;
-  height: 2px;
-  background: var(--rouge-500);
+  width: 22px;
+  height: 1.5px;
+  background: #D32F2F;
   border-radius: 2px;
   flex-shrink: 0;
+  opacity: 0.9;
 }
+
+/* Conteneur logo + texte */
+.nav-logo-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bloc logo miniaturisé */
+.nav-logo-identity .logo-dembeni img,
+.nav-logo-identity .logo-dembeni > a > .logo-dembeni img {
+  height: 26px !important;
+  width: auto !important;
+  max-height: 28px !important;
+  object-fit: contain;
+  padding: 1px;
+}
+
+/* Wordmark DEMBENI */
+.nav-logo-wordmark {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.nav-logo-demb { color: #111111; }
+.nav-logo-e    { color: #D32F2F; }
+.nav-logo-ni   { color: #111111; }
 
 /* Hamburger mobile pour navbar-green (caché par défaut) */
 .nav-hamburger {
@@ -1191,7 +1216,7 @@ table.pro-table {
 
 @media (max-width: 768px) {
   .nav-left, .nav-right { display: none; }
-  .nav-hamburger { display: flex; position: absolute; right: 1.5rem; top: 18px; }
+  .nav-hamburger { display: flex; position: absolute; right: 1.5rem; top: 17px; }
   .footer-top { grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 1.5rem 1.5rem; }
   .footer-bottom { flex-direction: column; text-align: center; padding: 1rem 1.5rem; }
   .section { padding: 2.5rem 1.25rem; }
@@ -1199,13 +1224,11 @@ table.pro-table {
 
   .mobile-menu-overlay {
     position: fixed;
-    top: 68px;
+    top: 62px;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(9, 89, 59, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: #0F4D2F;
     z-index: 1999;
     display: flex;
     flex-direction: column;
@@ -1226,7 +1249,7 @@ table.pro-table {
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     width: 100%;
     text-align: center;
   }
@@ -1237,7 +1260,12 @@ table.pro-table {
 
   .mobile-menu-content a.active {
     font-weight: 700;
+    background: #D32F2F;
   }
+  
+  /* Cache les lignes décoratives sur mobile pour économiser l'espace */
+  .nav-logo-line { width: 12px; }
+  .nav-logo-wordmark { font-size: 15px; letter-spacing: 1.5px; }
   
   /* Tables Responsiveness */
   .table-wrap {

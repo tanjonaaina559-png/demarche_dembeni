@@ -78,15 +78,15 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
 
 /* ======== NAVBAR ======== */
 .navbar-green {
-  background: linear-gradient(90deg, var(--vert-900) 0%, var(--vert-700) 60%, var(--vert-600) 100%);
-  border-bottom: 3px solid var(--rouge-500);
+  background: #0F4D2F;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  height: 68px;
+  height: 62px;
   width: 100%;
-  box-shadow: 0 4px 20px rgba(10,39,19,.40);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.20);
   position: fixed;
   top: 0;
   left: 0;
@@ -106,73 +106,92 @@ h1,h2,h3,h4,h5 { font-family: var(--font-head); color: var(--vert-800); line-hei
 .nav-right { flex: 1; justify-content: flex-end; }
 
 .nav-left a, .nav-right a {
-  color: rgba(255,255,255,.80);
+  color: rgba(255,255,255,.78);
   text-decoration: none;
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  transition: all 0.2s ease;
-  letter-spacing: 0.3px;
-  padding: .3rem .5rem;
-  border-radius: 6px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.4px;
+  padding: .28rem .6rem;
+  border-radius: 5px;
+  white-space: nowrap;
 }
 
 .nav-left a:hover, .nav-right a:hover {
-  color: var(--blanc);
+  color: #FFFFFF;
   background: rgba(255,255,255,.10);
+  transform: translateY(-1px);
 }
 
 .nav-left a.active, .nav-right a.active {
-  color: var(--blanc);
-  background: var(--rouge-600);
+  color: #FFFFFF;
+  background: #D32F2F;
   font-weight: 600;
-  padding: .3rem .8rem;
-  border-radius: 6px;
+  padding: .28rem .8rem;
+  border-radius: 5px;
 }
 
 .nav-logo-center {
-  /* Centrage absolu parfait — au-dessus de tout */
+  /* Centrage absolu parfait */
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  /* Fond opaque pour cacher ce qui se trouve derrière */
-  background: var(--vert-800);
-  padding: .35rem 1.2rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,.10);
-  /* Typographie */
-  color: var(--blanc);
-  font-family: var(--font-head);
-  font-weight: 800;
-  font-size: 1.25rem;
-  text-decoration: none;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  /* Séparateurs décoratifs */
+  /* Fond bloc central institutionnel */
+  background: #145A32;
+  padding: .3rem 1.1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+  /* Layout */
   display: flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
   pointer-events: auto;
-  transition: var(--transition);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .nav-logo-center:hover {
-  background: var(--vert-700);
-  border-color: rgba(255,255,255,.20);
+  background: #1a6b3c;
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 4px 18px rgba(0,0,0,.25);
 }
 
-.nav-logo-center::before,
-.nav-logo-center::after {
-  content: '';
+/* Lignes décoratives rouges de part et d'autre */
+.nav-logo-line {
   display: block;
-  width: 20px;
-  height: 2px;
-  background: var(--rouge-500);
+  width: 22px;
+  height: 1.5px;
+  background: #D32F2F;
   border-radius: 2px;
   flex-shrink: 0;
+  opacity: 0.9;
 }
+
+/* Conteneur logo + texte */
+.nav-logo-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Wordmark DEMBENI */
+.nav-logo-wordmark {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.nav-logo-demb { color: #111111; }
+.nav-logo-e    { color: #D32F2F; }
+.nav-logo-ni   { color: #111111; }
 
 /* Hamburger mobile pour navbar-green (caché par défaut) */
 .nav-hamburger {

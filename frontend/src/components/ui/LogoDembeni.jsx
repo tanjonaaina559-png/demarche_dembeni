@@ -12,7 +12,7 @@ const LogoDembeni = ({
   const [imgError, setImgError] = useState(false);
 
   const sizes = {
-    sm: { img: 48, title: '14px', sub: '9px' },
+    sm: { img: 28, title: '14px', sub: '9px' },
     md: { img: 64, title: '18px', sub: '11px' },
     lg: { img: 80, title: '22px', sub: '13px' },
     xl: { img: 120, title: '28px', sub: '16px' }
