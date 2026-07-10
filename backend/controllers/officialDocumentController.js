@@ -36,15 +36,23 @@ const createDocument = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez télécharger un fichier PDF.' });
     }
 
-    console.log('REQ.FILE', req.file);
-    console.log('CLOUDINARY URL', req.file?.path);
+    console.log('\n========== OFFICIAL DOCUMENT UPLOAD ==========');
+    console.log('Uploading PDF to Cloudinary...');
+    console.log('REQ FILE =', req.file);
+    console.log('CLOUDINARY PATH =', req.file?.path);
+    console.log('FILENAME =', req.file?.filename);
 
     const cloudinaryUrl = req.file.path;
-    console.log('PDF URL SAVED', cloudinaryUrl);
 
-    if (cloudinaryUrl && !cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
-      throw new Error('Local URL detected: ' + cloudinaryUrl);
+    if (!cloudinaryUrl || !cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+      console.error('[OfficialDocument] URL locale détectée — upload Cloudinary échoué:', cloudinaryUrl);
+      return res.status(500).json({
+        message: 'Erreur: le fichier n\'a pas été uploadé sur Cloudinary. URL invalide: ' + cloudinaryUrl,
+      });
     }
+
+    console.log('Cloudinary Upload Success');
+    console.log('Cloudinary URL:', cloudinaryUrl);
 
     const document = await OfficialDocument.create({
       title,
@@ -56,10 +64,12 @@ const createDocument = async (req, res) => {
       active: active === 'true' || active === true,
     });
 
-    console.log('Document officiel créé avec URL Cloudinary:', cloudinaryUrl);
+    console.log('PDF URL saved in MongoDB:', cloudinaryUrl);
+    console.log('==============================================\n');
+
     res.status(201).json(document);
   } catch (error) {
-    console.error('Cloudinary Upload Error:', error);
+    console.error('[OfficialDocument] Erreur création:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
@@ -93,32 +103,43 @@ const updateDocument = async (req, res) => {
             let publicId = publicIdMatch[1];
             if (publicId.includes('.')) publicId = publicId.substring(0, publicId.lastIndexOf('.'));
             await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
-            console.log('Ancien fichier Cloudinary supprimé:', publicId);
+            console.log('[OfficialDocument] Ancien fichier Cloudinary supprimé:', publicId);
           }
         } catch (e) {
-          console.error('Erreur suppression ancien Cloudinary:', e);
+          console.error('[OfficialDocument] Erreur suppression ancien Cloudinary:', e);
         }
       }
 
-      console.log('REQ.FILE', req.file);
-      console.log('CLOUDINARY URL', req.file?.path);
+      console.log('\n========== OFFICIAL DOCUMENT UPDATE UPLOAD ==========');
+      console.log('Uploading PDF to Cloudinary...');
+      console.log('REQ FILE =', req.file);
+      console.log('CLOUDINARY PATH =', req.file?.path);
+      console.log('FILENAME =', req.file?.filename);
 
       const cloudinaryUrl = req.file.path;
-      console.log('PDF URL SAVED', cloudinaryUrl);
 
-      if (cloudinaryUrl && !cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
-        throw new Error('Local URL detected: ' + cloudinaryUrl);
+      if (!cloudinaryUrl || !cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+        console.error('[OfficialDocument] URL locale détectée lors de la mise à jour:', cloudinaryUrl);
+        return res.status(500).json({
+          message: 'Erreur: le fichier n\'a pas été uploadé sur Cloudinary. URL invalide: ' + cloudinaryUrl,
+        });
       }
+
+      console.log('Cloudinary Upload Success');
+      console.log('Cloudinary URL:', cloudinaryUrl);
 
       document.fileName = req.file.originalname;
       document.pdfUrl = cloudinaryUrl;
       document.size = req.file.size;
+
+      console.log('PDF URL saved in MongoDB:', cloudinaryUrl);
+      console.log('=====================================================\n');
     }
 
     const updatedDocument = await document.save();
     res.json(updatedDocument);
   } catch (error) {
-    console.error('Cloudinary Upload Error:', error);
+    console.error('[OfficialDocument] Erreur mise à jour:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };

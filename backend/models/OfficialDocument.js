@@ -22,6 +22,10 @@ const officialDocumentSchema = new mongoose.Schema({
   pdfUrl: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => !v || v.startsWith('https://res.cloudinary.com/'),
+      message: 'pdfUrl doit être une URL Cloudinary valide (https://res.cloudinary.com/...)',
+    },
   },
   size: {
     type: Number,

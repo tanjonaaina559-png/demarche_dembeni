@@ -16,8 +16,12 @@ const officialPdfTemplateSchema = new mongoose.Schema({
     trim: true,
   },
   templateFile: {
-    type: String, // relative path: /uploads/pdf-templates/...
+    type: String, // Cloudinary URL: https://res.cloudinary.com/...
     required: [true, 'Le fichier PDF est requis'],
+    validate: {
+      validator: (v) => !v || v.startsWith('https://res.cloudinary.com/'),
+      message: 'templateFile doit être une URL Cloudinary valide (https://res.cloudinary.com/...)',
+    },
   },
   fileName: {
     type: String,
