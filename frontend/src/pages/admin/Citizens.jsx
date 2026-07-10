@@ -99,13 +99,24 @@ const Citizens = () => {
     } catch { showToast('Erreur', 'error'); }
   };
 
-  /* ── Validate / Reject ── */
+  /* ── Validate (pending → approved) ── */
   const handleValidate = async (id) => {
+    console.log('APPROVE CLICKED', id);
     try {
       await api.put(`/admin/citizens/${id}/validate`);
-      showToast('Citoyen validé');
+      showToast('Citoyen approuvé avec succès ✅');
       fetchCitizens();
-    } catch { showToast('Erreur', 'error'); }
+    } catch { showToast('Erreur lors de la validation', 'error'); }
+  };
+
+  /* ── Reject (pending → rejected) ── */
+  const handleReject = async (id) => {
+    console.log('REJECT CLICKED', id);
+    try {
+      await api.put(`/admin/citizens/${id}/reject`);
+      showToast('Citoyen refusé');
+      fetchCitizens();
+    } catch { showToast('Erreur lors du refus', 'error'); }
   };
 
   /* ── Delete ── */
@@ -166,11 +177,12 @@ const Citizens = () => {
                 <FaCheckCircle color="#10B981" />
               </button>
               <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: 12 }}
-                title="Refuser" onClick={() => handleToggleStatus(row._id, 'active')}>
+                title="Refuser" onClick={() => handleReject(row._id)}>
                 <FaBan color="#EF4444" />
               </button>
             </>
           )}
+
 
           {/* Suspendre / Réactiver (pour les statuts autres que pending) */}
           {row.status !== 'pending' && (
