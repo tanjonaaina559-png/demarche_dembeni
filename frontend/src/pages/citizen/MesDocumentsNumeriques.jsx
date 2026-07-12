@@ -65,24 +65,28 @@ export default function MesDocumentsNumeriques() {
   const handleDownload = async (doc) => {
     setDownloading(doc._id);
     try {
-      const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-      const url = `${baseUrl}/${doc.pdfUrl.replace(/\\/g, '/')}`;
+      // pdfUrl is always a full Cloudinary URL (https://res.cloudinary.com/...)
+      const url = doc.pdfUrl?.startsWith('http')
+        ? doc.pdfUrl
+        : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}/${doc.pdfUrl?.replace(/\\/g, '/')}`;
       const a = document.createElement('a');
       a.href = url;
-      a.target = "_blank";
+      a.target = '_blank';
       a.download = `${doc.documentType}-${doc.referenceNumber}.pdf`;
       a.click();
     } catch (err) {
       console.error(err);
-      alert("Erreur lors du téléchargement");
+      alert('Erreur lors du téléchargement');
     } finally {
       setDownloading(null);
     }
   };
 
   const handlePreview = (doc) => {
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    const url = `${baseUrl}/${doc.pdfUrl.replace(/\\/g, '/')}`;
+    // pdfUrl is always a full Cloudinary URL (https://res.cloudinary.com/...)
+    const url = doc.pdfUrl?.startsWith('http')
+      ? doc.pdfUrl
+      : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}/${doc.pdfUrl?.replace(/\\/g, '/')}`;
     window.open(url, '_blank');
   };
 

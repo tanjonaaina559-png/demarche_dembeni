@@ -149,13 +149,16 @@ const AdminDashboard = () => {
       Header: 'Changer statut', accessor: 'actions',
       Cell: row => (
         <select
-          value={row?.status || 'en attente'}
+          value={row?.status || 'En attente'}
           onChange={e => handleUpdateStatus(row?._id, e.target.value)}
           style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13 }}
         >
-          <option value="en attente">En attente</option>
-          <option value="approuvée">Approuvée</option>
-          <option value="rejetée">Rejetée</option>
+          <option value="En attente">En attente</option>
+          <option value="Reçue">Reçue</option>
+          <option value="En cours">En cours</option>
+          <option value="Validée">Validée</option>
+          <option value="Rejetée">Rejetée</option>
+          <option value="Complément demandé">Complément demandé</option>
         </select>
       ),
     },

@@ -21,18 +21,29 @@ const MesDemandes = () => {
 
   const downloadPdf = async (demandeId) => {
     try {
-      const response = await api.get(`/requests/${demandeId}/pdf`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `recepisse_${demandeId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const token = localStorage.getItem('token') ||
+        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const url = `${apiBase}/requests/${demandeId}/pdf`;
+      // Follow redirect to Cloudinary URL
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        redirect: 'follow'
+      });
+      if (response.ok || response.redirected) {
+        window.open(response.url || url, '_blank');
+      } else if (response.status === 403) {
+        alert('Le document sera disponible après validation par l\'administration.');
+      } else {
+        alert('Impossible de télécharger le document.');
+      }
     } catch (error) {
       console.error('Erreur téléchargement PDF', error);
-      alert('Impossible de télécharger le reçu.');
+      // Fallback: try to open directly
+      const token = localStorage.getItem('token') ||
+        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      window.open(`${apiBase}/requests/${demandeId}/pdf`, '_blank');
     }
   };
 

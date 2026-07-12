@@ -21,9 +21,7 @@ const notificationService = {
    */
   markAsRead: async (notificationId) => {
     try {
-      const response = await api.put(`/notifications/${notificationId}`, {
-        read: true,
-      });
+      const response = await api.patch(`/notifications/${notificationId}/read`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to mark notification as read' };
@@ -36,7 +34,7 @@ const notificationService = {
    */
   markAllAsRead: async () => {
     try {
-      const response = await api.put('/notifications/mark-all-read');
+      const response = await api.put('/notifications/read-all');
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to mark all as read' };
@@ -63,8 +61,9 @@ const notificationService = {
    */
   getUnreadCount: async () => {
     try {
-      const response = await api.get('/notifications/unread/count');
-      return response.data;
+      const response = await api.get('/notifications/unread');
+      // Backend returns the full array; count the items
+      return { count: (response.data || []).length, notifications: response.data || [] };
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch unread count' };
     }

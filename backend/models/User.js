@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'approved', 'rejected', 'active'],
+    enum: ['pending', 'approved', 'rejected', 'suspended', 'active'],
     default: 'pending' 
   },
   role: { type: String, enum: ['citizen', 'admin'], default: 'citizen' },

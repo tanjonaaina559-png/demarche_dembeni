@@ -95,7 +95,7 @@ const suspendCitizen = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Citoyen non trouvé' });
 
-    user.status = 'rejected';
+    user.status = 'suspended';
     await user.save();
 
     await createNotification(user._id, 'Compte suspendu', 'Votre compte a été suspendu par l\'administration.', 'rejection');

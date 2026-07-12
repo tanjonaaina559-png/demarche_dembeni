@@ -551,10 +551,6 @@ const generateFromOfficialTemplate = async (request, citizen, referenceNumber, t
   return result.secure_url;
 };
 
-  fs.unlinkSync(filePath);
-  return result.secure_url;
-};
-
 module.exports = {
   generateReferenceNumber,
   generateReceiptPdf,

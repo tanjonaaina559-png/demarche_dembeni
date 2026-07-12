@@ -3,13 +3,8 @@ const router = express.Router();
 const demarchesController = require('../controllers/demarches.controller');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Vérification de l'existence du middleware upload
-let upload;
-try {
-  upload = require('../middleware/upload');
-} catch {
-  upload = require('../middleware/uploadMiddleware');
-}
+// Upload middleware: Cloudinary for persistent citizen document storage
+const cloudinaryCitizenUpload = require('../middleware/cloudinaryCitizenUpload');
 
 // ── Routes publiques ─────────────────────────────────────────────────────────
 router.get('/demarches', demarchesController.getDemarches);
@@ -25,7 +20,7 @@ router.delete('/demarches/:id', protect, admin, procedureController.deleteProced
 router.get('/requests/stats', protect, admin, demarchesController.getStats);
 
 // ── Routes citoyens ───────────────────────────────────────────────────────────
-router.post('/requests', protect, upload.array('documents', 5), demarchesController.createRequest);
+router.post('/requests', protect, cloudinaryCitizenUpload.array('documents', 5), demarchesController.createRequest);
 router.get('/requests/user/:id', protect, demarchesController.getUserRequests);
 
 // ── Routes admin ─────────────────────────────────────────────────────────────

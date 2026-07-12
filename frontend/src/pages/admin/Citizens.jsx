@@ -133,10 +133,11 @@ const Citizens = () => {
   /* ── Status badge ── */
   const statusBadge = (status) => {
     const map = {
-      active:   { bg: '#D1FAE5', color: '#059669' },
-      approved: { bg: '#D1FAE5', color: '#059669' },
-      pending:  { bg: '#FEF3C7', color: '#D97706' },
-      rejected: { bg: '#FEE2E2', color: '#DC2626' },
+      active:    { bg: '#D1FAE5', color: '#059669' },
+      approved:  { bg: '#D1FAE5', color: '#059669' },
+      pending:   { bg: '#FEF3C7', color: '#D97706' },
+      rejected:  { bg: '#FEE2E2', color: '#DC2626' },
+      suspended: { bg: '#FEE2E2', color: '#B45309' },
     };
     const s = map[status] || { bg: '#F3F4F6', color: '#6B7280' };
     return (
@@ -243,7 +244,7 @@ const Citizens = () => {
           <DashboardCard title="Total Citoyens"     value={citizens.length} icon={<FaUsers size={22} />} color="#4F46E5" />
           <DashboardCard title="Actifs / Approuvés" value={citizens.filter(c => c.status === 'active' || c.status === 'approved').length} icon={<FaCheckCircle size={22} />} color="#10B981" />
           <DashboardCard title="En attente"         value={citizens.filter(c => c.status === 'pending').length} icon={<FaUserEdit size={22} />} color="#F59E0B" />
-          <DashboardCard title="Suspendus / Refusés" value={citizens.filter(c => c.status === 'rejected').length} icon={<FaBan size={22} />} color="#EF4444" />
+          <DashboardCard title="Suspendus / Refusés" value={citizens.filter(c => c.status === 'rejected' || c.status === 'suspended').length} icon={<FaBan size={22} />} color="#EF4444" />
         </section>
 
         {/* Filtres */}
@@ -264,7 +265,8 @@ const Citizens = () => {
             <option value="pending">En attente</option>
             <option value="approved">Approuvé</option>
             <option value="active">Actif</option>
-            <option value="rejected">Suspendu/Refusé</option>
+            <option value="suspended">Suspendu</option>
+            <option value="rejected">Refusé</option>
           </select>
         </div>
 

@@ -35,12 +35,14 @@ exports.createRequest = async (req, res) => {
     const uploadedDocs = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
+        // file.path is the Cloudinary secure_url when using cloudinaryCitizenUpload
+        const cloudinaryUrl = file.path;
         const doc = new UploadedDocument({
-          filename: file.filename,
+          filename: file.filename || file.originalname,
           originalName: file.originalname,
           mimetype: file.mimetype,
           size: file.size,
-          path: file.path.replace(/\\/g, '/'),
+          path: cloudinaryUrl, // Cloudinary URL
           uploader: req.user._id
         });
         await doc.save();

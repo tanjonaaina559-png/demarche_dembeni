@@ -31,8 +31,12 @@ const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMar
       onMarkAsRead(notif._id);
     }
     if (notif.relatedId) {
-      // Assuming admin routing for requests, navigate there
-      navigate(`/admin/request/${notif.relatedId}`);
+      // Navigate to the relevant admin page based on notification type
+      if (notif.type === 'request_update' || notif.type === 'validation' || notif.type === 'rejection') {
+        navigate('/admin/requests');
+      } else {
+        navigate('/admin/citizens');
+      }
     }
     onClose();
   };

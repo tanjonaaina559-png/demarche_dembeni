@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const requestController = require('../controllers/requestController');
 const { protect, admin } = require('../middleware/authMiddleware');
-const uploadPdf = require('../middleware/uploadPdfMiddleware');
+const cloudinaryCitizenUpload = require('../middleware/cloudinaryCitizenUpload');
 
 // Public verification route
 router.get('/verify/:reference', requestController.verifyDocument);
 
 // Citizen routes
-router.post('/', protect, uploadPdf.array('documents', 5), requestController.createRequest);
+router.post('/', protect, cloudinaryCitizenUpload.array('documents', 5), requestController.createRequest);
 router.get('/my-requests', protect, requestController.getCitizenRequests);
 router.get('/my-documents', protect, requestController.getCitizenDocuments);
 router.get('/:id/pdf', protect, requestController.downloadPdfReceipt);

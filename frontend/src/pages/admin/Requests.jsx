@@ -59,17 +59,29 @@ const Requests = () => {
 
   const downloadRequestPdf = async (id, type = 'receipt') => {
     try {
-      const response = await api.get(`/requests/${id}/pdf?type=${type}`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${type}_${id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // The backend redirects to the Cloudinary URL — open in a new tab
+      const token = localStorage.getItem('token') ||
+        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const url = `${apiBase}/requests/${id}/pdf?type=${type}`;
+      // Use fetch to follow the redirect and get the final Cloudinary URL
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        redirect: 'follow'
+      });
+      if (response.ok || response.redirected) {
+        window.open(response.url || url, '_blank');
+      } else if (response.status === 403) {
+        showToast('Document disponible uniquement pour les demandes validées.', 'error');
+      } else {
+        showToast('Impossible de télécharger le PDF.', 'error');
+      }
     } catch (error) {
-      showToast('Impossible de télécharger le PDF', 'error');
+      // Fallback: open via API link directly
+      const token = localStorage.getItem('token') ||
+        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      window.open(`${apiBase}/requests/${id}/pdf?type=${type}`, '_blank');
     }
   };
 
@@ -378,7 +390,12 @@ const Requests = () => {
                     const filePath = isObj ? doc.path : doc;
                     const fileName = isObj ? (doc.originalName || doc.filename || `Document ${idx + 1}`) : `Document ${idx + 1}`;
                     const mimeType = isObj ? doc.mimetype : '';
-                    const fileUrl = filePath ? `${API_BASE}/${String(filePath).replace(/\\/g, '/')}` : null;
+                    // Use Cloudinary URL directly if it starts with http
+                    const fileUrl = filePath
+                      ? (String(filePath).startsWith('http')
+                          ? String(filePath)
+                          : `${API_BASE}/${String(filePath).replace(/\\/g, '/')}`)
+                      : null;
                     const isPdf = mimeType === 'application/pdf' || String(filePath || '').toLowerCase().endsWith('.pdf');
                     if (!fileUrl) return null;
                     return isPdf ? (

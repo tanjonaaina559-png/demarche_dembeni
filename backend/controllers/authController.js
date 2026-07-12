@@ -73,6 +73,9 @@ const loginUser = async (req, res) => {
         if (user.status === 'rejected') {
           return res.status(401).json({ message: "Votre compte a été refusé. Veuillez contacter l'administration." });
         }
+        if (user.status === 'suspended') {
+          return res.status(401).json({ message: "Votre compte est suspendu. Veuillez contacter la mairie de Dembéni." });
+        }
       }
 
       res.json({
