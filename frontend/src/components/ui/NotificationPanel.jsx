@@ -1,13 +1,27 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Check, X, BellDot, ExternalLink, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import styles from './NotificationPanel.module.css';
 
+// Stable singleton portal target (prevents removeChild crash on navigation)
+let notifRoot = null;
+const getNotifRoot = () => {
+  if (!notifRoot || !document.body.contains(notifRoot)) {
+    notifRoot = document.createElement('div');
+    notifRoot.id = 'notification-portal-root';
+    document.body.appendChild(notifRoot);
+  }
+  return notifRoot;
+};
+
 const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMarkAllAsRead, onDelete, btnRef }) => {
   const navigate = useNavigate();
   const panelRef = useRef();
+  const [portalTarget, setPortalTarget] = useState(null);
+
+  useEffect(() => { setPortalTarget(getNotifRoot()); }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -122,7 +136,8 @@ const NotificationPanel = ({ isOpen, onClose, notifications, onMarkAsRead, onMar
     </AnimatePresence>
   );
 
-  return createPortal(panelContent, document.body);
+  if (!portalTarget) return null;
+  return createPortal(panelContent, portalTarget);
 };
 
 export default NotificationPanel;

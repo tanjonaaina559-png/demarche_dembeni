@@ -43,7 +43,13 @@ const NewRequestComponent = () => {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedProcedure, setSelectedProcedure] = useState('');
+  // files is now [{id: string, file: File}] — stable keys prevent removeChild on removal
   const [files, setFiles] = useState([]);
+  const fileIdCounter = React.useRef(0);
+  const addFile = (file) => {
+    const id = `file-${Date.now()}-${fileIdCounter.current++}`;
+    setFiles(prev => [...prev, { id, file }]);
+  };
   const [formData, setFormData] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -247,7 +253,7 @@ const NewRequestComponent = () => {
       showToast(`Téléchargement de ${doc.documentType}...`, 'success');
       const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
       const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
-      setFiles(prev => [...prev, file]);
+      addFile(file);
       setShowDocModal(false);
       showToast('Document ajouté avec succès.', 'success');
     } catch(e) {
@@ -322,7 +328,7 @@ const NewRequestComponent = () => {
 
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  const removeFile = (index) => setFiles(prev => prev.filter((_, i) => i !== index));
+  const removeFile = (id) => setFiles(prev => prev.filter(f => f.id !== id));
 
   const handleSubmit = async () => {
     const requiredDocs = (selectedProcDetails?.documents || []).filter(d => d?.required) || [];
@@ -337,7 +343,8 @@ const NewRequestComponent = () => {
     const formDataPayload = new FormData();
     formDataPayload.append('procedureId', selectedProcedure);
     formDataPayload.append('formData', JSON.stringify(formData));
-    files.forEach(file => formDataPayload.append('documents', file));
+    // Append the actual File objects
+    files.forEach(({ file }) => formDataPayload.append('documents', file));
 
     try {
       const res = await api.post('/requests', formDataPayload, {
@@ -563,7 +570,7 @@ const NewRequestComponent = () => {
                   </div>
                 )}
 
-                <UploadDocument onUpload={(file) => setFiles(prev => [...prev, file])} maxSizeMB={5} acceptedType=".pdf,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf" />
+                <UploadDocument onUpload={(file) => addFile(file)} maxSizeMB={5} acceptedType=".pdf,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf" />
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                   <button type="button" onClick={openDocModal} style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -575,13 +582,13 @@ const NewRequestComponent = () => {
                   <div style={{ marginTop: '20px' }}>
                     <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Documents pr\u00eats \u00e0 l'envoi ({files?.length || 0})</h4>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {(files || []).map((file, idx) => (
-                        <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', padding: '10px 15px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                      {(files || []).map(({ id, file }) => (
+                        <li key={id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', padding: '10px 15px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
                             <FileText size={18} color="#6B7280" />
                             <span>{file?.name} ({((file?.size || 0) / 1024 / 1024).toFixed(2)} Mo)</span>
                           </div>
-                          <button type="button" onClick={() => removeFile(idx)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}>✖</button>
+                          <button type="button" onClick={() => removeFile(id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}>✖</button>
                         </li>
                       ))}
                     </ul>

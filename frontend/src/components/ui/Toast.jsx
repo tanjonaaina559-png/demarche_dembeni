@@ -4,6 +4,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaCheck, FaExclamationTriangle, FaInfoCircle, FaTimes, FaExclamationCircle } from 'react-icons/fa';
 import styles from './Toast.module.css';
 
+// ─── Stable singleton container ──────────────────────────────────────────────
+// A dedicated DOM node that lives for the entire app lifetime.
+// This prevents the removeChild NotFoundError that occurs when createPortal
+// targets document.body directly and the parent component unmounts during
+// a framer-motion exit animation.
+let toastRoot = null;
+const getToastRoot = () => {
+  if (!toastRoot || !document.body.contains(toastRoot)) {
+    toastRoot = document.createElement('div');
+    toastRoot.id = 'toast-portal-root';
+    toastRoot.setAttribute('aria-live', 'assertive');
+    toastRoot.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(toastRoot);
+  }
+  return toastRoot;
+};
+
 /**
  * Toast — Professional top-right notification
  * Props:
@@ -15,8 +32,18 @@ import styles from './Toast.module.css';
  */
 const Toast = ({ isOpen, onClose, message, type = 'info', duration = 5000 }) => {
   const [progress, setProgress] = useState(100);
+  const [portalTarget, setPortalTarget] = useState(null);
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
+
+  // Initialise the stable portal container on mount only
+  useEffect(() => {
+    setPortalTarget(getToastRoot());
+    return () => {
+      // Do NOT remove toastRoot on unmount — it is reused across navigation.
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const startProgress = useCallback(() => {
     startTimeRef.current = Date.now();
@@ -55,13 +82,15 @@ const Toast = ({ isOpen, onClose, message, type = 'info', duration = 5000 }) => 
     info: 'Information',
   };
 
+  // Guard: don't render until the stable container is ready
+  if (!portalTarget) return null;
+
   const toastContent = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           className={`${styles.toastWrapper} ${styles[type]}`}
           role="alert"
-          aria-live="polite"
           initial={{ x: 420, opacity: 0, y: 0 }}
           animate={{ x: 0, opacity: 1, y: 0 }}
           exit={{ x: 420, opacity: 0 }}
@@ -99,8 +128,8 @@ const Toast = ({ isOpen, onClose, message, type = 'info', duration = 5000 }) => 
     </AnimatePresence>
   );
 
-  // Render into a portal so z-index is always on top
-  return createPortal(toastContent, document.body);
+  // Render into the stable singleton container — never directly into document.body
+  return createPortal(toastContent, portalTarget);
 };
 
 export default Toast;
