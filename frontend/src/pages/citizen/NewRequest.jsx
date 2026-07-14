@@ -37,6 +37,8 @@ const NewRequestComponent = () => {
   const searchParams = new URLSearchParams(location.search);
   const paramProcId = searchParams.get('procedureId');
 
+  console.log("RENDER STEP", currentStep);
+
   // ── Debug lifecycle ──────────────────────────────────────────────────────
   useEffect(() => {
     console.log('MOUNT — NewRequestComponent');
@@ -222,6 +224,9 @@ const NewRequestComponent = () => {
     };
 
     fetchProcsAndDocs();
+    return () => {
+      console.log("CLEANUP FROM fetchProcsAndDocs useEffect");
+    };
   }, [user, navigate, paramProcId]);
 
   useEffect(() => {
@@ -241,6 +246,9 @@ const NewRequestComponent = () => {
       };
       loadDoc();
     }
+    return () => {
+      console.log("CLEANUP FROM preloadedDoc useEffect");
+    };
   }, [location.state, navigate, location.pathname, location.search]);
 
   const openDocModal = async () => {
@@ -332,6 +340,7 @@ const NewRequestComponent = () => {
       }
     }
     console.log('STEP CHANGE —', currentStep, '→', Math.min(currentStep + 1, 4));
+    console.log("NEXT STEP CLICKED");
     setCurrentStep(prev => Math.min(prev + 1, 4));
   };
 
@@ -440,15 +449,19 @@ const NewRequestComponent = () => {
         {renderStepIndicator()}
 
         <AnimatePresence mode="wait">
-          {/* STEP 1 : Procedure Selection */}
-          {currentStep === 1 && (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
+          <motion.div
+            key={`step-${currentStep}`}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            onAnimationStart={() => console.log(`MOUNT STEP${currentStep}`)}
+            onAnimationComplete={(def) => {
+              if (def.opacity === 0) console.log(`UNMOUNT STEP${currentStep}`);
+            }}
+          >
+            {/* STEP 1 : Procedure Selection */}
+            {currentStep === 1 && (
               <div>
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre démarche</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
@@ -468,24 +481,16 @@ const NewRequestComponent = () => {
                       </div>
                       <div>
                         <h4 style={{ margin: '0 0 4px', color: '#111827', fontSize: '1rem' }}>{p?.title || 'Sans titre'}</h4>
-                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#6B7280' }}>D\u00e9lai estim\u00e9: {p?.duration || 'Variable'}</p>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#6B7280' }}>Délai estimé: {p?.duration || 'Variable'}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* STEP 2 : Dynamic Form */}
-          {currentStep === 2 && (
-            <motion.div
-              key="step2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
+            {/* STEP 2 : Dynamic Form */}
+            {currentStep === 2 && (
               <div>
                 {selectedProcDetails ? (
                   <div>
@@ -501,11 +506,11 @@ const NewRequestComponent = () => {
                           let inputType = field?.type || 'text';
                           let extraProps = {};
                           if (inputType === 'text') {
-                            if (nameLower.includes('t\u00e9l\u00e9phone') || nameLower.includes('telephone')) { inputType = 'tel'; extraProps = { pattern: '[0-9]*', maxLength: 20 }; }
+                            if (nameLower.includes('téléphone') || nameLower.includes('telephone')) { inputType = 'tel'; extraProps = { pattern: '[0-9]*', maxLength: 20 }; }
                             else if (nameLower.includes('email')) { inputType = 'email'; }
                             else if (nameLower.includes('date')) { inputType = 'date'; }
-                            else if (nameLower.includes('age') || nameLower.includes('\u00e2ge')) { inputType = 'number'; extraProps = { min: 0, max: 120 }; }
-                            else if (nameLower.includes('nombre') || nameLower.includes('quantit\u00e9')) { inputType = 'number'; extraProps = { min: 1 }; }
+                            else if (nameLower.includes('age') || nameLower.includes('âge')) { inputType = 'number'; extraProps = { min: 0, max: 120 }; }
+                            else if (nameLower.includes('nombre') || nameLower.includes('quantité')) { inputType = 'number'; extraProps = { min: 1 }; }
                             else if (nameLower.includes('description') || nameLower.includes('motif') || nameLower.includes('commentaire')) { inputType = 'textarea'; }
                           }
                           return (
@@ -517,7 +522,7 @@ const NewRequestComponent = () => {
                                 <textarea name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} rows="3" style={inputStyle} onInvalid={e => e.target.setCustomValidity('Ce champ est obligatoire')} onInput={e => e.target.setCustomValidity('')} {...extraProps} />
                               ) : inputType === 'select' ? (
                                 <select name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} style={inputStyle} onInvalid={e => e.target.setCustomValidity('Ce champ est obligatoire')} onInput={e => e.target.setCustomValidity('')}>
-                                  <option value="">S\u00e9lectionner...</option>
+                                  <option value="">Sélectionner...</option>
                                   {(field?.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                 </select>
                               ) : (
@@ -529,28 +534,20 @@ const NewRequestComponent = () => {
                       </div>
                     ) : (
                       <div style={{ textAlign: 'center', padding: '30px', color: '#6B7280' }}>
-                        Aucune information suppl\u00e9mentaire n'est requise pour cette d\u00e9marche. Cliquez sur Suivant.
+                        Aucune information supplémentaire n'est requise pour cette démarche. Cliquez sur Suivant.
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la proc\u00e9dure...</div>
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la procédure...</div>
                 )}
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* STEP 3 : Uploads */}
-          {currentStep === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
+            {/* STEP 3 : Uploads */}
+            {currentStep === 3 && (
               <div>
-                <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pi\u00e8ces justificatives</h2>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pièces justificatives</h2>
 
                 {(selectedProcDetails?.documents || []).length > 0 ? (
                   <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
@@ -572,9 +569,9 @@ const NewRequestComponent = () => {
                             </div>
                             {(matches?.length || 0) === 0 && doc?.required && (
                               <div style={{ paddingLeft: '24px', marginTop: '8px' }}>
-                                <p style={{ margin: '0 0 5px', fontSize: '0.8rem', color: '#6B7280' }}>Je ne poss\u00e8de pas encore ce document :</p>
+                                <p style={{ margin: '0 0 5px', fontSize: '0.8rem', color: '#6B7280' }}>Je ne possède pas encore ce document :</p>
                                 <button type="button" onClick={() => openQuickCreator(doc.name)} style={{ background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE', padding: '6px 12px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                  <Plus size={16} /> Cr\u00e9er rapidement
+                                  <Plus size={16} /> Créer rapidement
                                 </button>
                               </div>
                             )}
@@ -582,7 +579,7 @@ const NewRequestComponent = () => {
                               <div style={{ paddingLeft: '24px' }}>
                                 {(matches || []).map(m => (
                                   <button key={m?._id} type="button" onClick={() => handleSelectDemoDoc(m)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '8px', marginTop: '4px' }}>
-                                    \u2713 Utiliser {m?.documentType} enregistr\u00e9
+                                    ✓ Utiliser {m?.documentType} enregistré
                                   </button>
                                 ))}
                               </div>
@@ -594,7 +591,7 @@ const NewRequestComponent = () => {
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '30px', color: '#6B7280', background: '#F9FAFB', borderRadius: '8px', marginBottom: '20px' }}>
-                    Aucune pi\u00e8ce justificative demand\u00e9e pour cette d\u00e9marche.
+                    Aucune pièce justificative demandée pour cette démarche.
                   </div>
                 )}
 
@@ -602,13 +599,13 @@ const NewRequestComponent = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                   <button type="button" onClick={openDocModal} style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FileText size={18} /> Utiliser mes documents enregistr\u00e9s
+                    <FileText size={18} /> Utiliser mes documents enregistrés
                   </button>
                 </div>
 
                 {(files?.length || 0) > 0 && (
                   <div style={{ marginTop: '20px' }}>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Documents pr\u00eats \u00e0 l'envoi ({files?.length || 0})</h4>
+                    <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Documents prêts à l'envoi ({files?.length || 0})</h4>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {(files || []).map(({ id, file }) => (
                         <li key={id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', padding: '10px 15px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
@@ -632,84 +629,76 @@ const NewRequestComponent = () => {
                   </div>
                 )}
               </div>
-            </motion.div>
-          )}
+            )}
 
-          {/* STEP 4 : Confirmation */}
-          {currentStep === 4 && (
-            <motion.div
-              key="step4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {(() => {
-                const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-              const rawPdf = successData?.generatedPdf;
-              // Si l'URL commence par http (Cloudinary), on l'utilise directement.
-              // Sinon c'est un chemin local legacy → on préfixe l'API base.
-              const pdfUrl = rawPdf
-                ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.replace(/\\/g, '/')}`)
-                : null;
-              return (
-                <div style={{ textAlign: 'center', padding: '20px 10px' }}>
-                  <div style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white', boxShadow: '0 8px 20px rgba(16,185,129,0.35)' }}>
-                    <CheckCircle size={36} />
-                  </div>
-                  <h2 style={{ color: '#111827', fontSize: '1.7rem', marginBottom: '8px' }}>Demande envoyée avec succès&nbsp;!</h2>
-                  <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '24px' }}>Votre dossier a bien été transmis aux services de la mairie.</p>
+            {/* STEP 4 : Confirmation */}
+            {currentStep === 4 && (
+              <div>
+                {(() => {
+                  const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                  const rawPdf = successData?.generatedPdf;
+                  const pdfUrl = rawPdf
+                    ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.replace(/\/g, '/')}`)
+                    : null;
+                  return (
+                    <div style={{ textAlign: 'center', padding: '20px 10px' }}>
+                      <div style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white', boxShadow: '0 8px 20px rgba(16,185,129,0.35)' }}>
+                        <CheckCircle size={36} />
+                      </div>
+                      <h2 style={{ color: '#111827', fontSize: '1.7rem', marginBottom: '8px' }}>Demande envoyée avec succès&nbsp;!</h2>
+                      <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '24px' }}>Votre dossier a bien été transmis aux services de la mairie.</p>
 
-                  {/* Reference box */}
-                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 24px', maxWidth: '380px', margin: '0 auto 28px' }}>
-                    <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Numéro de suivi</p>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '2px', fontFamily: 'monospace' }}>
-                      {successData?.referenceNumber || successData?._id || '---'}
-                    </div>
-                    <p style={{ fontSize: '0.78rem', color: '#9CA3AF', margin: '4px 0 0' }}>Conservez ce numéro pour le suivi de votre demande</p>
-                  </div>
+                      {/* Reference box */}
+                      <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 24px', maxWidth: '380px', margin: '0 auto 28px' }}>
+                        <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Numéro de suivi</p>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '2px', fontFamily: 'monospace' }}>
+                          {successData?.referenceNumber || successData?._id || '---'}
+                        </div>
+                        <p style={{ fontSize: '0.78rem', color: '#9CA3AF', margin: '4px 0 0' }}>Conservez ce numéro pour le suivi de votre demande</p>
+                      </div>
 
-                  {/* PDF Preview */}
-                  {pdfUrl ? (
-                    <div style={{ marginBottom: 24 }}>
-                      <h4 style={{ fontSize: '1rem', color: '#1F2937', marginBottom: 12 }}>📄 Votre document généré</h4>
-                      <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', maxWidth: 700, margin: '0 auto 16px', height: 400, background: '#F9FAFB' }}>
-                        <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 20 }}>
-                            <FileText size={40} color="#D1D5DB" />
-                            <p style={{ color: '#6B7280', margin: 0 }}>Aperçu non disponible dans ce navigateur.</p>
-                            <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
-                              style={{ background: '#3B82F6', color: 'white', padding: '8px 18px', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
-                              Ouvrir dans un nouvel onglet
-                            </a>
+                      {/* PDF Preview */}
+                      {pdfUrl ? (
+                        <div style={{ marginBottom: 24 }}>
+                          <h4 style={{ fontSize: '1rem', color: '#1F2937', marginBottom: 12 }}>📄 Votre document généré</h4>
+                          <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', maxWidth: 700, margin: '0 auto 16px', height: 400, background: '#F9FAFB' }}>
+                            <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 20 }}>
+                                <FileText size={40} color="#D1D5DB" />
+                                <p style={{ color: '#6B7280', margin: 0 }}>Aperçu non disponible dans ce navigateur.</p>
+                                <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                                  style={{ background: '#3B82F6', color: 'white', padding: '8px 18px', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                                  Ouvrir dans un nouvel onglet
+                                </a>
+                              </div>
+                            </object>
                           </div>
-                        </object>
+                        </div>
+                      ) : (
+                        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 20px', maxWidth: 480, margin: '0 auto 24px', fontSize: '0.9rem', color: '#78350F' }}>
+                          ℹ️ Aucun template PDF officiel disponible pour cette procédure. Un récépissé standard sera généré par la mairie.
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          Suivre ma demande <ArrowRight size={18} />
+                        </Link>
+                        {pdfUrl && (
+                          <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download
+                            className="btn btn-outline"
+                            style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <FileText size={18} /> Télécharger le PDF
+                          </a>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 20px', maxWidth: 480, margin: '0 auto 24px', fontSize: '0.9rem', color: '#78350F' }}>
-                      ℹ️ Aucun template PDF officiel disponible pour cette procédure. Un récépissé standard sera généré par la mairie.
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      Suivre ma demande <ArrowRight size={18} />
-                    </Link>
-                    {pdfUrl && (
-                      <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download
-                        className="btn btn-outline"
-                        style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FileText size={18} /> Télécharger le PDF
-                      </a>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-            </motion.div>
-          )}
+                  );
+                })()}
+              </div>
+            )}
+          </motion.div>
         </AnimatePresence>
 
 
