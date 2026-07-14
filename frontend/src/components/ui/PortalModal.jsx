@@ -1,25 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
 
+// ─── Stable singleton container ──────────────────────────────────────────────
+// A single persistent DOM node that lives for the entire app lifetime.
+// Targeting document.body directly causes removeChild NotFoundError when
+// framer-motion's async exit animation outlives the owning component.
+let portalRoot = null;
+const getPortalRoot = () => {
+  if (!portalRoot || !document.body.contains(portalRoot)) {
+    portalRoot = document.createElement('div');
+    portalRoot.id = 'portal-modal-root';
+    document.body.appendChild(portalRoot);
+  }
+  return portalRoot;
+};
+
 /**
  * PortalModal
- * Renders into document.body via ReactDOM.createPortal.
+ * Renders into a stable singleton div appended once to document.body.
  * The overlay is a fixed full-screen flex container that centers the modal.
  * NO transform/translate/absolute on the modal itself.
  */
 const PortalModal = ({ isOpen, onClose, title, children, width = '900px' }) => {
-  const [mounted, setMounted] = useState(false);
+  const containerRef = useRef(null);
 
-  useEffect(() => { setMounted(true); return () => setMounted(false); }, []);
+  // Initialise the stable container once on mount; never tear it down.
+  useEffect(() => {
+    containerRef.current = getPortalRoot();
+    console.log('[PortalModal] MOUNT — container:', containerRef.current?.id);
+    return () => {
+      console.log('[PortalModal] UNMOUNT');
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  if (!mounted) return null;
+  // Guard: don't render until stable container is registered
+  if (!containerRef.current) return null;
 
   // Overlay: fixed, full screen, flex-centered
   const overlayStyle = {
@@ -130,7 +152,8 @@ const PortalModal = ({ isOpen, onClose, title, children, width = '900px' }) => {
     </AnimatePresence>
   );
 
-  return ReactDOM.createPortal(portal, document.body);
+  // Render into the stable singleton — never directly into document.body
+  return ReactDOM.createPortal(portal, containerRef.current);
 };
 
 export default PortalModal;

@@ -37,6 +37,12 @@ const NewRequestComponent = () => {
   const searchParams = new URLSearchParams(location.search);
   const paramProcId = searchParams.get('procedureId');
 
+  // ── Debug lifecycle ──────────────────────────────────────────────────────
+  useEffect(() => {
+    console.log('MOUNT — NewRequestComponent');
+    return () => console.log('UNMOUNT — NewRequestComponent');
+  }, []);
+
   const [procedures, setProcedures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -135,8 +141,10 @@ const NewRequestComponent = () => {
           if (pdfRes?.data) {
             const fileName = `${newDoc?.documentType || 'doc'}-${newDoc?.referenceNumber || 'demo'}.pdf`;
             const file = new File([pdfRes.data], fileName, { type: 'application/pdf' });
-            setFiles(prev => [...(prev || []), file]);
-            console.log("[QuickCreate] PDF ajouté avec succès aux pièces jointes.");
+            // Use addFile to assign a stable unique id — raw File push causes removeChild crash
+            addFile(file);
+            console.log('[QuickCreate] PDF ajouté avec succès aux pièces jointes.');
+            console.log('STEP CHANGE — fichiers count:', files.length + 1);
           }
         } catch (pdfErr) {
           console.error("[QuickCreate] Erreur récupération PDF:", pdfErr);
@@ -224,7 +232,9 @@ const NewRequestComponent = () => {
           const doc = location.state.preloadedDoc;
           const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
           const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
-          setFiles(prev => [...prev, file]);
+          // Use addFile to assign a stable unique id — raw File push causes removeChild crash
+          addFile(file);
+          console.log('[preloadedDoc] MOUNT — fichier pré-sélectionné ajouté:', file.name);
           showToast(`Document ajouté automatiquement: ${doc.documentType}`, 'success');
           navigate(location.pathname + location.search, { replace: true, state: {} });
         } catch(e) {
@@ -323,10 +333,14 @@ const NewRequestComponent = () => {
         return;
       }
     }
+    console.log('STEP CHANGE —', currentStep, '→', Math.min(currentStep + 1, 4));
     setCurrentStep(prev => Math.min(prev + 1, 4));
   };
 
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  const prevStep = () => {
+    console.log('STEP CHANGE —', currentStep, '→', Math.max(currentStep - 1, 1));
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
 
   const removeFile = (id) => setFiles(prev => prev.filter(f => f.id !== id));
 
