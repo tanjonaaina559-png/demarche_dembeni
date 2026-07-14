@@ -141,9 +141,8 @@ const NewRequestComponent = () => {
           if (pdfRes?.data) {
             const fileName = `${newDoc?.documentType || 'doc'}-${newDoc?.referenceNumber || 'demo'}.pdf`;
             const file = new File([pdfRes.data], fileName, { type: 'application/pdf' });
-            // Use addFile to assign a stable unique id — raw File push causes removeChild crash
             addFile(file);
-            console.log('[QuickCreate] PDF ajouté avec succès aux pièces jointes.');
+            console.log("[QuickCreate] PDF ajouté avec succès aux pièces jointes.");
             console.log('STEP CHANGE — fichiers count:', files.length + 1);
           }
         } catch (pdfErr) {
@@ -232,7 +231,6 @@ const NewRequestComponent = () => {
           const doc = location.state.preloadedDoc;
           const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
           const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
-          // Use addFile to assign a stable unique id — raw File push causes removeChild crash
           addFile(file);
           console.log('[preloadedDoc] MOUNT — fichier pré-sélectionné ajouté:', file.name);
           showToast(`Document ajouté automatiquement: ${doc.documentType}`, 'success');
@@ -264,8 +262,8 @@ const NewRequestComponent = () => {
       const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
       const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
       addFile(file);
+      showToast(`Document ajouté automatiquement: ${doc.documentType}`, 'success');
       setShowDocModal(false);
-      showToast('Document ajouté avec succès.', 'success');
     } catch(e) {
       showToast("Erreur lors de l'ajout du document.", "error");
     }
@@ -442,17 +440,17 @@ const NewRequestComponent = () => {
         {renderStepIndicator()}
 
         <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* STEP 1 : Procedure Selection */}
-            {currentStep === 1 && (
+          {/* STEP 1 : Procedure Selection */}
+          {currentStep === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
               <div>
-                <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre d\u00e9marche</h2>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre démarche</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
                   {(procedures || []).map(p => (
                     <div
@@ -476,10 +474,18 @@ const NewRequestComponent = () => {
                   ))}
                 </div>
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {/* STEP 2 : Dynamic Form */}
-            {currentStep === 2 && (
+          {/* STEP 2 : Dynamic Form */}
+          {currentStep === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
               <div>
                 {selectedProcDetails ? (
                   <div>
@@ -531,10 +537,18 @@ const NewRequestComponent = () => {
                   <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la proc\u00e9dure...</div>
                 )}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {/* STEP 3 : Uploads */}
-            {currentStep === 3 && (
+          {/* STEP 3 : Uploads */}
+          {currentStep === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
               <div>
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pi\u00e8ces justificatives</h2>
 
@@ -618,11 +632,20 @@ const NewRequestComponent = () => {
                   </div>
                 )}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {/* STEP 4 : Confirmation */}
-            {currentStep === 4 && (() => {
-              const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+          {/* STEP 4 : Confirmation */}
+          {currentStep === 4 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {(() => {
+                const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
               const rawPdf = successData?.generatedPdf;
               // Si l'URL commence par http (Cloudinary), on l'utilise directement.
               // Sinon c'est un chemin local legacy → on préfixe l'API base.
@@ -685,7 +708,8 @@ const NewRequestComponent = () => {
                 </div>
               );
             })()}
-          </motion.div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
 
