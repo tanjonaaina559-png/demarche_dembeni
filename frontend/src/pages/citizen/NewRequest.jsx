@@ -449,19 +449,15 @@ const NewRequestComponent = () => {
         {renderStepIndicator()}
 
         <AnimatePresence mode="wait">
-          <motion.div
-            key={`step-${currentStep}`}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-            onAnimationStart={() => console.log(`MOUNT STEP${currentStep}`)}
-            onAnimationComplete={(def) => {
-              if (def.opacity === 0) console.log(`UNMOUNT STEP${currentStep}`);
-            }}
-          >
-            {/* STEP 1 : Procedure Selection */}
-            {currentStep === 1 && (
+          {currentStep === 1 && (
+            <motion.div
+              key="step-1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {console.log("STEP 1 RENDER")}
               <div>
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre démarche</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
@@ -487,10 +483,19 @@ const NewRequestComponent = () => {
                   ))}
                 </div>
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {/* STEP 2 : Dynamic Form */}
-            {currentStep === 2 && (
+          {/* STEP 2 : Dynamic Form */}
+          {currentStep === 2 && (
+            <motion.div
+              key="step-2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {console.log("STEP 2 RENDER")}
               <div>
                 {selectedProcDetails ? (
                   <div>
@@ -542,10 +547,19 @@ const NewRequestComponent = () => {
                   <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la procédure...</div>
                 )}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {/* STEP 3 : Uploads */}
-            {currentStep === 3 && (
+          {/* STEP 3 : Uploads */}
+          {currentStep === 3 && (
+            <motion.div
+              key="step-3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {console.log("STEP 3 RENDER")}
               <div>
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pièces justificatives</h2>
 
@@ -629,10 +643,19 @@ const NewRequestComponent = () => {
                   </div>
                 )}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {/* STEP 4 : Confirmation */}
-            {currentStep === 4 && (
+          {/* STEP 4 : Confirmation */}
+          {currentStep === 4 && (
+            <motion.div
+              key="step-4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {console.log("STEP 4 RENDER")}
               <div>
                 {(() => {
                   const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -697,8 +720,8 @@ const NewRequestComponent = () => {
                   );
                 })()}
               </div>
-            )}
-          </motion.div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
 
