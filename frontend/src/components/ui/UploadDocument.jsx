@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { UploadCloud, FileText, AlertCircle } from 'lucide-react';
 import './UploadDocument.css';
 
 const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/pdf' }) => {
@@ -24,27 +25,17 @@ const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/p
 
   const validateFile = (file) => {
     setError(null);
-    
-    // Check if acceptedType is a comma-separated list
     const acceptedTypesArray = acceptedType.split(',').map(t => t.trim().toLowerCase());
-    
     let isValidType = false;
     for (let type of acceptedTypesArray) {
       if (type.startsWith('.')) {
-        // It's an extension
-        if (file.name.toLowerCase().endsWith(type)) {
-          isValidType = true;
-          break;
-        }
+        if (file.name.toLowerCase().endsWith(type)) { isValidType = true; break; }
       } else {
-        // It's a mime type, maybe with wildcards
         if (type === file.type || type.startsWith(file.type.split('/')[0] + '/')) {
-          isValidType = true;
-          break;
+          isValidType = true; break;
         }
       }
     }
-
     if (!isValidType) {
       setError(`Le format du fichier n'est pas supporté. Accepté : ${acceptedType}`);
       return false;
@@ -82,7 +73,7 @@ const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/p
 
   return (
     <div className="upload-container">
-      <div 
+      <div
         className={`upload-zone ${dragActive ? 'drag-active' : ''} ${error ? 'has-error' : ''}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -90,16 +81,20 @@ const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/p
         onDrop={handleDrop}
         onClick={() => inputRef.current.click()}
       >
-        <input 
+        <input
           ref={inputRef}
-          type="file" 
-          accept={acceptedType} 
-          onChange={handleChange} 
-          style={{ display: 'none' }} 
+          type="file"
+          accept={acceptedType}
+          onChange={handleChange}
+          style={{ display: 'none' }}
         />
         <div className="upload-content">
+          {/* ✅ Lucide React icons — pure React SVG, no external DOM injection */}
           <div className="upload-icon-wrapper">
-            <i className={`fas ${file ? 'fa-file-pdf text-danger' : 'fa-cloud-upload-alt text-primary'}`}></i>
+            {file
+              ? <FileText size={36} color="#DC2626" />
+              : <UploadCloud size={36} color="#3B82F6" />
+            }
           </div>
           {file ? (
             <div className="file-selected">
@@ -114,7 +109,13 @@ const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/p
           )}
         </div>
       </div>
-      {error && <div className="upload-error"><i className="fas fa-exclamation-circle"></i> {error}</div>}
+      {error && (
+        <div className="upload-error">
+          {/* ✅ Lucide React icon — no Font Awesome DOM injection */}
+          <AlertCircle size={16} style={{ flexShrink: 0 }} />
+          {error}
+        </div>
+      )}
     </div>
   );
 };
