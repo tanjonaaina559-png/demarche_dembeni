@@ -573,7 +573,7 @@ const NewRequestComponent = () => {
                         if (!doc) return null;
                         const matches = getMatchingDemoDocs(doc?.name);
                         return (
-                          <li key={idx} style={{ marginBottom: '10px', background: 'white', padding: '10px', borderRadius: '8px', border: '1px dashed #A7F3D0' }}>
+                          <li key={doc?.name || idx} style={{ marginBottom: '10px', background: 'white', padding: '10px', borderRadius: '8px', border: '1px dashed #A7F3D0' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: (matches?.length || 0) > 0 ? '8px' : '0' }}>
                               <FileText size={16} color="#059669" />
                               <strong>{doc?.name}</strong>

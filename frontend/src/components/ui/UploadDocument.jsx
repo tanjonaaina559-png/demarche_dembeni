@@ -107,10 +107,10 @@ const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/p
               <p className="file-size">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
             </div>
           ) : (
-            <>
+            <div className="upload-placeholder">
               <p className="upload-text"><strong>Cliquez pour envoyer</strong> ou glissez-déposez</p>
               <p className="upload-subtext">PDF, JPG, PNG (Max. {maxSizeMB}MB)</p>
-            </>
+            </div>
           )}
         </div>
       </div>
