@@ -36,10 +36,8 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-// Apply CORS before any other middleware
+// Apply CORS before any other middleware — this also handles pre-flight OPTIONS for all routes
 app.use(cors(corsOptions));
-// Handle ALL pre-flight OPTIONS requests
-app.options('/(.*)', cors(corsOptions));
 
 // ─── 2. Security headers ─────────────────────────────────────────────────────────────
 app.use(helmet({
