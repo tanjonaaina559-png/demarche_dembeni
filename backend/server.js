@@ -39,7 +39,7 @@ const corsOptions = {
 // Apply CORS before any other middleware
 app.use(cors(corsOptions));
 // Handle ALL pre-flight OPTIONS requests
-app.options('*', cors(corsOptions));
+app.options('/(.*)', cors(corsOptions));
 
 // ─── 2. Security headers ─────────────────────────────────────────────────────────────
 app.use(helmet({
