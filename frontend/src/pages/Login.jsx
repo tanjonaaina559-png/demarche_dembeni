@@ -19,7 +19,20 @@ const Login = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       const defaultPath = user.role === 'admin' ? '/admin/dashboard' : '/citizen/dashboard';
-      const redirectPath = location.state?.from || defaultPath;
+      let redirectPath = defaultPath;
+      
+      const fromPath = location.state?.from?.pathname || location.state?.from;
+      if (typeof fromPath === 'string') {
+        // Prevent role mismatch redirects that would cause a 403
+        if (user.role === 'citizen' && fromPath.startsWith('/admin')) {
+          redirectPath = defaultPath;
+        } else if (user.role === 'admin' && fromPath.startsWith('/citizen')) {
+          redirectPath = defaultPath;
+        } else {
+          redirectPath = fromPath;
+        }
+      }
+
       navigate(redirectPath, { replace: true });
     }
   }, [isAuthenticated, user, navigate, location]);
