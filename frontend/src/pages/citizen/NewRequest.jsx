@@ -650,7 +650,7 @@ const NewRequestComponent = () => {
                   const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
                   const rawPdf = successData?.generatedPdf;
                   const pdfUrl = rawPdf
-                    ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.replace(/\/\/g, '/')}`)
+                    ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.split('//').join('/')}`)
                     : null;
                   return (
                     <div style={{ textAlign: 'center', padding: '20px 10px' }}>
