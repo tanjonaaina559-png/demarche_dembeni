@@ -102,21 +102,33 @@ const Citizens = () => {
   /* ── Validate (pending → approved) ── */
   const handleValidate = async (id) => {
     console.log('APPROVE CLICKED', id);
+    // Optimistic UI update
+    setCitizens(prev => prev.map(c => c._id === id ? { ...c, status: 'approved' } : c));
     try {
       await api.put(`/admin/citizens/${id}/validate`);
       showToast('Citoyen approuvé avec succès ✅');
       fetchCitizens();
-    } catch { showToast('Erreur lors de la validation', 'error'); }
+    } catch {
+      // Revert on error
+      setCitizens(prev => prev.map(c => c._id === id ? { ...c, status: 'pending' } : c));
+      showToast('Erreur lors de la validation', 'error');
+    }
   };
 
   /* ── Reject (pending → rejected) ── */
   const handleReject = async (id) => {
     console.log('REJECT CLICKED', id);
+    // Optimistic UI update
+    setCitizens(prev => prev.map(c => c._id === id ? { ...c, status: 'rejected' } : c));
     try {
       await api.put(`/admin/citizens/${id}/reject`);
-      showToast('Citoyen refusé');
+      showToast('Citoyen refusé', 'success'); // Make sure it uses a proper success toast
       fetchCitizens();
-    } catch { showToast('Erreur lors du refus', 'error'); }
+    } catch {
+      // Revert on error
+      setCitizens(prev => prev.map(c => c._id === id ? { ...c, status: 'pending' } : c));
+      showToast('Erreur lors du refus', 'error');
+    }
   };
 
   /* ── Delete ── */

@@ -44,11 +44,15 @@ const validateCitizen = async (req, res) => {
 
     await createNotification(user._id, 'Compte validé', 'Votre compte citoyen a été validé par l\'administration.', 'validation');
 
-    await emailService.sendEmail({
-      email: user.email,
-      subject: 'Compte validé - Mairie de Dembéni',
-      message: `Bonjour ${user.firstname || ''},\n\nVotre compte citoyen sur la plateforme de la Mairie de Dembéni a été validé avec succès.\nVous pouvez maintenant vous connecter et commencer vos démarches en ligne.\n\nCordialement,\nMairie de Dembéni`,
-    });
+    try {
+      await emailService.sendEmail({
+        email: user.email,
+        subject: 'Compte validé - Mairie de Dembéni',
+        message: `Bonjour ${user.firstname || ''},\n\nVotre compte citoyen sur la plateforme de la Mairie de Dembéni a été validé avec succès.\nVous pouvez maintenant vous connecter et commencer vos démarches en ligne.\n\nCordialement,\nMairie de Dembéni`,
+      });
+    } catch (emailErr) {
+      console.error('[AdminController] Erreur envoi email validation:', emailErr);
+    }
 
     res.json({ message: 'Citoyen validé', user });
   } catch (error) {
@@ -66,11 +70,15 @@ const rejectCitizen = async (req, res) => {
 
     await createNotification(user._id, 'Compte refusé', 'Votre demande d\'inscription a été refusée.', 'rejection');
 
-    await emailService.sendEmail({
-      email: user.email,
-      subject: "Mise à jour de votre request d'inscription",
-      message: `Bonjour ${user.firstname || ''},\n\nVotre request d'inscription sur la plateforme de la Mairie de Dembéni a été refusée pour le moment.\nVeuillez contacter la mairie pour plus d'informations.\n\nCordialement,\nMairie de Dembéni`,
-    });
+    try {
+      await emailService.sendEmail({
+        email: user.email,
+        subject: "Mise à jour de votre demande d'inscription",
+        message: `Bonjour ${user.firstname || ''},\n\nVotre demande d'inscription sur la plateforme de la Mairie de Dembéni a été refusée pour le moment.\nVeuillez contacter la mairie pour plus d'informations.\n\nCordialement,\nMairie de Dembéni`,
+      });
+    } catch (emailErr) {
+      console.error('[AdminController] Erreur envoi email refus:', emailErr);
+    }
 
     res.json({ message: 'Citoyen refusé', user });
   } catch (error) {
