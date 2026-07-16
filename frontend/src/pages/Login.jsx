@@ -28,17 +28,9 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      const data = await login(email, password);
-      if (data.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (data.role === 'citizen' && data.status === 'approved') {
-        const redirectPath = location.state?.from || '/citizen/dashboard';
-        navigate(redirectPath);
-      } else if (data.role === 'citizen' && data.status === 'pending') {
-        setError('Votre compte est en attente de validation par l\'administration.');
-      } else if (data.role === 'citizen' && data.status === 'rejected') {
-        setError('Votre compte a été refusé. Veuillez contacter l\'administration.');
-      }
+      await login(email, password);
+      // Navigation is now handled by the useEffect above
+      // This ensures AuthContext has fully propagated 'user' before we mount ProtectedRoute
     } catch (err) {
       const errorMsg = err.message || 'Erreur lors de la connexion';
       setError(errorMsg);
