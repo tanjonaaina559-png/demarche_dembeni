@@ -35,53 +35,78 @@ const updateCitizen = async (req, res) => {
 };
 
 const validateCitizen = async (req, res) => {
+  console.time(`[validateCitizen] ${req.params.id}`);
   try {
+    console.log(`[validateCitizen] Recherche citoyen: ${req.params.id}`);
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'Citoyen non trouvé' });
+    if (!user) return res.status(404).json({ message: 'Citoyen non trouv\u00e9' });
 
+    // 1. Mise à jour du statut en base — OP CRITIQUE, bloquante
     user.status = 'approved';
     await user.save();
+    console.log(`[validateCitizen] Statut mis à jour: approved`);
 
-    await createNotification(user._id, 'Compte validé', 'Votre compte citoyen a été validé par l\'administration.', 'validation');
+    // 2. Réponse immédiate au frontend — NE PAS attendre notification ni email
+    res.json({ message: 'Citoyen valid\u00e9', user });
+    console.timeEnd(`[validateCitizen] ${req.params.id}`);
 
-    try {
-      await emailService.sendEmail({
-        email: user.email,
-        subject: 'Compte validé - Mairie de Dembéni',
-        message: `Bonjour ${user.firstname || ''},\n\nVotre compte citoyen sur la plateforme de la Mairie de Dembéni a été validé avec succès.\nVous pouvez maintenant vous connecter et commencer vos démarches en ligne.\n\nCordialement,\nMairie de Dembéni`,
-      });
-    } catch (emailErr) {
-      console.error('[AdminController] Erreur envoi email validation:', emailErr);
-    }
-
-    res.json({ message: 'Citoyen validé', user });
+    // 3. Tâches secondaires NON-BLOQUANTES (fire-and-forget)
+    // Ces opérations s'exécutent après l'envoi de la réponse HTTP
+    setImmediate(async () => {
+      try {
+        await createNotification(user._id, 'Compte valid\u00e9', 'Votre compte citoyen a \u00e9t\u00e9 valid\u00e9 par l\'administration.', 'validation');
+      } catch (e) {
+        console.error('[validateCitizen] Erreur notification:', e.message);
+      }
+      try {
+        await emailService.sendEmail({
+          email: user.email,
+          subject: 'Compte valid\u00e9 - Mairie de Demb\u00e9ni',
+          message: `Bonjour ${user.firstname || ''},\n\nVotre compte citoyen a \u00e9t\u00e9 valid\u00e9 avec succ\u00e8s.\nVous pouvez maintenant vous connecter.\n\nCordialement,\nMairie de Demb\u00e9ni`,
+        });
+      } catch (e) {
+        console.error('[validateCitizen] Erreur email:', e.message);
+      }
+    });
   } catch (error) {
+    console.error('[validateCitizen] ERREUR:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 const rejectCitizen = async (req, res) => {
+  console.time(`[rejectCitizen] ${req.params.id}`);
   try {
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'Citoyen non trouvé' });
+    if (!user) return res.status(404).json({ message: 'Citoyen non trouv\u00e9' });
 
+    // 1. Mise à jour critique
     user.status = 'rejected';
     await user.save();
 
-    await createNotification(user._id, 'Compte refusé', 'Votre demande d\'inscription a été refusée.', 'rejection');
+    // 2. Réponse immédiate
+    res.json({ message: 'Citoyen refus\u00e9', user });
+    console.timeEnd(`[rejectCitizen] ${req.params.id}`);
 
-    try {
-      await emailService.sendEmail({
-        email: user.email,
-        subject: "Mise à jour de votre demande d'inscription",
-        message: `Bonjour ${user.firstname || ''},\n\nVotre demande d'inscription sur la plateforme de la Mairie de Dembéni a été refusée pour le moment.\nVeuillez contacter la mairie pour plus d'informations.\n\nCordialement,\nMairie de Dembéni`,
-      });
-    } catch (emailErr) {
-      console.error('[AdminController] Erreur envoi email refus:', emailErr);
-    }
-
-    res.json({ message: 'Citoyen refusé', user });
+    // 3. Tâches secondaires NON-BLOQUANTES
+    setImmediate(async () => {
+      try {
+        await createNotification(user._id, 'Compte refus\u00e9', 'Votre demande d\'inscription a \u00e9t\u00e9 refus\u00e9e.', 'rejection');
+      } catch (e) {
+        console.error('[rejectCitizen] Erreur notification:', e.message);
+      }
+      try {
+        await emailService.sendEmail({
+          email: user.email,
+          subject: "Mise \u00e0 jour de votre demande d'inscription",
+          message: `Bonjour ${user.firstname || ''},\n\nVotre demande d'inscription a \u00e9t\u00e9 refus\u00e9e.\nVeuillez contacter la mairie pour plus d'informations.\n\nCordialement,\nMairie de Demb\u00e9ni`,
+        });
+      } catch (e) {
+        console.error('[rejectCitizen] Erreur email:', e.message);
+      }
+    });
   } catch (error) {
+    console.error('[rejectCitizen] ERREUR:', error);
     res.status(500).json({ message: error.message });
   }
 };
