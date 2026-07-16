@@ -11,13 +11,13 @@ import Loader from './ui/Loader';
  * Pending/Rejected → affiche un écran dédié
  */
 const ProtectedRoute = ({ allowedRoles, requiredStatus }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading: loadingAuth, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // Loader pendant la vérification initiale
-  if (loading) {
+  // Loader pendant la vérification initiale ou si le profil utilisateur n'est pas encore complet
+  if (loadingAuth || (isAuthenticated && !user?.role)) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f8fafc' }}>
         <Loader />
       </div>
     );
@@ -60,7 +60,7 @@ const ProtectedRoute = ({ allowedRoles, requiredStatus }) => {
       return (
         <div style={{ textAlign: 'center', maxWidth: '600px', margin: '120px auto', padding: '40px', background: 'var(--bg-card)', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🚫</div>
-          <h2 style={{ color: 'var(--rouge-600)', marginBottom: '15px' }}>Accès refusé</h2>
+          <h2 style={{ color: 'var(--rouge-600)', marginBottom: '15px' }}>Demande refusée</h2>
           <p style={{ color: 'var(--gris-500)', lineHeight: '1.7' }}>
             Votre compte a été refusé par l'administration de Dembéni.
             <br />Veuillez contacter la mairie pour plus d'informations.
@@ -71,6 +71,21 @@ const ProtectedRoute = ({ allowedRoles, requiredStatus }) => {
         </div>
       );
     }
+
+    // Si le compte est suspendu ou autre statut non reconnu
+    return (
+      <div style={{ textAlign: 'center', maxWidth: '600px', margin: '120px auto', padding: '40px', background: 'var(--bg-card)', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '20px' }}>⚠️</div>
+        <h2 style={{ color: 'var(--rouge-600)', marginBottom: '15px' }}>Compte Inactif</h2>
+        <p style={{ color: 'var(--gris-500)', lineHeight: '1.7' }}>
+          Votre compte n'est pas autorisé à accéder à cet espace. (Statut actuel: {user.status})
+          <br />Veuillez contacter l'administration de Dembéni.
+        </p>
+        <a href="/contact" className="btn btn-secondary" style={{ marginTop: '25px', display: 'inline-flex' }}>
+          Contacter la mairie
+        </a>
+      </div>
+    );
   }
 
   return <Outlet />;
