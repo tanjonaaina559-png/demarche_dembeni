@@ -37,7 +37,6 @@ const NewRequestComponent = () => {
   const searchParams = new URLSearchParams(location.search);
   const paramProcId = searchParams.get('procedureId');
 
-  console.log("RENDER STEP", currentStep);
 
   // ── Debug lifecycle ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -448,17 +447,16 @@ const NewRequestComponent = () => {
         
         {renderStepIndicator()}
 
-        <AnimatePresence mode="wait">
-          {currentStep === 1 && (
-            <motion.div
-              key="step-1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {console.log("STEP 1 RENDER")}
-              <div>
+        <AnimatePresence mode="wait" initial={false}>
+            {/* ── STEP 1 : Sélection de la démarche ── */}
+            {currentStep === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre démarche</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
                   {(procedures || []).map(p => (
@@ -482,21 +480,18 @@ const NewRequestComponent = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {/* STEP 2 : Dynamic Form */}
-          {currentStep === 2 && (
-            <motion.div
-              key="step-2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {console.log("STEP 2 RENDER")}
-              <div>
+            {/* ── STEP 2 : Formulaire ── */}
+            {currentStep === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
                 {selectedProcDetails ? (
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', background: '#F9FAFB', padding: '12px', borderRadius: '8px' }}>
@@ -519,7 +514,7 @@ const NewRequestComponent = () => {
                             else if (nameLower.includes('description') || nameLower.includes('motif') || nameLower.includes('commentaire')) { inputType = 'textarea'; }
                           }
                           return (
-                            <div key={idx} style={{ gridColumn: inputType === 'textarea' ? '1 / -1' : 'auto' }}>
+                            <div key={field?.name || idx} style={{ gridColumn: inputType === 'textarea' ? '1 / -1' : 'auto' }}>
                               <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
                                 {field?.label} {field?.required && <span style={{ color: '#DC2626' }}>*</span>}
                               </label>
@@ -546,21 +541,18 @@ const NewRequestComponent = () => {
                 ) : (
                   <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la procédure...</div>
                 )}
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {/* STEP 3 : Uploads */}
-          {currentStep === 3 && (
-            <motion.div
-              key="step-3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {console.log("STEP 3 RENDER")}
-              <div>
+            {/* ── STEP 3 : Pièces justificatives ── */}
+            {currentStep === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pièces justificatives</h2>
 
                 {(selectedProcDetails?.documents || []).length > 0 ? (
@@ -592,7 +584,7 @@ const NewRequestComponent = () => {
                             {(matches?.length || 0) > 0 && (
                               <div style={{ paddingLeft: '24px' }}>
                                 {(matches || []).map(m => (
-                                  <button key={m?._id} type="button" onClick={() => handleSelectDemoDoc(m)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '8px', marginTop: '4px' }}>
+                                  <button key={m?._id || m?.documentType} type="button" onClick={() => handleSelectDemoDoc(m)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '8px', marginTop: '4px' }}>
                                     ✓ Utiliser {m?.documentType} enregistré
                                   </button>
                                 ))}
@@ -642,26 +634,23 @@ const NewRequestComponent = () => {
                     <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#6B7280', marginTop: '8px' }}>Envoi en cours... {uploadProgress}%</p>
                   </div>
                 )}
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {/* STEP 4 : Confirmation */}
-          {currentStep === 4 && (
-            <motion.div
-              key="step-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {console.log("STEP 4 RENDER")}
-              <div>
+            {/* ── STEP 4 : Confirmation ── */}
+            {currentStep === 4 && (
+              <motion.div
+                key="step4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
                 {(() => {
                   const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
                   const rawPdf = successData?.generatedPdf;
                   const pdfUrl = rawPdf
-                    ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.replace(/\/g, '/')}`)
+                    ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.replace(/\/\/g, '/')}`)
                     : null;
                   return (
                     <div style={{ textAlign: 'center', padding: '20px 10px' }}>
@@ -670,8 +659,6 @@ const NewRequestComponent = () => {
                       </div>
                       <h2 style={{ color: '#111827', fontSize: '1.7rem', marginBottom: '8px' }}>Demande envoyée avec succès&nbsp;!</h2>
                       <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '24px' }}>Votre dossier a bien été transmis aux services de la mairie.</p>
-
-                      {/* Reference box */}
                       <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 24px', maxWidth: '380px', margin: '0 auto 28px' }}>
                         <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Numéro de suivi</p>
                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '2px', fontFamily: 'monospace' }}>
@@ -679,8 +666,6 @@ const NewRequestComponent = () => {
                         </div>
                         <p style={{ fontSize: '0.78rem', color: '#9CA3AF', margin: '4px 0 0' }}>Conservez ce numéro pour le suivi de votre demande</p>
                       </div>
-
-                      {/* PDF Preview */}
                       {pdfUrl ? (
                         <div style={{ marginBottom: 24 }}>
                           <h4 style={{ fontSize: '1rem', color: '#1F2937', marginBottom: 12 }}>📄 Votre document généré</h4>
@@ -702,8 +687,6 @@ const NewRequestComponent = () => {
                           ℹ️ Aucun template PDF officiel disponible pour cette procédure. Un récépissé standard sera généré par la mairie.
                         </div>
                       )}
-
-                      {/* Actions */}
                       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           Suivre ma demande <ArrowRight size={18} />
@@ -719,13 +702,9 @@ const NewRequestComponent = () => {
                     </div>
                   );
                 })()}
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
         </AnimatePresence>
-
-
-
 
         {/* Navigation Buttons */}
         {currentStep < 4 && (

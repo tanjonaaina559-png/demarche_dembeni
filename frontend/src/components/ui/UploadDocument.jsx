@@ -9,8 +9,8 @@ const UploadDocument = ({ onUpload, maxSizeMB = 5, acceptedType = 'application/p
   const inputRef = useRef(null);
 
   React.useEffect(() => {
-    console.log("MOUNT COMPONENT - UploadDocument");
-    return () => console.log("UNMOUNT COMPONENT - UploadDocument");
+    console.log("STEP3 COMPONENT MOUNT", "UploadDocument");
+    return () => console.log("STEP3 COMPONENT UNMOUNT", "UploadDocument");
   }, []);
 
   const handleDrag = (e) => {
