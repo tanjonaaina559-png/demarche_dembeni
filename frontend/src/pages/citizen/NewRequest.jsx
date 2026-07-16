@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -14,7 +14,7 @@ import './NewRequest.css';
 import { getDocumentTemplate } from '../../utils/documentTemplates';
 import ErrorBoundary from '../../components/ErrorBoundary';
 
-// Style constants — defined here to be accessible throughout the component
+// Style constants â€” defined here to be accessible throughout the component
 const lStyle = { display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '5px' };
 const iStyle = { width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB' };
 const inputStyle = {
@@ -23,9 +23,9 @@ const inputStyle = {
 };
 
 const STEPS = [
-  { id: 1, title: 'Démarche' },
+  { id: 1, title: 'DÃ©marche' },
   { id: 2, title: 'Formulaire' },
-  { id: 3, title: 'Pièces jointes' },
+  { id: 3, title: 'PiÃ¨ces jointes' },
   { id: 4, title: 'Confirmation' }
 ];
 
@@ -38,10 +38,10 @@ const NewRequestComponent = () => {
   const paramProcId = searchParams.get('procedureId');
 
 
-  // ── Debug lifecycle ──────────────────────────────────────────────────────
+  // â”€â”€ Debug lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
-    console.log('MOUNT — NewRequestComponent');
-    return () => console.log('UNMOUNT — NewRequestComponent');
+    console.log('MOUNT â€” NewRequestComponent');
+    return () => console.log('UNMOUNT â€” NewRequestComponent');
   }, []);
 
   const [procedures, setProcedures] = useState([]);
@@ -50,7 +50,7 @@ const NewRequestComponent = () => {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedProcedure, setSelectedProcedure] = useState('');
-  // files is now [{id: string, file: File}] — stable keys prevent removeChild on removal
+  // files is now [{id: string, file: File}] â€” stable keys prevent removeChild on removal
   const [files, setFiles] = useState([]);
   const fileIdCounter = React.useRef(0);
   const addFile = (file) => {
@@ -101,7 +101,7 @@ const NewRequestComponent = () => {
 
   const handleQuickCreate = async (e) => {
     if (e?.preventDefault) e.preventDefault();
-    console.log("[QuickCreate] Démarrage process...");
+    console.log("[QuickCreate] DÃ©marrage process...");
     
     try {
       const template = getDocumentTemplate(quickDocType);
@@ -127,28 +127,28 @@ const NewRequestComponent = () => {
       };
       
       const res = await api.post('/citizen-documents', payload);
-      console.log("[QuickCreate] Réponse API POST :", res?.data);
+      console.log("[QuickCreate] RÃ©ponse API POST :", res?.data);
       
       const newDoc = res?.data?.document;
-      if (!newDoc) throw new Error("Document introuvable dans la réponse API");
+      if (!newDoc) throw new Error("Document introuvable dans la rÃ©ponse API");
       
       if (res?.data?.pdfError) {
-        showToast('Document créé sans PDF', 'warning');
+        showToast('Document crÃ©Ã© sans PDF', 'warning');
       } else {
-        showToast('Création réussie. Ajout du PDF en cours...', 'success');
+        showToast('CrÃ©ation rÃ©ussie. Ajout du PDF en cours...', 'success');
         try {
-          console.log("[QuickCreate] Téléchargement du PDF...");
+          console.log("[QuickCreate] TÃ©lÃ©chargement du PDF...");
           const pdfRes = await api.get(`/citizen-documents/pdf/${newDoc?._id}`, { responseType: 'blob' });
           if (pdfRes?.data) {
             const fileName = `${newDoc?.documentType || 'doc'}-${newDoc?.referenceNumber || 'demo'}.pdf`;
             const file = new File([pdfRes.data], fileName, { type: 'application/pdf' });
             addFile(file);
-            console.log("[QuickCreate] PDF ajouté avec succès aux pièces jointes.");
-            console.log('STEP CHANGE — fichiers count:', files.length + 1);
+            console.log("[QuickCreate] PDF ajoutÃ© avec succÃ¨s aux piÃ¨ces jointes.");
+            console.log('STEP CHANGE â€” fichiers count:', files.length + 1);
           }
         } catch (pdfErr) {
-          console.error("[QuickCreate] Erreur récupération PDF:", pdfErr);
-          showToast("Document créé, mais récupération du PDF échouée.", "error");
+          console.error("[QuickCreate] Erreur rÃ©cupÃ©ration PDF:", pdfErr);
+          showToast("Document crÃ©Ã©, mais rÃ©cupÃ©ration du PDF Ã©chouÃ©e.", "error");
         }
       }
       
@@ -156,14 +156,14 @@ const NewRequestComponent = () => {
       setShowQuickCreator(false);
       
       if (!res?.data?.pdfError) {
-        showToast('Document généré et ajouté avec succès', 'success');
+        showToast('Document gÃ©nÃ©rÃ© et ajoutÃ© avec succÃ¨s', 'success');
       }
     } catch (err) {
       console.error("[QuickCreate] Erreur FATALE :", err);
-      showToast(err?.message || "Une erreur inattendue a empêché la génération", "error");
+      showToast(err?.message || "Une erreur inattendue a empÃªchÃ© la gÃ©nÃ©ration", "error");
     } finally {
       setSubmittingQuick(false);
-      console.log("[QuickCreate] Processus terminé.");
+      console.log("[QuickCreate] Processus terminÃ©.");
     }
   };
 
@@ -198,11 +198,11 @@ const NewRequestComponent = () => {
               initializeFormData(procRes.data);
               setCurrentStep(2);
             } else {
-              setError("Procédure introuvable");
+              setError("ProcÃ©dure introuvable");
             }
           } catch (e) {
-            setError("Procédure introuvable");
-            showToast("Procédure introuvable", "error");
+            setError("ProcÃ©dure introuvable");
+            showToast("ProcÃ©dure introuvable", "error");
           }
         } else {
           try {
@@ -210,7 +210,7 @@ const NewRequestComponent = () => {
             const activeProcedures = Array.isArray(procRes.data) ? procRes.data.filter(p => p?.isActive || p?.active !== false) : [];
             setProcedures(activeProcedures);
           } catch (e) {
-            setError("Erreur de chargement des procédures");
+            setError("Erreur de chargement des procÃ©dures");
           }
         }
       } catch (e) {
@@ -236,11 +236,11 @@ const NewRequestComponent = () => {
           const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
           const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
           addFile(file);
-          console.log('[preloadedDoc] MOUNT — fichier pré-sélectionné ajouté:', file.name);
-          showToast(`Document ajouté automatiquement: ${doc.documentType}`, 'success');
+          console.log('[preloadedDoc] MOUNT â€” fichier prÃ©-sÃ©lectionnÃ© ajoutÃ©:', file.name);
+          showToast(`Document ajoutÃ© automatiquement: ${doc.documentType}`, 'success');
           navigate(location.pathname + location.search, { replace: true, state: {} });
         } catch(e) {
-          showToast('Erreur lors du chargement du document pré-sélectionné', 'error');
+          showToast('Erreur lors du chargement du document prÃ©-sÃ©lectionnÃ©', 'error');
         }
       };
       loadDoc();
@@ -265,11 +265,11 @@ const NewRequestComponent = () => {
 
   const handleSelectDemoDoc = async (doc) => {
     try {
-      showToast(`Téléchargement de ${doc.documentType}...`, 'success');
+      showToast(`TÃ©lÃ©chargement de ${doc.documentType}...`, 'success');
       const res = await api.get(`/citizen-documents/pdf/${doc._id}`, { responseType: 'blob' });
       const file = new File([res.data], `${doc.documentType}-${doc.referenceNumber}.pdf`, { type: 'application/pdf' });
       addFile(file);
-      showToast(`Document ajouté automatiquement: ${doc.documentType}`, 'success');
+      showToast(`Document ajoutÃ© automatiquement: ${doc.documentType}`, 'success');
       setShowDocModal(false);
     } catch(e) {
       showToast("Erreur lors de l'ajout du document.", "error");
@@ -282,8 +282,8 @@ const NewRequestComponent = () => {
     return (citizenDocs || []).filter(demoDoc => {
       const typeLower = demoDoc?.documentType?.toLowerCase() || '';
       if (nameLower.includes(typeLower) || typeLower.includes(nameLower)) return true;
-      if (nameLower.includes('identité') && (typeLower.includes('cni') || typeLower.includes('carte nationale'))) return true;
-      if (nameLower.includes('cni') && typeLower.includes('identité')) return true;
+      if (nameLower.includes('identitÃ©') && (typeLower.includes('cni') || typeLower.includes('carte nationale'))) return true;
+      if (nameLower.includes('cni') && typeLower.includes('identitÃ©')) return true;
       if (nameLower.includes('domicile') && typeLower.includes('domicile')) return true;
       if (nameLower.includes('naissance') && typeLower.includes('naissance')) return true;
       return false;
@@ -306,9 +306,9 @@ const NewRequestComponent = () => {
       let val = '';
       const nameLower = f?.name?.toLowerCase() || '';
       if (nameLower === 'nom' || nameLower === 'lastname') val = user?.lastname || user?.nom || '';
-      else if (nameLower === 'prenom' || nameLower === 'firstname' || nameLower === 'prénom') val = user?.firstname || user?.prenom || '';
+      else if (nameLower === 'prenom' || nameLower === 'firstname' || nameLower === 'prÃ©nom') val = user?.firstname || user?.prenom || '';
       else if (nameLower === 'email') val = user?.email || '';
-      else if (nameLower === 'telephone' || nameLower === 'téléphone' || nameLower === 'phone') val = user?.phone || user?.telephone || '';
+      else if (nameLower === 'telephone' || nameLower === 'tÃ©lÃ©phone' || nameLower === 'phone') val = user?.phone || user?.telephone || '';
       else if (nameLower === 'adresse' || nameLower === 'address') val = user?.address || user?.adresse || '';
       else if (nameLower === 'cin' || nameLower === 'cni') val = user?.CIN || user?.cin || '';
       else if (nameLower === 'datenaissance' || nameLower === 'date de naissance') val = user?.dateNaissance ? user.dateNaissance.split('T')[0] : '';
@@ -328,7 +328,7 @@ const NewRequestComponent = () => {
 
   const nextStep = () => {
     if (currentStep === 1 && !selectedProcedure) {
-      showToast('Veuillez sélectionner une démarche.', 'error');
+      showToast('Veuillez sÃ©lectionner une dÃ©marche.', 'error');
       return;
     }
     if (currentStep === 2) {
@@ -338,13 +338,13 @@ const NewRequestComponent = () => {
         return;
       }
     }
-    console.log('STEP CHANGE —', currentStep, '→', Math.min(currentStep + 1, 4));
+    console.log('STEP CHANGE â€”', currentStep, 'â†’', Math.min(currentStep + 1, 4));
     console.log("NEXT STEP CLICKED");
     setCurrentStep(prev => Math.min(prev + 1, 4));
   };
 
   const prevStep = () => {
-    console.log('STEP CHANGE —', currentStep, '→', Math.max(currentStep - 1, 1));
+    console.log('STEP CHANGE â€”', currentStep, 'â†’', Math.max(currentStep - 1, 1));
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
@@ -424,10 +424,10 @@ const NewRequestComponent = () => {
           <div style={{ width: '80px', height: '80px', background: '#FEE2E2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#DC2626' }}>
             <X size={40} />
           </div>
-          <h2 style={{ color: '#111827', fontSize: '1.8rem', marginBottom: '10px' }}>Procédure introuvable</h2>
-          <p style={{ color: '#6B7280', fontSize: '1.1rem', marginBottom: '30px' }}>La démarche que vous avez demandée n'existe pas ou n'est plus disponible.</p>
+          <h2 style={{ color: '#111827', fontSize: '1.8rem', marginBottom: '10px' }}>ProcÃ©dure introuvable</h2>
+          <p style={{ color: '#6B7280', fontSize: '1.1rem', marginBottom: '30px' }}>La dÃ©marche que vous avez demandÃ©e n'existe pas ou n'est plus disponible.</p>
           <Link to="/demarches" className="btn btn-primary" style={{ padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-            <ArrowLeft size={18} /> Retour aux démarches
+            <ArrowLeft size={18} /> Retour aux dÃ©marches
           </Link>
         </div>
       </div>
@@ -440,7 +440,7 @@ const NewRequestComponent = () => {
       
       <div style={{ marginBottom: '30px', marginTop: '20px' }}>
         <h1 style={{ color: '#111827', margin: '0 0 10px', fontSize: '2rem' }}>Nouvelle demande</h1>
-        <p style={{ color: '#6B7280', margin: 0 }}>Effectuez vos démarches administratives directement en ligne.</p>
+        <p style={{ color: '#6B7280', margin: 0 }}>Effectuez vos dÃ©marches administratives directement en ligne.</p>
       </div>
 
       <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '30px', border: '1px solid #F3F4F6' }}>
@@ -448,16 +448,17 @@ const NewRequestComponent = () => {
         {renderStepIndicator()}
 
         <AnimatePresence mode="wait" initial={false}>
-            {/* ── STEP 1 : Sélection de la démarche ── */}
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.15 }}
+          >
+            {/* â”€â”€ STEP 1 : SÃ©lection de la dÃ©marche â”€â”€ */}
             {currentStep === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.15 }}
-              >
-                <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre démarche</h2>
+              <div>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre dÃ©marche</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
                   {(procedures || []).map(p => (
                     <div
@@ -475,23 +476,17 @@ const NewRequestComponent = () => {
                       </div>
                       <div>
                         <h4 style={{ margin: '0 0 4px', color: '#111827', fontSize: '1rem' }}>{p?.title || 'Sans titre'}</h4>
-                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#6B7280' }}>Délai estimé: {p?.duration || 'Variable'}</p>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#6B7280' }}>DÃ©lai estimÃ©: {p?.duration || 'Variable'}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
-            {/* ── STEP 2 : Formulaire ── */}
+            {/* â”€â”€ STEP 2 : Formulaire â”€â”€ */}
             {currentStep === 2 && (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.15 }}
-              >
+              <div>
                 {selectedProcDetails ? (
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', background: '#F9FAFB', padding: '12px', borderRadius: '8px' }}>
@@ -506,11 +501,11 @@ const NewRequestComponent = () => {
                           let inputType = field?.type || 'text';
                           let extraProps = {};
                           if (inputType === 'text') {
-                            if (nameLower.includes('téléphone') || nameLower.includes('telephone')) { inputType = 'tel'; extraProps = { pattern: '[0-9]*', maxLength: 20 }; }
+                            if (nameLower.includes('tÃ©lÃ©phone') || nameLower.includes('telephone')) { inputType = 'tel'; extraProps = { pattern: '[0-9]*', maxLength: 20 }; }
                             else if (nameLower.includes('email')) { inputType = 'email'; }
                             else if (nameLower.includes('date')) { inputType = 'date'; }
-                            else if (nameLower.includes('age') || nameLower.includes('âge')) { inputType = 'number'; extraProps = { min: 0, max: 120 }; }
-                            else if (nameLower.includes('nombre') || nameLower.includes('quantité')) { inputType = 'number'; extraProps = { min: 1 }; }
+                            else if (nameLower.includes('age') || nameLower.includes('Ã¢ge')) { inputType = 'number'; extraProps = { min: 0, max: 120 }; }
+                            else if (nameLower.includes('nombre') || nameLower.includes('quantitÃ©')) { inputType = 'number'; extraProps = { min: 1 }; }
                             else if (nameLower.includes('description') || nameLower.includes('motif') || nameLower.includes('commentaire')) { inputType = 'textarea'; }
                           }
                           return (
@@ -522,7 +517,7 @@ const NewRequestComponent = () => {
                                 <textarea name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} rows="3" style={inputStyle} onInvalid={e => e.target.setCustomValidity('Ce champ est obligatoire')} onInput={e => e.target.setCustomValidity('')} {...extraProps} />
                               ) : inputType === 'select' ? (
                                 <select name={field?.name} value={formData[field?.name] || ''} onChange={handleFormDataChange} required={field?.required} style={inputStyle} onInvalid={e => e.target.setCustomValidity('Ce champ est obligatoire')} onInput={e => e.target.setCustomValidity('')}>
-                                  <option value="">Sélectionner...</option>
+                                  <option value="">SÃ©lectionner...</option>
                                   {(field?.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                 </select>
                               ) : (
@@ -534,26 +529,20 @@ const NewRequestComponent = () => {
                       </div>
                     ) : (
                       <div style={{ textAlign: 'center', padding: '30px', color: '#6B7280' }}>
-                        Aucune information supplémentaire n'est requise pour cette démarche. Cliquez sur Suivant.
+                        Aucune information supplÃ©mentaire n'est requise pour cette dÃ©marche. Cliquez sur Suivant.
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la procédure...</div>
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la procÃ©dure...</div>
                 )}
-              </motion.div>
+              </div>
             )}
 
-            {/* ── STEP 3 : Pièces justificatives ── */}
+            {/* â”€â”€ STEP 3 : PiÃ¨ces justificatives â”€â”€ */}
             {currentStep === 3 && (
-              <motion.div
-                key="step3"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.15 }}
-              >
-                <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>Pièces justificatives</h2>
+              <div>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>PiÃ¨ces justificatives</h2>
 
                 {(selectedProcDetails?.documents || []).length > 0 ? (
                   <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
@@ -575,9 +564,9 @@ const NewRequestComponent = () => {
                             </div>
                             {(matches?.length || 0) === 0 && doc?.required && (
                               <div style={{ paddingLeft: '24px', marginTop: '8px' }}>
-                                <p style={{ margin: '0 0 5px', fontSize: '0.8rem', color: '#6B7280' }}>Je ne possède pas encore ce document :</p>
+                                <p style={{ margin: '0 0 5px', fontSize: '0.8rem', color: '#6B7280' }}>Je ne possÃ¨de pas encore ce document :</p>
                                 <button type="button" onClick={() => openQuickCreator(doc.name)} style={{ background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE', padding: '6px 12px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                  <Plus size={16} /> Créer rapidement
+                                  <Plus size={16} /> CrÃ©er rapidement
                                 </button>
                               </div>
                             )}
@@ -585,7 +574,7 @@ const NewRequestComponent = () => {
                               <div style={{ paddingLeft: '24px' }}>
                                 {(matches || []).map(m => (
                                   <button key={m?._id || m?.documentType} type="button" onClick={() => handleSelectDemoDoc(m)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, marginRight: '8px', marginTop: '4px' }}>
-                                    ✓ Utiliser {m?.documentType} enregistré
+                                    âœ“ Utiliser {m?.documentType} enregistrÃ©
                                   </button>
                                 ))}
                               </div>
@@ -597,7 +586,7 @@ const NewRequestComponent = () => {
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '30px', color: '#6B7280', background: '#F9FAFB', borderRadius: '8px', marginBottom: '20px' }}>
-                    Aucune pièce justificative demandée pour cette démarche.
+                    Aucune piÃ¨ce justificative demandÃ©e pour cette dÃ©marche.
                   </div>
                 )}
 
@@ -605,13 +594,13 @@ const NewRequestComponent = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                   <button type="button" onClick={openDocModal} style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FileText size={18} /> Utiliser mes documents enregistrés
+                    <FileText size={18} /> Utiliser mes documents enregistrÃ©s
                   </button>
                 </div>
 
                 {(files?.length || 0) > 0 && (
                   <div style={{ marginTop: '20px' }}>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Documents prêts à l'envoi ({files?.length || 0})</h4>
+                    <h4 style={{ fontSize: '1rem', marginBottom: '10px' }}>Documents prÃªts Ã  l'envoi ({files?.length || 0})</h4>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {(files || []).map(({ id, file }) => (
                         <li key={id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', padding: '10px 15px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
@@ -619,7 +608,7 @@ const NewRequestComponent = () => {
                             <FileText size={18} color="#6B7280" />
                             <span>{file?.name} ({((file?.size || 0) / 1024 / 1024).toFixed(2)} Mo)</span>
                           </div>
-                          <button type="button" onClick={() => removeFile(id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}>✖</button>
+                          <button type="button" onClick={() => removeFile(id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}>âœ–</button>
                         </li>
                       ))}
                     </ul>
@@ -634,76 +623,67 @@ const NewRequestComponent = () => {
                     <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#6B7280', marginTop: '8px' }}>Envoi en cours... {uploadProgress}%</p>
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
 
-            {/* ── STEP 4 : Confirmation ── */}
-            {currentStep === 4 && (
-              <motion.div
-                key="step4"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.15 }}
-              >
-                {(() => {
-                  const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-                  const rawPdf = successData?.generatedPdf;
-                  const pdfUrl = rawPdf
-                    ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.split('//').join('/')}`)
-                    : null;
-                  return (
-                    <div style={{ textAlign: 'center', padding: '20px 10px' }}>
-                      <div style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white', boxShadow: '0 8px 20px rgba(16,185,129,0.35)' }}>
-                        <CheckCircle size={36} />
-                      </div>
-                      <h2 style={{ color: '#111827', fontSize: '1.7rem', marginBottom: '8px' }}>Demande envoyée avec succès&nbsp;!</h2>
-                      <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '24px' }}>Votre dossier a bien été transmis aux services de la mairie.</p>
-                      <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 24px', maxWidth: '380px', margin: '0 auto 28px' }}>
-                        <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Numéro de suivi</p>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '2px', fontFamily: 'monospace' }}>
-                          {successData?.referenceNumber || successData?._id || '---'}
-                        </div>
-                        <p style={{ fontSize: '0.78rem', color: '#9CA3AF', margin: '4px 0 0' }}>Conservez ce numéro pour le suivi de votre demande</p>
-                      </div>
-                      {pdfUrl ? (
-                        <div style={{ marginBottom: 24 }}>
-                          <h4 style={{ fontSize: '1rem', color: '#1F2937', marginBottom: 12 }}>📄 Votre document généré</h4>
-                          <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', maxWidth: 700, margin: '0 auto 16px', height: 400, background: '#F9FAFB' }}>
-                            <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 20 }}>
-                                <FileText size={40} color="#D1D5DB" />
-                                <p style={{ color: '#6B7280', margin: 0 }}>Aperçu non disponible dans ce navigateur.</p>
-                                <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
-                                  style={{ background: '#3B82F6', color: 'white', padding: '8px 18px', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
-                                  Ouvrir dans un nouvel onglet
-                                </a>
-                              </div>
-                            </object>
+            {/* â”€â”€ STEP 4 : Confirmation â”€â”€ */}
+            {currentStep === 4 && (() => {
+              const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+              const rawPdf = successData?.generatedPdf;
+              const pdfUrl = rawPdf
+                ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.split('//').join('/')}`)
+                : null;
+              return (
+                <div style={{ textAlign: 'center', padding: '20px 10px' }}>
+                  <div style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white', boxShadow: '0 8px 20px rgba(16,185,129,0.35)' }}>
+                    <CheckCircle size={36} />
+                  </div>
+                  <h2 style={{ color: '#111827', fontSize: '1.7rem', marginBottom: '8px' }}>Demande envoyÃ©e avec succÃ¨s&nbsp;!</h2>
+                  <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '24px' }}>Votre dossier a bien Ã©tÃ© transmis aux services de la mairie.</p>
+                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 24px', maxWidth: '380px', margin: '0 auto 28px' }}>
+                    <p style={{ fontSize: '0.82rem', color: '#6B7280', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NumÃ©ro de suivi</p>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--vert-700)', letterSpacing: '2px', fontFamily: 'monospace' }}>
+                      {successData?.referenceNumber || successData?._id || '---'}
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: '#9CA3AF', margin: '4px 0 0' }}>Conservez ce numÃ©ro pour le suivi de votre demande</p>
+                  </div>
+                  {pdfUrl ? (
+                    <div style={{ marginBottom: 24 }}>
+                      <h4 style={{ fontSize: '1rem', color: '#1F2937', marginBottom: 12 }}>ðŸ“„ Votre document gÃ©nÃ©rÃ©</h4>
+                      <div style={{ border: '1px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', maxWidth: 700, margin: '0 auto 16px', height: 400, background: '#F9FAFB' }}>
+                        <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 20 }}>
+                            <FileText size={40} color="#D1D5DB" />
+                            <p style={{ color: '#6B7280', margin: 0 }}>AperÃ§u non disponible dans ce navigateur.</p>
+                            <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                              style={{ background: '#3B82F6', color: 'white', padding: '8px 18px', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+                              Ouvrir dans un nouvel onglet
+                            </a>
                           </div>
-                        </div>
-                      ) : (
-                        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 20px', maxWidth: 480, margin: '0 auto 24px', fontSize: '0.9rem', color: '#78350F' }}>
-                          ℹ️ Aucun template PDF officiel disponible pour cette procédure. Un récépissé standard sera généré par la mairie.
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          Suivre ma demande <ArrowRight size={18} />
-                        </Link>
-                        {pdfUrl && (
-                          <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download
-                            className="btn btn-outline"
-                            style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <FileText size={18} /> Télécharger le PDF
-                          </a>
-                        )}
+                        </object>
                       </div>
                     </div>
-                  );
-                })()}
-              </motion.div>
-            )}
+                  ) : (
+                    <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 20px', maxWidth: 480, margin: '0 auto 24px', fontSize: '0.9rem', color: '#78350F' }}>
+                      â„¹ï¸ Aucun template PDF officiel disponible pour cette procÃ©dure. Un rÃ©cÃ©pissÃ© standard sera gÃ©nÃ©rÃ© par la mairie.
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <Link to="/mes-demandes" className="btn btn-primary" style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      Suivre ma demande <ArrowRight size={18} />
+                    </Link>
+                    {pdfUrl && (
+                      <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download
+                        className="btn btn-outline"
+                        style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FileText size={18} /> TÃ©lÃ©charger le PDF
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+          </motion.div>
         </AnimatePresence>
 
         {/* Navigation Buttons */}
@@ -716,7 +696,7 @@ const NewRequestComponent = () => {
               className="btn btn-outline" 
               style={{ padding: '10px 20px', opacity: currentStep === 1 ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <ArrowLeft size={16} /> Précédent
+              <ArrowLeft size={16} /> PrÃ©cÃ©dent
             </button>
 
             {currentStep < 3 ? (
@@ -757,7 +737,7 @@ const NewRequestComponent = () => {
               style={{ background: 'white', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#111827' }}>Sélectionner un document (Démo)</h3>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#111827' }}>SÃ©lectionner un document (DÃ©mo)</h3>
                 <button onClick={() => setShowDocModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} color="#6B7280" /></button>
               </div>
               
@@ -765,20 +745,20 @@ const NewRequestComponent = () => {
                 {loadingDocs ? (
                   <div style={{ textAlign: 'center', padding: '20px' }}><Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /></div>
                 ) : (citizenDocs?.length || 0) === 0 ? (
-                  <div style={{ textAlign: 'center', color: '#6B7280', padding: '20px' }}>Aucun document trouvé. Vous pouvez en créer dans votre Espace Citoyen.</div>
+                  <div style={{ textAlign: 'center', color: '#6B7280', padding: '20px' }}>Aucun document trouvÃ©. Vous pouvez en crÃ©er dans votre Espace Citoyen.</div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {(citizenDocs || []).map(doc => (
                       <div key={doc?._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
                         <div>
                           <div style={{ fontWeight: 600, color: '#111827' }}>{doc?.documentType}</div>
-                          <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Réf: {doc?.referenceNumber}</div>
+                          <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>RÃ©f: {doc?.referenceNumber}</div>
                         </div>
                         <button 
                           onClick={() => handleSelectDemoDoc(doc)}
                           style={{ padding: '6px 12px', background: 'var(--vert-500)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
                         >
-                          Sélectionner
+                          SÃ©lectionner
                         </button>
                       </div>
                     ))}
@@ -805,7 +785,7 @@ const NewRequestComponent = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#164022', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Shield size={24} color="#16A34A" /> Création rapide : {quickDocType}
+                    <Shield size={24} color="#16A34A" /> CrÃ©ation rapide : {quickDocType}
                   </h3>
                 </div>
                 <button onClick={() => setShowQuickCreator(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} color="#6B7280" /></button>
@@ -813,7 +793,7 @@ const NewRequestComponent = () => {
 
               <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: '#991B1B' }}>
                 <AlertTriangle size={20} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>DOCUMENT FICTIF DESTINÉ UNIQUEMENT À LA DÉMONSTRATION</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>DOCUMENT FICTIF DESTINÃ‰ UNIQUEMENT Ã€ LA DÃ‰MONSTRATION</span>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
@@ -837,7 +817,7 @@ const NewRequestComponent = () => {
                               onChange={e => setQuickFormData(prev => ({ ...(prev || {}), [field?.name || 'unknown']: e.target.value }))}
                               style={iStyle}
                             >
-                              <option value="">Sélectionner...</option>
+                              <option value="">SÃ©lectionner...</option>
                               {(field?.options || []).map(opt => (
                                 <option key={opt} value={opt}>{opt}</option>
                               ))}
@@ -896,7 +876,7 @@ const NewRequestComponent = () => {
                 <button type="button" onClick={() => setShowQuickCreator(false)} style={{ padding: '10px 15px', borderRadius: '6px', border: '1px solid #D1D5DB', background: 'white', cursor: 'pointer', fontWeight: 600 }}>Annuler</button>
                 <button type="submit" form="quick-create-form" disabled={submittingQuick} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', background: 'var(--vert-500)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {submittingQuick ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <FileText size={18} />}
-                  Générer et Ajouter
+                  GÃ©nÃ©rer et Ajouter
                 </button>
               </div>
             </motion.div>
