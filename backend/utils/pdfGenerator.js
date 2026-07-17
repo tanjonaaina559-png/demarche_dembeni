@@ -51,19 +51,34 @@ const buildCitizenData = (citizen, formData = {}, referenceNumber = '', request 
 const fillTemplatePdf = async (templatePath, citizenData, referenceNumber, mapping = [], isDemonstration = false) => {
   let existingPdfBytes;
 
+  console.log(`[fillTemplatePdf] templatePath : ${templatePath}`);
+  console.log(`[fillTemplatePdf] referenceNumber : ${referenceNumber}`);
+  console.log(`[fillTemplatePdf] mapping items : ${mapping?.length || 0}`);
+
   if (templatePath.startsWith('http')) {
-    const resp = await fetch(templatePath);
-    if (!resp.ok) throw new Error(`Impossible de récupérer le template: ${templatePath}`);
+    console.log(`[fillTemplatePdf] Fetch Cloudinary template…`);
+    let resp;
+    try {
+      resp = await fetch(templatePath);
+    } catch (fetchErr) {
+      throw new Error(`Erreur réseau lors de la récupération du template Cloudinary : ${fetchErr.message} (url: ${templatePath})`);
+    }
+    if (!resp.ok) {
+      throw new Error(`Template Cloudinary inaccessible — HTTP ${resp.status} pour : ${templatePath}`);
+    }
     existingPdfBytes = await resp.arrayBuffer();
+    console.log(`[fillTemplatePdf] Template Cloudinary récupéré (${existingPdfBytes.byteLength} bytes)`);
   } else {
     const absPath = path.isAbsolute(templatePath)
       ? templatePath
       : path.resolve(__dirname, '..', templatePath.replace(/^\//, ''));
 
+    console.log(`[fillTemplatePdf] Lecture fichier local : ${absPath}`);
     if (!fs.existsSync(absPath)) {
-      throw new Error(`Fichier template introuvable: ${absPath}`);
+      throw new Error(`Fichier template local introuvable : ${absPath}`);
     }
     existingPdfBytes = fs.readFileSync(absPath);
+    console.log(`[fillTemplatePdf] Fichier local lu (${existingPdfBytes.length} bytes)`);
   }
 
   const pdfDoc = await PDFLibDocument.load(existingPdfBytes, { ignoreEncryption: true });
@@ -471,84 +486,125 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
     } catch (err) { reject(err); }
   });
 
-// ─── 4. Generate filled PDF from uploaded template ────────────────────────────
+// ─── 4. Generate filled PDF from uploaded template (avec fallback récépissé) ──
 const generateTemplatePdf = async (request, citizen, referenceNumber, procedure) => {
+  console.log(`[generateTemplatePdf] référence : ${referenceNumber}`);
+  console.log(`[generateTemplatePdf] procédure : ${procedure?.title || 'N/A'}`);
+  console.log(`[generateTemplatePdf] pdfTemplate : ${procedure?.pdfTemplate || 'absent'}`);
+
   if (!procedure || !procedure.pdfTemplate) {
-    throw new Error('Aucun template PDF associé à cette procédure.');
+    console.warn(`[generateTemplatePdf] Pas de template — fallback vers récépissé générique`);
+    return generateReceiptPdf(
+      { ...request, procedureType: procedure?.title },
+      citizen,
+      referenceNumber
+    );
   }
 
-  const formData = request.formData || {};
-  const citizenData = buildCitizenData(citizen, formData, referenceNumber, request);
+  try {
+    const formData = request.formData || {};
+    const citizenData = buildCitizenData(citizen, formData, referenceNumber, request);
+    const pdfBytes = await fillTemplatePdf(procedure.pdfTemplate, citizenData, referenceNumber);
 
-  const pdfBytes = await fillTemplatePdf(procedure.pdfTemplate, citizenData, referenceNumber);
+    const uploadDir = ensureUploadDir();
+    const filename = `receipt-${referenceNumber}.pdf`;
+    const filePath = path.join(uploadDir, filename);
+    fs.writeFileSync(filePath, pdfBytes);
 
-  const uploadDir = ensureUploadDir();
-  const filename = `official-${referenceNumber}.pdf`;
-  const filePath = path.join(uploadDir, filename);
-  fs.writeFileSync(filePath, pdfBytes);
-
-  console.log('Uploading PDF to Cloudinary');
-  const result = await cloudinary.uploader.upload(filePath, {
-    resource_type: 'raw',
-    folder: 'dembeni/documents',
-    public_id: filename
-  });
-
-  fs.unlinkSync(filePath);
-  console.log('Cloudinary URL:', result.secure_url);
-  return result.secure_url;
+    console.log(`[generateTemplatePdf] Upload Cloudinary : ${filename}`);
+    const result = await cloudinary.uploader.upload(filePath, {
+      resource_type: 'raw',
+      folder: 'dembeni/documents',
+      public_id: filename
+    });
+    fs.unlinkSync(filePath);
+    console.log(`[generateTemplatePdf] Cloudinary URL : ${result.secure_url}`);
+    return result.secure_url;
+  } catch (templateErr) {
+    console.error(`[generateTemplatePdf] Échec template (${templateErr.message}) — fallback vers récépissé générique`);
+    return generateReceiptPdf(
+      { ...request, procedureType: procedure?.title },
+      citizen,
+      referenceNumber
+    );
+  }
 };
 
 
-// ─── 5. Generate from OfficialPdfTemplate model (new system) ──────────────────
+// ─── 5. Generate from OfficialPdfTemplate model (avec fallback récépissé) ─────
 const generateFromOfficialTemplate = async (request, citizen, referenceNumber, template) => {
+  console.log(`[generateFromOfficialTemplate] référence : ${referenceNumber}`);
+  console.log(`[generateFromOfficialTemplate] template id : ${template?._id || 'N/A'}`);
+  console.log(`[generateFromOfficialTemplate] templateFile : ${template?.templateFile || 'absent'}`);
+
+  // Si pas de template ou fichier absent → fallback direct
   if (!template || !template.templateFile) {
-    throw new Error('Aucun template PDF officiel associé.');
+    console.warn(`[generateFromOfficialTemplate] templateFile absent — fallback vers récépissé générique`);
+    return generateReceiptPdf(
+      { ...request, procedureType: request.procedureId?.title },
+      citizen,
+      referenceNumber
+    );
   }
 
-  const formData = request.formData || {};
-  const citizenData = buildCitizenData(citizen, formData, referenceNumber, request);
+  try {
+    const formData = request.formData || {};
+    const citizenData = buildCitizenData(citizen, formData, referenceNumber, request);
 
-  // Apply fieldMapping from the template (legacy object format) or array
-  let mappedData = { ...citizenData };
-  if (template.fieldMapping && !Array.isArray(template.fieldMapping)) {
-    const map = template.fieldMapping instanceof Map
-      ? Object.fromEntries(template.fieldMapping)
-      : template.fieldMapping;
+    // Résoudre le chemin : URL Cloudinary directe ou chemin local
+    let templatePathResolved;
+    if (template.templateFile.startsWith('http')) {
+      templatePathResolved = template.templateFile;
+      console.log(`[generateFromOfficialTemplate] Template = URL Cloudinary`);
+    } else {
+      templatePathResolved = path.resolve(__dirname, '..', template.templateFile.replace(/^\//, ''));
+      console.log(`[generateFromOfficialTemplate] Template = fichier local : ${templatePathResolved}`);
+    }
 
-    Object.entries(map).forEach(([dataKey, pdfFieldName]) => {
-      if (citizenData[dataKey] !== undefined) {
-        mappedData[pdfFieldName] = citizenData[dataKey];
-      }
+    // Appliquer le fieldMapping
+    let mappedData = { ...citizenData };
+    if (template.fieldMapping && !Array.isArray(template.fieldMapping)) {
+      const map = template.fieldMapping instanceof Map
+        ? Object.fromEntries(template.fieldMapping)
+        : template.fieldMapping;
+      Object.entries(map).forEach(([dataKey, pdfFieldName]) => {
+        if (citizenData[dataKey] !== undefined) {
+          mappedData[pdfFieldName] = citizenData[dataKey];
+        }
+      });
+    }
+
+    const mappingArray = Array.isArray(template.mapping) ? template.mapping : [];
+    const pdfBytes = await fillTemplatePdf(
+      templatePathResolved,
+      mappedData,
+      referenceNumber,
+      mappingArray,
+      template.isDemonstration || false
+    );
+
+    const uploadDir = ensureUploadDir();
+    const filename = `official-${referenceNumber}.pdf`;
+    const filePath = path.join(uploadDir, filename);
+    fs.writeFileSync(filePath, pdfBytes);
+
+    console.log(`[generateFromOfficialTemplate] Upload Cloudinary : ${filename}`);
+    const result = await cloudinary.uploader.upload(filePath, {
+      resource_type: 'raw',
+      folder: 'dembeni/documents',
+      public_id: filename
     });
+    fs.unlinkSync(filePath);
+    console.log(`[generateFromOfficialTemplate] Cloudinary URL : ${result.secure_url}`);
+    return result.secure_url;
+  } catch (templateErr) {
+    console.error(`[generateFromOfficialTemplate] Échec template (${templateErr.message}) — fallback vers récépissé générique`);
+    return generateReceiptPdf(
+      { ...request, procedureType: request.procedureId?.title },
+      citizen,
+      referenceNumber
+    );
   }
-
-  const templatePathAbs = path.resolve(__dirname, '..', template.templateFile.replace(/^\//, ''));
-  const mappingArray = Array.isArray(template.mapping) ? template.mapping : [];
-  
-  const pdfBytes = await fillTemplatePdf(
-    templatePathAbs, 
-    mappedData, 
-    referenceNumber, 
-    mappingArray, 
-    template.isDemonstration || false
-  );
-
-  const uploadDir = ensureUploadDir();
-  const filename = `official-${referenceNumber}.pdf`;
-  const filePath = path.join(uploadDir, filename);
-  fs.writeFileSync(filePath, pdfBytes);
-
-  console.log('Uploading PDF to Cloudinary');
-  const result = await cloudinary.uploader.upload(filePath, {
-    resource_type: 'raw',
-    folder: 'dembeni/documents',
-    public_id: filename
-  });
-
-  fs.unlinkSync(filePath);
-  console.log('Cloudinary URL:', result.secure_url);
-  return result.secure_url;
 };
 
 module.exports = {

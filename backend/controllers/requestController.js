@@ -323,41 +323,55 @@ exports.downloadPdfReceipt = async (req, res) => {
 
     console.log(`[PDF Download] URL PDF résolue : ${pdfUrl || '(vide)'}`);
 
-    // 5. Si PDF absent → tentative de régénération automatique
+    // 5. Si PDF absent → régénération avec triple fallback garanti
     if (!pdfUrl) {
-      console.warn(`[PDF Download] PDF absent — tentative de régénération automatique…`);
+      console.warn(`[PDF Download] PDF absent — régénération automatique avec fallback garanti…`);
       try {
         const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
         const GeneratedDocument = require('../models/GeneratedDocument');
-        let newPdfUrl;
-
-        const officialTemplate = request.procedureId
-          ? await OfficialPdfTemplate.findOne({ procedureId: request.procedureId._id, status: 'active' })
-          : null;
 
         const populated = await Request.findById(requestId)
           .populate('citizenId', 'firstname lastname email phone address')
           .populate('procedureId', 'title category pdfTemplate pdfFields')
           .populate('uploadedFiles');
 
+        const officialTemplate = populated.procedureId?._id
+          ? await OfficialPdfTemplate.findOne({ procedureId: populated.procedureId._id, status: 'active' })
+          : null;
+
+        let newPdfUrl;
+        let generationMethod = 'receipt-fallback';
+
+        // Niveau 1 : OfficialPdfTemplate (avec fallback interne vers receipt si template mort)
         if (officialTemplate) {
-          console.log(`[PDF Download] Régénération via OfficialPdfTemplate : ${officialTemplate._id}`);
+          console.log(`[PDF Download] Niveau 1 : OfficialPdfTemplate ${officialTemplate._id}`);
+          console.log(`[PDF Download] templateFile : ${officialTemplate.templateFile || 'absent'}`);
+          generationMethod = 'official-template';
+          // generateFromOfficialTemplate contient déjà un fallback interne vers generateReceiptPdf
           newPdfUrl = await pdfGenerator.generateFromOfficialTemplate(
             populated.toObject(),
             populated.citizenId,
             populated.referenceNumber,
             officialTemplate
           );
-        } else if (populated.procedureId?.pdfTemplate) {
-          console.log(`[PDF Download] Régénération via template procédure`);
+        }
+        // Niveau 2 : pdfTemplate sur la procédure (avec fallback interne vers receipt si template mort)
+        else if (populated.procedureId?.pdfTemplate) {
+          console.log(`[PDF Download] Niveau 2 : pdfTemplate procédure`);
+          console.log(`[PDF Download] pdfTemplate : ${populated.procedureId.pdfTemplate}`);
+          generationMethod = 'procedure-template';
+          // generateTemplatePdf contient déjà un fallback interne vers generateReceiptPdf
           newPdfUrl = await pdfGenerator.generateTemplatePdf(
             populated.toObject(),
             populated.citizenId,
             populated.referenceNumber,
             populated.procedureId
           );
-        } else {
-          console.log(`[PDF Download] Régénération via récépissé générique`);
+        }
+        // Niveau 3 : Récépissé PDFKit pur — aucune dépendance externe, toujours disponible
+        else {
+          console.log(`[PDF Download] Niveau 3 : récépissé générique PDFKit`);
+          generationMethod = 'receipt-pdfkit';
           newPdfUrl = await pdfGenerator.generateReceiptPdf(
             { ...populated.toObject(), procedureType: populated.procedureId?.title },
             populated.citizenId,
@@ -365,25 +379,31 @@ exports.downloadPdfReceipt = async (req, res) => {
           );
         }
 
+        console.log(`[PDF Download] Régénération réussie (${generationMethod}) : ${newPdfUrl}`);
+
         // Persister la nouvelle URL
         await Request.findByIdAndUpdate(requestId, { generatedPdf: newPdfUrl });
-        await GeneratedDocument.create({
-          citizenId: request.citizenId._id,
-          requestId: request._id,
-          documentType: officialTemplate ? 'official' : 'receipt',
-          referenceNumber: (officialTemplate ? 'DOC-' : 'REC-') + request.referenceNumber,
-          pdfUrl: newPdfUrl,
-          status: 'available'
-        });
+        try {
+          await GeneratedDocument.create({
+            citizenId: populated.citizenId._id,
+            requestId: populated._id,
+            documentType: generationMethod.startsWith('official') ? 'official' : 'receipt',
+            referenceNumber: (generationMethod.startsWith('official') ? 'DOC-' : 'REC-') + populated.referenceNumber,
+            pdfUrl: newPdfUrl,
+            status: 'available'
+          });
+        } catch (docErr) {
+          console.warn(`[PDF Download] Impossible de créer GeneratedDocument : ${docErr.message}`);
+        }
 
         pdfUrl = newPdfUrl;
-        console.log(`[PDF Download] Régénération réussie : ${pdfUrl}`);
       } catch (genErr) {
-        console.error(`[PDF Download] Échec de régénération : ${genErr.message}`);
+        console.error(`[PDF Download] Tous les niveaux de régénération ont échoué : ${genErr.message}`);
         return res.status(500).json({
-          message: `Le PDF n'existe pas et sa régénération a échoué : ${genErr.message}`,
+          message: `Impossible de générer le PDF. Erreur : ${genErr.message}`,
           requestId,
-          referenceNumber: request.referenceNumber
+          referenceNumber: request.referenceNumber,
+          hint: 'Contactez l\'administration si le problème persiste.'
         });
       }
     }
