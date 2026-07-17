@@ -19,31 +19,56 @@ const MesDemandes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('toutes');
 
-  const downloadPdf = async (demandeId) => {
+  const downloadPdf = async (demandeId, type = 'receipt') => {
     try {
       const token = localStorage.getItem('token') ||
         JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
       const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const url = `${apiBase}/requests/${demandeId}/pdf`;
-      // Follow redirect to Cloudinary URL
+      const url = `${apiBase}/requests/${demandeId}/pdf?type=${type}`;
+
+      console.log(`[PDF] Téléchargement → ${url}`);
+
+      // On fait un HEAD/GET pour vérifier le statut AVANT d'ouvrir le tab
+      // Le backend redirige vers Cloudinary : on laisse fetch suivre et on ouvre l'URL finale
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
         redirect: 'follow'
       });
+
+      console.log(`[PDF] Réponse statut : ${response.status}, redirigé : ${response.redirected}, URL finale : ${response.url}`);
+
       if (response.ok || response.redirected) {
-        window.open(response.url || url, '_blank');
-      } else if (response.status === 403) {
-        alert('Le document sera disponible après validation par l\'administration.');
+        // URL finale : soit Cloudinary, soit l'URL de l'API si le backend a servi directement
+        const finalUrl = response.redirected ? response.url : url;
+        window.open(finalUrl, '_blank');
+        return;
+      }
+
+      // Lire le message d'erreur JSON du backend
+      let errorMsg = 'Impossible de télécharger le document.';
+      try {
+        const json = await response.json();
+        errorMsg = json.message || errorMsg;
+      } catch (_) { /* réponse non-JSON */ }
+
+      if (response.status === 403) {
+        alert(`⚠️ Accès refusé :\n${errorMsg}`);
+      } else if (response.status === 404) {
+        alert(`❌ Document introuvable :\n${errorMsg}`);
+      } else if (response.status === 500) {
+        alert(`🔴 Erreur serveur :\n${errorMsg}\n\nContactez l'administration si le problème persiste.`);
       } else {
-        alert('Impossible de télécharger le document.');
+        alert(`Erreur ${response.status} : ${errorMsg}`);
       }
     } catch (error) {
-      console.error('Erreur téléchargement PDF', error);
-      // Fallback: try to open directly
+      console.error('[PDF] Erreur réseau :', error);
+      // Fallback ultime : ouvrir l'URL directement (le navigateur gèrera la redirection)
       const token = localStorage.getItem('token') ||
         JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
       const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      window.open(`${apiBase}/requests/${demandeId}/pdf`, '_blank');
+      const fallbackUrl = `${apiBase}/requests/${demandeId}/pdf?type=${type}`;
+      console.warn('[PDF] Fallback window.open →', fallbackUrl);
+      window.open(fallbackUrl, '_blank');
     }
   };
 
@@ -222,9 +247,16 @@ const MesDemandes = () => {
                     <Eye size={16} /> Voir les détails
                   </button>
                   {['validée', 'terminée'].includes(demande.status?.toLowerCase()) ? (
-                    <button onClick={() => downloadPdf(demande._id)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'var(--vert-600)', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
-                      <Download size={16} /> Télécharger le document
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button onClick={() => downloadPdf(demande._id, 'receipt')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'var(--vert-600)', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
+                        <Download size={16} /> Récépissé de dépôt
+                      </button>
+                      {demande.finalDocument && (
+                        <button onClick={() => downloadPdf(demande._id, 'official')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: '#1D4ED8', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
+                          <Download size={16} /> Document officiel
+                        </button>
+                      )}
+                    </div>
                   ) : (
                     <div style={{ padding: '8px 12px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Clock size={14} /> Le document sera disponible après validation.

@@ -79,6 +79,7 @@ exports.createRequest = async (req, res) => {
     // Auto-generate official PDF: check OfficialPdfTemplate first
     try {
       let pdfPath;
+      let generationType = 'receipt';
 
       // 1. Look for an OfficialPdfTemplate linked to this procedure
       const officialTemplate = procedureRef
@@ -86,6 +87,8 @@ exports.createRequest = async (req, res) => {
         : null;
 
       if (officialTemplate) {
+        generationType = 'official-template';
+        console.log(`[createRequest] Génération PDF via OfficialPdfTemplate : ${officialTemplate._id}`);
         pdfPath = await pdfGenerator.generateFromOfficialTemplate(
           populated.toObject(),
           populated.citizenId,
@@ -94,6 +97,8 @@ exports.createRequest = async (req, res) => {
         );
       } else if (populated.procedureId && populated.procedureId.pdfTemplate) {
         // 2. Legacy: procedure has a pdfTemplate field
+        generationType = 'template';
+        console.log(`[createRequest] Génération PDF via pdfTemplate procédure`);
         pdfPath = await pdfGenerator.generateTemplatePdf(
           populated.toObject(),
           populated.citizenId,
@@ -102,12 +107,16 @@ exports.createRequest = async (req, res) => {
         );
       } else {
         // 3. Generic professional receipt
+        generationType = 'receipt';
+        console.log(`[createRequest] Génération récépissé générique`);
         pdfPath = await pdfGenerator.generateReceiptPdf(
           { ...populated.toObject(), procedureType: populated.procedureId?.title },
           populated.citizenId,
           populated.referenceNumber
         );
       }
+
+      console.log(`[createRequest] PDF généré (${generationType}) → ${pdfPath}`);
 
       populated.generatedPdf = pdfPath;
       await Request.findByIdAndUpdate(newRequest._id, { generatedPdf: pdfPath });
@@ -121,7 +130,7 @@ exports.createRequest = async (req, res) => {
         status: 'available'
       });
     } catch (pdfErr) {
-      console.warn('PDF generation failed (non-blocking):', pdfErr.message);
+      console.error(`[createRequest] Échec génération PDF (non-bloquant) : ${pdfErr.message}`, pdfErr.stack);
     }
 
     // Citizen notification
@@ -161,6 +170,7 @@ exports.getCitizenRequests = async (req, res) => {
     const requests = await Request.find({ citizenId: req.user._id })
       .populate('procedureId', 'title category')
       .populate('uploadedFiles')
+      .select('referenceNumber status procedureId formData uploadedFiles adminComment generatedPdf finalDocument createdAt updatedAt')
       .sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
@@ -254,45 +264,157 @@ exports.updateRequestStatus = async (req, res) => {
 
 // ─── Download generated PDF receipt/official (citizen or admin) ────────────────────────
 exports.downloadPdfReceipt = async (req, res) => {
+  const requestId = req.params.id;
+  const type = req.query.type || 'receipt';
+
+  console.log(`[PDF Download] ─── Début ───────────────────────────────`);
+  console.log(`[PDF Download] requestId  : ${requestId}`);
+  console.log(`[PDF Download] type       : ${type}`);
+  console.log(`[PDF Download] userId     : ${req.user?._id}`);
+
   try {
-    const request = await Request.findById(req.params.id)
+    // 1. Vérifier que l'ID est un ObjectId valide
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      console.warn(`[PDF Download] ID invalide : ${requestId}`);
+      return res.status(400).json({ message: `ID de demande invalide : ${requestId}` });
+    }
+
+    // 2. Chercher la demande
+    const request = await Request.findById(requestId)
       .populate('citizenId', 'firstname lastname email phone address')
-      .populate('procedureId', 'title category');
+      .populate('procedureId', 'title category pdfTemplate pdfFields');
 
     if (!request) {
-      return res.status(404).json({ message: 'Demande introuvable' });
+      console.warn(`[PDF Download] Demande introuvable en base : ${requestId}`);
+      return res.status(404).json({
+        message: `Demande introuvable. Vérifiez que l'ID ${requestId} est correct.`
+      });
     }
 
-    if (!['Validée', 'Terminée'].includes(request.status)) {
-      return res.status(403).json({ message: 'Le document sera disponible après validation par l\'administration.' });
-    }
+    console.log(`[PDF Download] Demande trouvée : ${request.referenceNumber} (statut: ${request.status})`);
 
-    // Ensure user owns the request or is admin
+    // 3. Vérifier propriété ou rôle admin
     if (
       request.citizenId._id.toString() !== req.user._id.toString() &&
       req.user.role !== 'admin'
     ) {
-      return res.status(403).json({ message: 'Accès refusé' });
+      console.warn(`[PDF Download] Accès refusé — userId: ${req.user._id}, citoyenId: ${request.citizenId._id}`);
+      return res.status(403).json({ message: 'Accès refusé : cette demande ne vous appartient pas.' });
     }
 
-    const type = req.query.type || 'receipt';
-    const pdfUrl = type === 'official' ? request.finalDocument : request.generatedPdf;
+    // 4. Résoudre l'URL du PDF selon le type demandé
+    //    - 'receipt'  → récépissé de dépôt (generatedPdf), disponible dès la soumission
+    //    - 'official' → document officiel validé (finalDocument), disponible après validation
+    let pdfUrl;
+    if (type === 'official') {
+      // Document officiel : disponible seulement si la demande est validée/terminée
+      if (!['Validée', 'Terminée'].includes(request.status)) {
+        console.warn(`[PDF Download] Document officiel demandé mais statut = ${request.status}`);
+        return res.status(403).json({
+          message: `Le document officiel sera disponible après validation par l'administration. Statut actuel : ${request.status}`
+        });
+      }
+      pdfUrl = request.finalDocument || request.generatedPdf;
+    } else {
+      // Récépissé : disponible dès la soumission (generatedPdf)
+      pdfUrl = request.generatedPdf;
+    }
 
+    console.log(`[PDF Download] URL PDF résolue : ${pdfUrl || '(vide)'}`);
+
+    // 5. Si PDF absent → tentative de régénération automatique
     if (!pdfUrl) {
-      return res.status(404).json({ message: 'PDF non disponible' });
+      console.warn(`[PDF Download] PDF absent — tentative de régénération automatique…`);
+      try {
+        const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
+        const GeneratedDocument = require('../models/GeneratedDocument');
+        let newPdfUrl;
+
+        const officialTemplate = request.procedureId
+          ? await OfficialPdfTemplate.findOne({ procedureId: request.procedureId._id, status: 'active' })
+          : null;
+
+        const populated = await Request.findById(requestId)
+          .populate('citizenId', 'firstname lastname email phone address')
+          .populate('procedureId', 'title category pdfTemplate pdfFields')
+          .populate('uploadedFiles');
+
+        if (officialTemplate) {
+          console.log(`[PDF Download] Régénération via OfficialPdfTemplate : ${officialTemplate._id}`);
+          newPdfUrl = await pdfGenerator.generateFromOfficialTemplate(
+            populated.toObject(),
+            populated.citizenId,
+            populated.referenceNumber,
+            officialTemplate
+          );
+        } else if (populated.procedureId?.pdfTemplate) {
+          console.log(`[PDF Download] Régénération via template procédure`);
+          newPdfUrl = await pdfGenerator.generateTemplatePdf(
+            populated.toObject(),
+            populated.citizenId,
+            populated.referenceNumber,
+            populated.procedureId
+          );
+        } else {
+          console.log(`[PDF Download] Régénération via récépissé générique`);
+          newPdfUrl = await pdfGenerator.generateReceiptPdf(
+            { ...populated.toObject(), procedureType: populated.procedureId?.title },
+            populated.citizenId,
+            populated.referenceNumber
+          );
+        }
+
+        // Persister la nouvelle URL
+        await Request.findByIdAndUpdate(requestId, { generatedPdf: newPdfUrl });
+        await GeneratedDocument.create({
+          citizenId: request.citizenId._id,
+          requestId: request._id,
+          documentType: officialTemplate ? 'official' : 'receipt',
+          referenceNumber: (officialTemplate ? 'DOC-' : 'REC-') + request.referenceNumber,
+          pdfUrl: newPdfUrl,
+          status: 'available'
+        });
+
+        pdfUrl = newPdfUrl;
+        console.log(`[PDF Download] Régénération réussie : ${pdfUrl}`);
+      } catch (genErr) {
+        console.error(`[PDF Download] Échec de régénération : ${genErr.message}`);
+        return res.status(500).json({
+          message: `Le PDF n'existe pas et sa régénération a échoué : ${genErr.message}`,
+          requestId,
+          referenceNumber: request.referenceNumber
+        });
+      }
     }
+
+    // 6. Servir le PDF
+    console.log(`[PDF Download] Envoi du PDF → ${pdfUrl}`);
 
     if (pdfUrl.startsWith('http')) {
+      // URL Cloudinary : redirection
       return res.redirect(pdfUrl);
     }
 
-    // fallback for legacy local files
-    const path = require('path');
-    const fullPath = path.join(__dirname, '..', pdfUrl);
-    
+    // Fallback legacy fichier local
+    const pathModule = require('path');
+    const fullPath = pathModule.join(__dirname, '..', pdfUrl);
+    console.log(`[PDF Download] Fichier local : ${fullPath}`);
+
+    const fs = require('fs');
+    if (!fs.existsSync(fullPath)) {
+      console.error(`[PDF Download] Fichier local introuvable : ${fullPath}`);
+      return res.status(404).json({
+        message: `Le fichier PDF local est introuvable : ${fullPath}`,
+        pdfUrl
+      });
+    }
+
     res.download(fullPath);
+    console.log(`[PDF Download] ─── Succès ───────────────────────────────`);
   } catch (error) {
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    console.error(`[PDF Download] Erreur inattendue :`, error);
+    res.status(500).json({ message: 'Erreur serveur lors du téléchargement du PDF', error: error.message });
   }
 };
 
