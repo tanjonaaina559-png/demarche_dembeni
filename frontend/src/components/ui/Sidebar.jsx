@@ -57,11 +57,11 @@ const Sidebar = ({ isOpen, toggle, collapsed, setCollapsed }) => {
       <nav className={styles.nav}>
         <div className={styles.navGroupTitle}>{!collapsed && 'Menu Principal'}</div>
         
-        {navItems.map((item, idx) => {
+        {navItems.map((item) => {
           if (item.isSubmenu) {
             const isActiveChild = item.children.some(child => location.pathname === child.to);
             return (
-              <div key={idx} className={styles.submenuWrapper}>
+              <div key={item.label} className={styles.submenuWrapper}>
                 <div 
                   className={classNames(styles.navItem, { [styles.active]: isActiveChild })}
                   onClick={() => setOpenSubmenu(!openSubmenu)}
@@ -69,10 +69,10 @@ const Sidebar = ({ isOpen, toggle, collapsed, setCollapsed }) => {
                 >
                   <span className={styles.icon}>{item.icon}</span>
                   {!collapsed && (
-                    <>
+                    <span style={{ display: 'contents' }}>
                       <span className={styles.label}>{item.label}</span>
                       <ChevronDown size={16} className={classNames(styles.chevron, { [styles.chevronOpen]: openSubmenu })} />
-                    </>
+                    </span>
                   )}
                 </div>
                 {!collapsed && openSubmenu && (

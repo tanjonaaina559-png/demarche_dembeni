@@ -132,7 +132,7 @@ const ProcedureCreate = () => {
 
   // List Management (Statistics)
   const addStatistic = () => {
-    setStatistics([...statistics, { value: '', label: '', icon: 'fas fa-chart-bar' }]);
+    setStatistics([...statistics, { _uid: `stat_${Date.now()}_${Math.random()}`, value: '', label: '', icon: 'fas fa-chart-bar' }]);
   };
   const removeStatistic = (idx) => {
     setStatistics(statistics.filter((_, i) => i !== idx));
@@ -145,7 +145,7 @@ const ProcedureCreate = () => {
 
   // List Management (Features / Rules)
   const addFeature = () => {
-    setFeatures([...features, { title: '', type: 'neutral', items: [''] }]);
+    setFeatures([...features, { _uid: `feat_${Date.now()}_${Math.random()}`, title: '', type: 'neutral', items: [{ _uid: `bullet_${Date.now()}`, text: '' }] }]);
   };
   const removeFeature = (idx) => {
     setFeatures(features.filter((_, i) => i !== idx));
@@ -157,7 +157,7 @@ const ProcedureCreate = () => {
   };
   const addFeatureBullet = (featIdx) => {
     const updated = [...features];
-    updated[featIdx].items.push('');
+    updated[featIdx].items.push({ _uid: `bullet_${Date.now()}_${Math.random()}`, text: '' });
     setFeatures(updated);
   };
   const removeFeatureBullet = (featIdx, bulletIdx) => {
@@ -167,13 +167,13 @@ const ProcedureCreate = () => {
   };
   const updateFeatureBullet = (featIdx, bulletIdx, val) => {
     const updated = [...features];
-    updated[featIdx].items[bulletIdx] = val;
+    updated[featIdx].items[bulletIdx] = { ...updated[featIdx].items[bulletIdx], text: val };
     setFeatures(updated);
   };
 
   // List Management (Steps)
   const addStep = () => {
-    setSteps([...steps, { stepNumber: steps.length + 1, title: '', description: '' }]);
+    setSteps([...steps, { _uid: `step_${Date.now()}_${Math.random()}`, stepNumber: steps.length + 1, title: '', description: '' }]);
   };
   const removeStep = (idx) => {
     const filtered = steps.filter((_, i) => i !== idx);
@@ -189,7 +189,7 @@ const ProcedureCreate = () => {
 
   // List Management (Required Documents)
   const addDocument = () => {
-    setDocuments([...documents, { name: '', fileUrl: '', required: true }]);
+    setDocuments([...documents, { _uid: `doc_${Date.now()}_${Math.random()}`, name: '', fileUrl: '', required: true }]);
   };
   const removeDocument = (idx) => {
     setDocuments(documents.filter((_, i) => i !== idx));
@@ -202,7 +202,7 @@ const ProcedureCreate = () => {
 
   // List Management (Required Fields)
   const addField = () => {
-    setRequiredFields([...requiredFields, { name: '', label: '', type: 'text', required: true, options: [] }]);
+    setRequiredFields([...requiredFields, { _uid: `field_${Date.now()}_${Math.random()}`, name: '', label: '', type: 'text', required: true, options: [] }]);
   };
   const removeField = (idx) => {
     setRequiredFields(requiredFields.filter((_, i) => i !== idx));
@@ -215,7 +215,7 @@ const ProcedureCreate = () => {
 
   // List Management (PDF Fields Map)
   const addPdfFieldMap = () => {
-    setPdfFieldsMap([...pdfFieldsMap, { dataKey: '', pdfField: '' }]);
+    setPdfFieldsMap([...pdfFieldsMap, { _uid: `pdf_${Date.now()}_${Math.random()}`, dataKey: '', pdfField: '' }]);
   };
   const removePdfFieldMap = (idx) => {
     setPdfFieldsMap(pdfFieldsMap.filter((_, i) => i !== idx));
@@ -255,21 +255,24 @@ const ProcedureCreate = () => {
       payload.append('icon', icon);
 
       // Arrays must be stringified for multipart/form-data
-      payload.append('statistics', JSON.stringify(statistics));
-      // Filter out empty rules/items
+      // Strip internal _uid fields before sending to backend
+      const stripUid = (arr) => arr.map(({ _uid, ...rest }) => rest);
+      payload.append('statistics', JSON.stringify(stripUid(statistics)));
+      // Filter out empty rules/items — items are now objects {_uid, text}
       const cleanedFeatures = features.map(f => ({
-        ...f,
-        items: f.items.filter(item => item.trim() !== '')
+        title: f.title,
+        type: f.type,
+        items: f.items.map(it => it.text).filter(t => t.trim() !== '')
       })).filter(f => f.title.trim() !== '');
       payload.append('features', JSON.stringify(cleanedFeatures));
       
-      const cleanedDocs = documents.filter(d => d.name.trim() !== '');
+      const cleanedDocs = documents.filter(d => d.name.trim() !== '').map(({ _uid, ...rest }) => rest);
       payload.append('documents', JSON.stringify(cleanedDocs));
       
-      const cleanedFields = requiredFields.filter(f => f.name.trim() !== '' && f.label.trim() !== '');
+      const cleanedFields = requiredFields.filter(f => f.name.trim() !== '' && f.label.trim() !== '').map(({ _uid, ...rest }) => rest);
       payload.append('requiredFields', JSON.stringify(cleanedFields));
       
-      const cleanedSteps = steps.filter(s => s.title.trim() !== '');
+      const cleanedSteps = steps.filter(s => s.title.trim() !== '').map(({ _uid, ...rest }) => rest);
       payload.append('steps', JSON.stringify(cleanedSteps));
 
       if (imageFile) {
@@ -344,11 +347,7 @@ const ProcedureCreate = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
             
             {/* 1. INFORMATIONS GÉNÉRALES */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <h3 style={sectionTitleStyle}><i className="fas fa-info-circle" style={{ color: 'var(--vert-500)' }}></i> Informations Générales</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -389,15 +388,10 @@ const ProcedureCreate = () => {
                   <label htmlFor="isActiveCheck" style={{ fontWeight: 'bold', cursor: 'pointer' }}>Activer immédiatement cette démarche</label>
                 </div>
               </div>
-            </motion.section>
+            </div>
 
             {/* 2. TEXTES & DESCRIPTIONS */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.05 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <h3 style={sectionTitleStyle}><i className="fas fa-align-left" style={{ color: 'var(--vert-500)' }}></i> Descriptions détaillées</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div>
@@ -409,15 +403,10 @@ const ProcedureCreate = () => {
                   <textarea rows="6" value={detailedDescription} onChange={(e) => setDetailedDescription(e.target.value)} placeholder="Présentez en détail les règles d'attribution, les bénéficiaires, etc. (Supporte le texte brut)." style={inputStyle}></textarea>
                 </div>
               </div>
-            </motion.section>
+            </div>
 
             {/* 3. VISUELS & MÉDIAS */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.1 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <h3 style={sectionTitleStyle}><i className="fas fa-images" style={{ color: 'var(--vert-500)' }}></i> Médias & Fonds</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 
@@ -472,15 +461,10 @@ const ProcedureCreate = () => {
                 </div>
 
               </div>
-            </motion.section>
+            </div>
 
             {/* 4. STATISTIQUES EN BANDEAU */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.15 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}><FaCoins style={{ color: 'var(--vert-500)' }} /> Statistiques Clés (Chiffres en bandeau)</h3>
                 <button type="button" onClick={addStatistic} className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -489,7 +473,7 @@ const ProcedureCreate = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {statistics.map((stat, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
+                  <div key={stat._uid || i} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
                     <div style={{ flex: 1 }}>
                       <input type="text" value={stat.value} onChange={e => updateStatistic(i, 'value', e.target.value)} placeholder="Ex: 100%, 48h, 2/mois" style={{ ...inputStyle, marginBottom: 0 }} />
                     </div>
@@ -506,15 +490,10 @@ const ProcedureCreate = () => {
                 ))}
                 {statistics.length === 0 && <p style={emptyTextStyle}>Aucun bloc statistique configuré. (Ils s'affichent sous forme de bandeau premium sur la page)</p>}
               </div>
-            </motion.section>
+            </div>
 
             {/* 5. GUIDE REGLES (ACCEPTÉ / REFUSÉ) */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.2 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}><FaClipboardList style={{ color: 'var(--vert-500)' }} /> Règles d'Acceptation & Refus (Guide Pratique)</h3>
                 <button type="button" onClick={addFeature} className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -523,7 +502,7 @@ const ProcedureCreate = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {features.map((feat, fIdx) => (
-                  <div key={fIdx} style={{ background: '#F9FAFB', padding: '15px', borderRadius: '10px', border: '1px solid var(--gris-200)', position: 'relative' }}>
+                  <div key={feat._uid || fIdx} style={{ background: '#F9FAFB', padding: '15px', borderRadius: '10px', border: '1px solid var(--gris-200)', position: 'relative' }}>
                     <button type="button" onClick={() => removeFeature(fIdx)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
                       <FaTrash size={16} />
                     </button>
@@ -545,9 +524,9 @@ const ProcedureCreate = () => {
                       <label style={labelStyle}>Éléments de la liste (puces)</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {feat.items.map((bullet, bIdx) => (
-                          <div key={bIdx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <div key={bullet._uid || bIdx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <i className="fas fa-circle" style={{ fontSize: '8px', color: feat.type === 'accepted' ? '#10B981' : feat.type === 'refused' ? '#EF4444' : '#3B82F6' }}></i>
-                            <input type="text" value={bullet} onChange={e => updateFeatureBullet(fIdx, bIdx, e.target.value)} placeholder="Élément de la liste..." style={{ ...inputStyle, marginBottom: 0, flex: 1 }} />
+                            <input type="text" value={bullet.text !== undefined ? bullet.text : bullet} onChange={e => updateFeatureBullet(fIdx, bIdx, e.target.value)} placeholder="Élément de la liste..." style={{ ...inputStyle, marginBottom: 0, flex: 1 }} />
                             <button type="button" onClick={() => removeFeatureBullet(fIdx, bIdx)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
                               <FaTimes size={12} />
                             </button>
@@ -562,15 +541,10 @@ const ProcedureCreate = () => {
                 ))}
                 {features.length === 0 && <p style={emptyTextStyle}>Aucun guide de règles configuré. (Permet d'afficher ce qui est accepté ou refusé, comme sur la page encombrants)</p>}
               </div>
-            </motion.section>
+            </div>
 
             {/* 6. ETAPES DE RÉALISATION */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.25 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}><FaClipboardList style={{ color: 'var(--vert-500)' }} /> Étapes du processus citoyen</h3>
                 <button type="button" onClick={addStep} className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -579,7 +553,7 @@ const ProcedureCreate = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {steps.map((step, idx) => (
-                  <div key={idx} style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', background: '#F9FAFB', padding: '15px', borderRadius: '10px', border: '1px solid var(--gris-200)' }}>
+                  <div key={step._uid || idx} style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', background: '#F9FAFB', padding: '15px', borderRadius: '10px', border: '1px solid var(--gris-200)' }}>
                     <div style={{ background: 'var(--vert-500)', color: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', flexShrink: 0 }}>
                       {step.stepNumber}
                     </div>
@@ -594,15 +568,10 @@ const ProcedureCreate = () => {
                 ))}
                 {steps.length === 0 && <p style={emptyTextStyle}>Aucune étape configurée. (Permet d'afficher un parcours fléché "Étape 1, 2, 3...")</p>}
               </div>
-            </motion.section>
+            </div>
 
             {/* 7. CHAMPS DU FORMULAIRE */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.28 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}><i className="fas fa-keyboard" style={{ color: 'var(--vert-500)' }}></i> Champs du formulaire citoyen</h3>
                 <button type="button" onClick={addField} className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -611,7 +580,7 @@ const ProcedureCreate = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {requiredFields.map((field, idx) => (
-                  <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '15px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
+                  <div key={field._uid || idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '15px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
                     <div style={{ flex: 1, minWidth: '150px' }}>
                       <label style={labelStyle}>Nom de la variable</label>
                       <input type="text" value={field.name} onChange={e => updateField(idx, 'name', e.target.value)} placeholder="Ex: nomEpoux" style={{ ...inputStyle, marginBottom: 0 }} />
@@ -649,15 +618,10 @@ const ProcedureCreate = () => {
                 ))}
                 {requiredFields.length === 0 && <p style={emptyTextStyle}>Aucun champ de formulaire configuré. Si vide, seul les documents seront demandés.</p>}
               </div>
-            </motion.section>
+            </div>
 
             {/* 8. DOCUMENTS À FOURNIR / TÉLÉCHARGER */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.3 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}><FaFileAlt style={{ color: 'var(--vert-500)' }} /> Documents requis & Téléchargements</h3>
                 <button type="button" onClick={addDocument} className="btn btn-outline" style={{ padding: '4px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -666,7 +630,7 @@ const ProcedureCreate = () => {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {documents.map((doc, idx) => (
-                  <div key={idx} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
+                  <div key={doc._uid || idx} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
                     <div style={{ flex: 2 }}>
                       <input type="text" value={doc.name} onChange={e => updateDocument(idx, 'name', e.target.value)} placeholder="Nom du document (Ex: Justificatif de domicile de -3 mois)" style={{ ...inputStyle, marginBottom: 0 }} />
                     </div>
@@ -684,15 +648,10 @@ const ProcedureCreate = () => {
                 ))}
                 {documents.length === 0 && <p style={emptyTextStyle}>Aucun document requis configuré. (Ceux-ci apparaîtront lors de la soumission de la demande et en téléchargement PDF)</p>}
               </div>
-            </motion.section>
+            </div>
 
             {/* 8. PARAMÈTRES DU BOUTON ACTIONS */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.35 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <h3 style={sectionTitleStyle}><i className="fas fa-external-link-alt" style={{ color: 'var(--vert-500)' }}></i> Bouton d'action personnalisé</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div>
@@ -704,15 +663,10 @@ const ProcedureCreate = () => {
                   <input type="text" value={buttonLink} onChange={(e) => setButtonLink(e.target.value)} placeholder="Ex: /collecte, /contact... (Ne pas utiliser de liens externes)" style={inputStyle} />
                 </div>
               </div>
-            </motion.section>
+            </div>
 
             {/* 9. MODÈLE DE DOCUMENT OFFICIEL (PDF) */}
-            <motion.section 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.4 }}
-              style={sectionStyle}
-            >
+            <div style={sectionStyle}>
               <h3 style={sectionTitleStyle}><i className="fas fa-file-pdf" style={{ color: 'var(--vert-500)' }}></i> Modèle de Document Officiel (PDF)</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--gris-500)', marginBottom: '15px' }}>
                 Uploadez un modèle PDF officiel contenant des champs de formulaire interactifs (AcroForm). Remplissez le tableau ci-dessous pour faire correspondre les données saisies par le citoyen avec les noms des champs PDF.
@@ -745,7 +699,7 @@ const ProcedureCreate = () => {
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {pdfFieldsMap.map((mapItem, idx) => (
-                  <div key={idx} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
+                  <div key={mapItem._uid || idx} style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#F9FAFB', padding: '10px', borderRadius: '8px', border: '1px solid var(--gris-200)' }}>
                     <div style={{ flex: 1 }}>
                       <input type="text" value={mapItem.dataKey} onChange={e => updatePdfFieldMap(idx, 'dataKey', e.target.value)} placeholder="Clé de donnée (Ex: nom, referenceParcelle)" style={{ ...inputStyle, marginBottom: 0 }} />
                     </div>
@@ -760,16 +714,16 @@ const ProcedureCreate = () => {
                 ))}
                 {pdfFieldsMap.length === 0 && <p style={emptyTextStyle}>Aucun mapping configuré.</p>}
               </div>
-            </motion.section>
+            </div>
 
             {/* Submit Bar */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
               <Link to="/admin/procedures" className="btn btn-outline" style={{ padding: '12px 24px' }}>Annuler</Link>
               <button type="submit" className="btn btn-primary" disabled={submitting} style={{ padding: '12px 30px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '15px' }}>
                 {submitting ? (
-                  <><i className="fas fa-spinner fa-spin"></i> Création...</>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-spinner fa-spin"></i> Création...</span>
                 ) : (
-                  <><FaCheckCircle /> Créer la Démarche</>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FaCheckCircle /> Créer la Démarche</span>
                 )}
               </button>
             </div>

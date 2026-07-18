@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -13,6 +14,13 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
     this.setState({ errorInfo });
+  }
+
+  componentDidUpdate(prevProps) {
+    // Réinitialiser l'erreur si la route change
+    if (this.state.hasError && this.props.location?.pathname !== prevProps.location?.pathname) {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+    }
   }
 
   render() {
@@ -75,4 +83,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-export default ErrorBoundary;
+export default function ErrorBoundaryWrapper(props) {
+  const location = useLocation();
+  return <ErrorBoundary location={location} {...props} />;
+}
