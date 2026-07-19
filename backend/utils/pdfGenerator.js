@@ -177,9 +177,11 @@ const fillTemplatePdf = async (templatePath, citizenData, referenceNumber, mappi
       });
     }
 
-    // Embed QR Code pointing to a verification URL (e.g. backend validation route)
+    // Embed QR Code pointing to a verification URL
     try {
-      const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify/${referenceNumber}`;
+      const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://dembeni.vercel.app';
+      const verifyUrl = `${baseUrl.replace(/\/$/, '')}/verify/${referenceNumber}`;
+      console.log(`[PDF GENERATOR USED] fillTemplatePdf - QR Code : ${verifyUrl}`);
       const qrBuf = await QRCode.toBuffer(verifyUrl, { margin: 1 });
       const qrImage = await pdfDoc.embedPng(qrBuf);
       
@@ -242,7 +244,9 @@ const generateReceiptPdf = (request, citizen, referenceNumber) =>
         .text('MAIRIE DE DEMBÉNI — RÉCÉPISSÉ DE DÉPÔT', M + 8, headerY + 10, { width: IW - 80, lineBreak: false });
 
       // QR Code pointing to verification URL
-      const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify/${referenceNumber}`;
+      const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://dembeni.vercel.app';
+      const verifyUrl = `${baseUrl.replace(/\/$/, '')}/verify/${referenceNumber}`;
+      console.log(`[PDF GENERATOR USED] generateReceiptPdf - QR Code : ${verifyUrl}`);
       const qrBuf = await QRCode.toBuffer(verifyUrl);
       doc.image(qrBuf, PW - M - 70, headerY + 2, { width: 70 });
 
@@ -380,7 +384,9 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
         .text('MAIRIE DE DEMBÉNI — DOCUMENT OFFICIEL VALIDÉ', M + 8, headerY + 10, { width: IW - 80, lineBreak: false });
 
       // QR Code pointing to verification URL
-      const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify/${referenceNumber}`;
+      const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://dembeni.vercel.app';
+      const verifyUrl = `${baseUrl.replace(/\/$/, '')}/verify/${referenceNumber}`;
+      console.log(`[PDF GENERATOR USED] generateOfficialPdf - QR Code : ${verifyUrl}`);
       const qrBuf = await QRCode.toBuffer(verifyUrl);
       doc.image(qrBuf, PW - M - 70, headerY + 2, { width: 70 });
 
@@ -463,9 +469,10 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
 
 // ─── 4. Generate filled PDF from uploaded template (avec fallback récépissé) ──
 const generateTemplatePdf = async (request, citizen, referenceNumber, procedure) => {
+  console.log(`[PDF GENERATOR USED] generateTemplatePdf`);
+  console.log(`[PDF TEMPLATE USED] Procedure pdfTemplate = ${procedure?.pdfTemplate || 'AUCUN'}`);
   console.log(`[generateTemplatePdf] référence : ${referenceNumber}`);
   console.log(`[generateTemplatePdf] procédure : ${procedure?.title || 'N/A'}`);
-  console.log(`[generateTemplatePdf] pdfTemplate : ${procedure?.pdfTemplate || 'absent'}`);
 
   if (!procedure || !procedure.pdfTemplate) {
     console.warn(`[generateTemplatePdf] Pas de template — fallback vers récépissé générique`);
@@ -483,7 +490,9 @@ const generateTemplatePdf = async (request, citizen, referenceNumber, procedure)
 
     return Buffer.from(pdfBytes);
   } catch (templateErr) {
-    console.error(`[generateTemplatePdf] Échec template (${templateErr.message}) — fallback vers récépissé générique`);
+    console.error(`[generateTemplatePdf] Échec fatal template (${templateErr.message}).`);
+    console.error(`Stack:`, templateErr.stack);
+    console.log(`[PDF GENERATOR USED] Fallback déclenché vers generateReceiptPdf`);
     return generateReceiptPdf(
       { ...request, procedureType: procedure?.title },
       citizen,
@@ -495,9 +504,10 @@ const generateTemplatePdf = async (request, citizen, referenceNumber, procedure)
 
 // ─── 5. Generate from OfficialPdfTemplate model (avec fallback récépissé) ─────
 const generateFromOfficialTemplate = async (request, citizen, referenceNumber, template) => {
+  console.log(`[PDF GENERATOR USED] generateFromOfficialTemplate`);
+  console.log(`[PDF TEMPLATE USED] OfficialTemplate file = ${template?.templateFile || 'AUCUN'}`);
   console.log(`[generateFromOfficialTemplate] référence : ${referenceNumber}`);
   console.log(`[generateFromOfficialTemplate] template id : ${template?._id || 'N/A'}`);
-  console.log(`[generateFromOfficialTemplate] templateFile : ${template?.templateFile || 'absent'}`);
 
   // Si pas de template ou fichier absent → fallback direct
   if (!template || !template.templateFile) {
@@ -547,7 +557,9 @@ const generateFromOfficialTemplate = async (request, citizen, referenceNumber, t
 
     return Buffer.from(pdfBytes);
   } catch (templateErr) {
-    console.error(`[generateFromOfficialTemplate] Échec template (${templateErr.message}) — fallback vers récépissé générique`);
+    console.error(`[generateFromOfficialTemplate] Échec fatal template (${templateErr.message}).`);
+    console.error(`Stack:`, templateErr.stack);
+    console.log(`[PDF GENERATOR USED] Fallback déclenché vers generateReceiptPdf`);
     return generateReceiptPdf(
       { ...request, procedureType: request.procedureId?.title },
       citizen,

@@ -279,6 +279,7 @@ exports.updateRequestStatus = async (req, res) => {
 // ─── Dynamic PDF Streaming Handlers (No Cloudinary) ────────────────────────
 const handleDynamicPdf = async (req, res, type) => {
   const requestId = req.params.id;
+  console.log(`[PDF ROUTE USED] handleDynamicPdf - Endpoint called for type: ${type}`);
   console.log(`[PDF Dynamic] ─── Début ───────────────────────────────`);
   console.log(`[PDF Dynamic] requestId  : ${requestId}, type: ${type}`);
 
