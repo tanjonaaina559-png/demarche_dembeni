@@ -1,0 +1,45 @@
+[
+  {
+    "key": "referenceNumber",
+    "x": 200,
+    "y": 661.89,
+    "size": 11,
+    "font": "Helvetica-Bold",
+    "placeholder": "{{referenceNumber}}"
+  },
+  {
+    "key": "nom",
+    "x": 150,
+    "y": 591.89,
+    "size": 10,
+    "placeholder": "{{nom}}"
+  },
+  {
+    "key": "prenom",
+    "x": 150,
+    "y": 571.89,
+    "size": 10,
+    "placeholder": "{{prenom}}"
+  },
+  {
+    "key": "adresse",
+    "x": 150,
+    "y": 551.89,
+    "size": 10,
+    "placeholder": "{{adresse}}"
+  },
+  {
+    "key": "date_soumission",
+    "x": 170,
+    "y": 481.89,
+    "size": 10,
+    "placeholder": "{{date_demande}}"
+  },
+  {
+    "key": "date_validation",
+    "x": 170,
+    "y": 461.89,
+    "size": 10,
+    "placeholder": "{{date_validation}}"
+  }
+]

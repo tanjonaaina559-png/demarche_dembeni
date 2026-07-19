@@ -1,0 +1,142 @@
+[
+  {
+    "key": "resp1_civilite",
+    "x": 100,
+    "y": 583.89,
+    "size": 9,
+    "placeholder": "{{resp1_civilite}}"
+  },
+  {
+    "key": "resp1_nom",
+    "x": 135,
+    "y": 568.89,
+    "size": 9,
+    "placeholder": "{{resp1_nom}}"
+  },
+  {
+    "key": "resp1_nom_naissance",
+    "x": 135,
+    "y": 553.89,
+    "size": 9,
+    "placeholder": "{{resp1_nom_naissance}}"
+  },
+  {
+    "key": "resp1_prenom",
+    "x": 135,
+    "y": 538.89,
+    "size": 9,
+    "placeholder": "{{resp1_prenom}}"
+  },
+  {
+    "key": "resp1_email",
+    "x": 135,
+    "y": 523.89,
+    "size": 9,
+    "placeholder": "{{resp1_email}}"
+  },
+  {
+    "key": "resp1_telephone",
+    "x": 135,
+    "y": 508.89,
+    "size": 9,
+    "placeholder": "{{resp1_telephone}}"
+  },
+  {
+    "key": "resp1_adresse",
+    "x": 135,
+    "y": 493.89,
+    "size": 9,
+    "placeholder": "{{resp1_adresse}}"
+  },
+  {
+    "key": "resp2_civilite",
+    "x": 362.64,
+    "y": 583.89,
+    "size": 9,
+    "placeholder": "{{resp2_civilite}}"
+  },
+  {
+    "key": "resp2_nom",
+    "x": 397.64,
+    "y": 568.89,
+    "size": 9,
+    "placeholder": "{{resp2_nom}}"
+  },
+  {
+    "key": "resp2_nom_naissance",
+    "x": 397.64,
+    "y": 553.89,
+    "size": 9,
+    "placeholder": "{{resp2_nom_naissance}}"
+  },
+  {
+    "key": "resp2_prenom",
+    "x": 397.64,
+    "y": 538.89,
+    "size": 9,
+    "placeholder": "{{resp2_prenom}}"
+  },
+  {
+    "key": "resp2_email",
+    "x": 397.64,
+    "y": 523.89,
+    "size": 9,
+    "placeholder": "{{resp2_email}}"
+  },
+  {
+    "key": "resp2_telephone",
+    "x": 397.64,
+    "y": 508.89,
+    "size": 9,
+    "placeholder": "{{resp2_telephone}}"
+  },
+  {
+    "key": "resp2_adresse",
+    "x": 397.64,
+    "y": 493.89,
+    "size": 9,
+    "placeholder": "{{resp2_adresse}}"
+  },
+  {
+    "key": "enfant_date_naissance",
+    "x": 175,
+    "y": 443.89,
+    "size": 9,
+    "placeholder": "{{enfant_date_naissance}}"
+  },
+  {
+    "key": "autre_enfant_1",
+    "x": 45,
+    "y": 388.89,
+    "size": 9,
+    "placeholder": "{{autre_enfant_1}}"
+  },
+  {
+    "key": "autre_enfant_2",
+    "x": 45,
+    "y": 373.89,
+    "size": 9,
+    "placeholder": "{{autre_enfant_2}}"
+  },
+  {
+    "key": "autre_enfant_3",
+    "x": 45,
+    "y": 358.89,
+    "size": 9,
+    "placeholder": "{{autre_enfant_3}}"
+  },
+  {
+    "key": "autre_enfant_4",
+    "x": 45,
+    "y": 343.89,
+    "size": 9,
+    "placeholder": "{{autre_enfant_4}}"
+  },
+  {
+    "key": "date_soumission",
+    "x": 75,
+    "y": 263.89,
+    "size": 9,
+    "placeholder": "{{date_soumission}}"
+  }
+]

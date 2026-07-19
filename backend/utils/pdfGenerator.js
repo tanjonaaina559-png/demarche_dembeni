@@ -79,6 +79,20 @@ const fillTemplatePdf = async (templatePath, citizenData, referenceNumber, mappi
     }
     existingPdfBytes = fs.readFileSync(absPath);
     console.log(`[fillTemplatePdf] Fichier local lu (${existingPdfBytes.length} bytes)`);
+
+    // Auto-load matching JSON mapping if present and mapping array is empty
+    if (!mapping || mapping.length === 0) {
+      const jsonPath = absPath.replace('.pdf', '.json');
+      if (fs.existsSync(jsonPath)) {
+        try {
+          const rawJson = fs.readFileSync(jsonPath, 'utf8');
+          mapping = JSON.parse(rawJson);
+          console.log(`[fillTemplatePdf] Auto-loaded mapping depuis ${jsonPath} (${mapping.length} champs)`);
+        } catch (err) {
+          console.warn(`[fillTemplatePdf] Impossible de lire le mapping JSON : ${err.message}`);
+        }
+      }
+    }
   }
 
   const pdfDoc = await PDFLibDocument.load(existingPdfBytes, { ignoreEncryption: true });
