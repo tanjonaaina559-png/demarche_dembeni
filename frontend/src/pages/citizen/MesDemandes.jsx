@@ -21,54 +21,27 @@ const MesDemandes = () => {
 
   const downloadPdf = async (demandeId, type = 'receipt') => {
     try {
-      const token = localStorage.getItem('token') ||
-        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const url = `${apiBase}/requests/${demandeId}/pdf?type=${type}`;
-
+      const url = `/requests/${demandeId}/pdf?type=${type}`;
       console.log(`[PDF] Téléchargement → ${url}`);
 
-      // On fait un HEAD/GET pour vérifier le statut AVANT d'ouvrir le tab
-      // Le backend redirige vers Cloudinary : on laisse fetch suivre et on ouvre l'URL finale
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-        redirect: 'follow'
-      });
+      // Axios envoie automatiquement le header Authorization via l'intercepteur api.js
+      const res = await api.get(url);
+      console.log('[PDF] Réponse :', res.data);
 
-      console.log(`[PDF] Réponse statut : ${response.status}, redirigé : ${response.redirected}, URL finale : ${response.url}`);
-
-      if (response.ok || response.redirected) {
-        // URL finale : soit Cloudinary, soit l'URL de l'API si le backend a servi directement
-        const finalUrl = response.redirected ? response.url : url;
-        window.open(finalUrl, '_blank');
-        return;
-      }
-
-      // Lire le message d'erreur JSON du backend
-      let errorMsg = 'Impossible de télécharger le document.';
-      try {
-        const json = await response.json();
-        errorMsg = json.message || errorMsg;
-      } catch (_) { /* réponse non-JSON */ }
-
-      if (response.status === 403) {
-        alert(`⚠️ Accès refusé :\n${errorMsg}`);
-      } else if (response.status === 404) {
-        alert(`❌ Document introuvable :\n${errorMsg}`);
-      } else if (response.status === 500) {
-        alert(`🔴 Erreur serveur :\n${errorMsg}\n\nContactez l'administration si le problème persiste.`);
+      if (res.data && res.data.url) {
+        window.open(res.data.url, '_blank');
       } else {
-        alert(`Erreur ${response.status} : ${errorMsg}`);
+        alert('Impossible de récupérer le lien du document.');
       }
     } catch (error) {
-      console.error('[PDF] Erreur réseau :', error);
-      // Fallback ultime : ouvrir l'URL directement (le navigateur gèrera la redirection)
-      const token = localStorage.getItem('token') ||
-        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const fallbackUrl = `${apiBase}/requests/${demandeId}/pdf?type=${type}`;
-      console.warn('[PDF] Fallback window.open →', fallbackUrl);
-      window.open(fallbackUrl, '_blank');
+      console.error('[PDF] Erreur :', error);
+      if (error.response?.status === 403) {
+        alert(`⚠️ Document officiel disponible uniquement après validation de votre demande.`);
+      } else if (error.response?.status === 404) {
+        alert(`❌ Document introuvable.`);
+      } else {
+        alert(`Erreur : ${error.response?.data?.message || error.message}`);
+      }
     }
   };
 

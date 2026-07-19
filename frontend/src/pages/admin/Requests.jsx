@@ -58,44 +58,36 @@ const Requests = () => {
   };
 
   const downloadRequestPdf = async (id, type = 'receipt') => {
-    console.log('[DOWNLOAD]', id);
+    console.log('[DOWNLOAD]', id, 'type:', type);
     try {
-      const token = localStorage.getItem('token') ||
-        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const url = `${apiBase}/requests/${id}/pdf?type=${type}`;
+      const url = `/requests/${id}/pdf?type=${type}`;
       console.log('[API REQUEST]', url);
-      
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      console.log('[API RESPONSE]', response);
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.url) {
-            window.open(data.url, '_blank');
-            return;
-          }
-        }
-        
-        // If it is a local file Blob returned directly
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        window.open(objectUrl, '_blank');
-      } else if (response.status === 403) {
-        showToast('Document disponible uniquement pour les demandes validées.', 'error');
+      // ── Utiliser api (Axios) et non fetch() natif ──────────────────────
+      // Axios envoie automatiquement le header Authorization: Bearer <token>
+      // via son intercepteur (api.js) — contrairement à window.open() ou fetch brut.
+      const res = await api.get(url);
+      console.log('[API RESPONSE]', res.data);
+
+      if (res.data && res.data.url) {
+        // Backend retourne { url: "https://cloudinary.com/..." }
+        // On ouvre l'URL Cloudinary publique directement dans un nouvel onglet.
+        window.open(res.data.url, '_blank');
       } else {
-        showToast('Impossible de télécharger le PDF.', 'error');
+        showToast('Impossible de récupérer le lien PDF.', 'error');
       }
     } catch (error) {
-      console.error(error);
-      showToast('Erreur inattendue.', 'error');
+      console.error('[DOWNLOAD ERROR]', error);
+      if (error.response?.status === 403) {
+        showToast('Document officiel disponible uniquement pour les demandes validées.', 'error');
+      } else if (error.response?.status === 404) {
+        showToast('PDF introuvable pour cette demande.', 'error');
+      } else {
+        showToast(`Erreur téléchargement : ${error.response?.data?.message || error.message}`, 'error');
+      }
     }
   };
+
 
   const statusBadge = (s) => {
     const map = {
