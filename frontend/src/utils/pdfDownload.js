@@ -14,49 +14,34 @@ export const handlePdf = async (requestId, type = 'receipt', action = 'view') =>
   }
 
   try {
-    const url = `/requests/${requestId}/pdf?type=${type}`;
-    console.log(`[PDF] ${action.toUpperCase()} type=${type} id=${requestId}`);
+    const endpoint = type === 'official' ? 'official' : 'receipt';
+    const url = `/requests/${requestId}/${endpoint}`;
+    console.log(`[PDF] ${action.toUpperCase()} endpoint=${url} id=${requestId}`);
 
-    const res = await api.get(url);
-    console.log('[PDF] Backend response:', res.data);
+    const res = await api.get(url, { responseType: 'blob' });
+    console.log('[PDF] Backend returned blob:', res.data.size, 'bytes');
 
-    const pdfUrl = res.data?.url;
-    if (!pdfUrl) {
-      if (newWindow) newWindow.close();
-      return { ok: false, error: 'Le lien PDF est introuvable.' };
-    }
+    // Create a local blob URL for the downloaded PDF data
+    const blob = new Blob([res.data], { type: 'application/pdf' });
+    const blobUrl = window.URL.createObjectURL(blob);
 
     if (action === 'view') {
       if (newWindow) {
-        newWindow.location.href = pdfUrl;
+        newWindow.location.href = blobUrl;
       } else {
-        window.location.href = pdfUrl; // fallback if popup blocked completely
+        window.location.href = blobUrl;
       }
+      // Revoke the URL after a short delay to allow the browser to load it
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
     } else if (action === 'download') {
-      // Force download of cross-origin file by fetching it as a blob
-      try {
-        const response = await fetch(pdfUrl);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-        
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = `${type === 'official' ? 'document-officiel' : 'recepisse'}-${requestId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(blobUrl);
-      } catch (fetchErr) {
-        console.error('[PDF] Fetch blob error:', fetchErr);
-        // Fallback: just open the URL and let the browser handle it
-        const a = document.createElement('a');
-        a.href = pdfUrl;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      // The backend content-disposition usually handles filename, but we force one here just in case
+      a.download = `${type === 'official' ? 'document-officiel' : 'recepisse'}-${requestId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
     }
 
     return { ok: true };

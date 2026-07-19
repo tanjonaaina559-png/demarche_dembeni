@@ -276,192 +276,86 @@ exports.updateRequestStatus = async (req, res) => {
   }
 };
 
-// ─── Download generated PDF receipt/official (citizen or admin) ────────────────────────
-exports.downloadPdfReceipt = async (req, res) => {
+// ─── Dynamic PDF Streaming Handlers (No Cloudinary) ────────────────────────
+const handleDynamicPdf = async (req, res, type) => {
   const requestId = req.params.id;
-  const type = req.query.type || 'receipt';
-
-  console.log(`[PDF Download] ─── Début ───────────────────────────────`);
-  console.log(`[PDF Download] requestId  : ${requestId}`);
-  console.log(`[PDF Download] type       : ${type}`);
-  console.log(`[PDF Download] userId     : ${req.user?._id}`);
+  console.log(`[PDF Dynamic] ─── Début ───────────────────────────────`);
+  console.log(`[PDF Dynamic] requestId  : ${requestId}, type: ${type}`);
 
   try {
-    // 1. Vérifier que l'ID est un ObjectId valide
     const mongoose = require('mongoose');
     if (!mongoose.Types.ObjectId.isValid(requestId)) {
-      console.warn(`[PDF Download] ID invalide : ${requestId}`);
-      return res.status(400).json({ message: `ID de demande invalide : ${requestId}` });
+      return res.status(400).json({ message: `ID invalide : ${requestId}` });
     }
 
-    // 2. Chercher la demande
     const request = await Request.findById(requestId)
       .populate('citizenId', 'firstname lastname email phone address')
-      .populate('procedureId', 'title category pdfTemplate pdfFields');
+      .populate('procedureId', 'title category pdfTemplate pdfFields')
+      .populate('uploadedFiles');
 
     if (!request) {
-      console.warn(`[PDF Download] Demande introuvable en base : ${requestId}`);
-      return res.status(404).json({
-        message: `Demande introuvable. Vérifiez que l'ID ${requestId} est correct.`
-      });
+      return res.status(404).json({ message: 'Demande introuvable.' });
     }
 
-    console.log(`[PDF Download] Demande trouvée : ${request.referenceNumber} (statut: ${request.status})`);
-
-    // 3. Vérifier propriété ou rôle admin
     if (
       request.citizenId._id.toString() !== req.user._id.toString() &&
       req.user.role !== 'admin'
     ) {
-      console.warn(`[PDF Download] Accès refusé — userId: ${req.user._id}, citoyenId: ${request.citizenId._id}`);
-      return res.status(403).json({ message: 'Accès refusé : cette demande ne vous appartient pas.' });
+      return res.status(403).json({ message: 'Accès refusé.' });
     }
 
-    // 4. Résoudre l'URL du PDF selon le type demandé
-    //    - 'receipt'  → récépissé de dépôt (generatedPdf), disponible dès la soumission
-    //    - 'official' → document officiel validé (finalDocument), disponible après validation
-    let pdfUrl;
+    if (type === 'official' && !['Validée', 'Terminée'].includes(request.status)) {
+      return res.status(403).json({ message: 'Le document officiel sera disponible après validation.' });
+    }
+
+    const pdfGenerator = require('../utils/pdfGenerator');
+    let pdfBuffer;
+
     if (type === 'official') {
-      // Document officiel : disponible seulement si la demande est validée/terminée
-      if (!['Validée', 'Terminée'].includes(request.status)) {
-        console.warn(`[PDF Download] Document officiel demandé mais statut = ${request.status}`);
-        return res.status(403).json({
-          message: `Le document officiel sera disponible après validation par l'administration. Statut actuel : ${request.status}`
-        });
+      const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
+      const officialTemplate = request.procedureId?._id
+        ? await OfficialPdfTemplate.findOne({ procedureId: request.procedureId._id, status: 'active' })
+        : null;
+
+      if (officialTemplate && officialTemplate.templateFile) {
+        console.log(`[PDF Dynamic] Using OfficialPdfTemplate`);
+        pdfBuffer = await pdfGenerator.generateFromOfficialTemplate(
+          request.toObject(), request.citizenId, request.referenceNumber, officialTemplate
+        );
+      } else if (request.procedureId?.pdfTemplate) {
+        console.log(`[PDF Dynamic] Using Procedure pdfTemplate: ${request.procedureId.pdfTemplate}`);
+        pdfBuffer = await pdfGenerator.generateTemplatePdf(
+          request.toObject(), request.citizenId, request.referenceNumber, request.procedureId
+        );
+      } else {
+        console.log(`[PDF Dynamic] Fallback to generic official PDFKit`);
+        pdfBuffer = await pdfGenerator.generateOfficialPdf(
+          request.toObject(), request.citizenId, request.referenceNumber
+        );
       }
-      pdfUrl = request.finalDocument || request.generatedPdf;
     } else {
-      // Récépissé : disponible dès la soumission (generatedPdf)
-      pdfUrl = request.generatedPdf;
+      console.log(`[PDF Dynamic] Generating generic PDFKit receipt`);
+      pdfBuffer = await pdfGenerator.generateReceiptPdf(
+        { ...request.toObject(), procedureType: request.procedureId?.title },
+        request.citizenId, request.referenceNumber
+      );
     }
 
-    console.log(`[PDF Download] URL PDF résolue : ${pdfUrl || '(vide)'}`);
+    // Set headers and return the raw binary buffer directly
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${type === 'official' ? 'document-officiel' : 'recepisse'}-${request.referenceNumber}.pdf"`);
+    res.send(pdfBuffer);
 
-    // 5. Si PDF absent → régénération avec triple fallback garanti
-    if (!pdfUrl) {
-      console.warn(`[PDF Download] PDF absent — régénération automatique avec fallback garanti…`);
-      try {
-        const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
-        const GeneratedDocument = require('../models/GeneratedDocument');
-
-        const populated = await Request.findById(requestId)
-          .populate('citizenId', 'firstname lastname email phone address')
-          .populate('procedureId', 'title category pdfTemplate pdfFields')
-          .populate('uploadedFiles');
-
-        const officialTemplate = populated.procedureId?._id
-          ? await OfficialPdfTemplate.findOne({ procedureId: populated.procedureId._id, status: 'active' })
-          : null;
-
-        let newPdfUrl;
-        let generationMethod = 'receipt-fallback';
-
-        // Niveau 1 : OfficialPdfTemplate (avec fallback interne vers receipt si template mort)
-        if (officialTemplate) {
-          console.log(`[PDF Download] Niveau 1 : OfficialPdfTemplate ${officialTemplate._id}`);
-          console.log(`[PDF Download] templateFile : ${officialTemplate.templateFile || 'absent'}`);
-          generationMethod = 'official-template';
-          // generateFromOfficialTemplate contient déjà un fallback interne vers generateReceiptPdf
-          newPdfUrl = await pdfGenerator.generateFromOfficialTemplate(
-            populated.toObject(),
-            populated.citizenId,
-            populated.referenceNumber,
-            officialTemplate
-          );
-        }
-        // Niveau 2 : pdfTemplate sur la procédure (avec fallback interne vers receipt si template mort)
-        else if (populated.procedureId?.pdfTemplate) {
-          console.log(`[PDF Download] Niveau 2 : pdfTemplate procédure`);
-          console.log(`[PDF Download] pdfTemplate : ${populated.procedureId.pdfTemplate}`);
-          generationMethod = 'procedure-template';
-          // generateTemplatePdf contient déjà un fallback interne vers generateReceiptPdf
-          newPdfUrl = await pdfGenerator.generateTemplatePdf(
-            populated.toObject(),
-            populated.citizenId,
-            populated.referenceNumber,
-            populated.procedureId
-          );
-        }
-        // Niveau 3 : Récépissé PDFKit pur — aucune dépendance externe, toujours disponible
-        else {
-          console.log(`[PDF Download] Niveau 3 : récépissé générique PDFKit`);
-          generationMethod = 'receipt-pdfkit';
-          newPdfUrl = await pdfGenerator.generateReceiptPdf(
-            { ...populated.toObject(), procedureType: populated.procedureId?.title },
-            populated.citizenId,
-            populated.referenceNumber
-          );
-        }
-
-        console.log(`[PDF Download] Régénération réussie (${generationMethod}) : ${newPdfUrl}`);
-
-        // Persister la nouvelle URL
-        await Request.findByIdAndUpdate(requestId, { generatedPdf: newPdfUrl });
-        try {
-          await GeneratedDocument.create({
-            citizenId: populated.citizenId._id,
-            requestId: populated._id,
-            documentType: generationMethod.startsWith('official') ? 'official' : 'receipt',
-            referenceNumber: (generationMethod.startsWith('official') ? 'DOC-' : 'REC-') + populated.referenceNumber,
-            pdfUrl: newPdfUrl,
-            status: 'available'
-          });
-        } catch (docErr) {
-          console.warn(`[PDF Download] Impossible de créer GeneratedDocument : ${docErr.message}`);
-        }
-
-        pdfUrl = newPdfUrl;
-      } catch (genErr) {
-        console.error(`[PDF Download] Tous les niveaux de régénération ont échoué : ${genErr.message}`);
-        return res.status(500).json({
-          message: `Impossible de générer le PDF. Erreur : ${genErr.message}`,
-          requestId,
-          referenceNumber: request.referenceNumber,
-          hint: 'Contactez l\'administration si le problème persiste.'
-        });
-      }
-    }
-
-    // 6. Servir le PDF
-    console.log(`[PDF Download] ─── Envoi ───────────────────────────────`);
-    console.log(`[PDF Download] pdfUrl        : ${pdfUrl}`);
-    console.log(`[PDF Download] type          : ${type}`);
-    console.log(`[PDF Download] starts http?  : ${String(pdfUrl).startsWith('http')}`);
-    console.log(`[PDF Download] contains .pdf?: ${String(pdfUrl).toLowerCase().includes('.pdf')}`);
-    console.log(`[PDF Download] Content-Type  : application/json (payload: { url })`);
-
-    if (pdfUrl.startsWith('http')) {
-      // Retourne l'URL en JSON — le frontend ouvre window.open(data.url)
-      // NE PAS faire res.redirect() car cela enverrait le header Authorization à Cloudinary → 401
-      console.log(`[PDF Download] ✅ Réponse JSON → { url: "${pdfUrl.substring(0, 80)}..." }`);
-      return res.json({ url: pdfUrl });
-    }
-
-    // Fallback legacy fichier local
-    const pathModule = require('path');
-    const fullPath = pathModule.join(__dirname, '..', pdfUrl);
-    console.log(`[PDF Download] Fichier local : ${fullPath}`);
-
-    const fs = require('fs');
-    if (!fs.existsSync(fullPath)) {
-      console.error(`[PDF Download] Fichier local introuvable : ${fullPath}`);
-      return res.status(404).json({
-        message: `Le fichier PDF local est introuvable : ${fullPath}`,
-        pdfUrl
-      });
-    }
-
-    // Return JSON for local files as well so the frontend handles it uniformly if needed,
-    // or just download. The frontend fetch expects a blob if not redirected!
-    // But since we can't redirect, the frontend will see response.ok and call response.blob().
-    // So for local files, res.download is perfect.
-    res.download(fullPath);
-    console.log(`[PDF Download] ─── Succès ───────────────────────────────`);
   } catch (error) {
-    console.error(`[PDF Download] Erreur inattendue :`, error);
-    res.status(500).json({ message: 'Erreur serveur lors du téléchargement du PDF', error: error.message });
+    console.error(`[PDF Dynamic] Erreur : ${error.message}`);
+    res.status(500).json({ message: `Impossible de générer le PDF : ${error.message}` });
   }
 };
+
+exports.downloadReceipt = (req, res) => handleDynamicPdf(req, res, 'receipt');
+exports.downloadOfficial = (req, res) => handleDynamicPdf(req, res, 'official');
+exports.downloadLegacyPdf = (req, res) => handleDynamicPdf(req, res, req.query.type === 'official' ? 'official' : 'receipt');
+
 
 // ─── Get generated documents for a citizen ───────────────────────────────────
 exports.getCitizenDocuments = async (req, res) => {

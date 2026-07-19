@@ -3,11 +3,6 @@ const { PDFDocument: PDFLibDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs');
 const path = require('path');
 const QRCode = require('qrcode');
-const cloudinary = require('../config/cloudinary');
-
-const getCloudinaryUrl = (filename) => {
-  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload/dembeni/documents/${filename}`;
-};
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
@@ -182,16 +177,12 @@ const fillTemplatePdf = async (templatePath, citizenData, referenceNumber, mappi
       });
     }
 
-    // Embed QR Code for verification
+    // Embed QR Code pointing to a verification URL (e.g. backend validation route)
     try {
-      // Point to the predictable Cloudinary URL for this document
-      const expectedFilename = `official-${referenceNumber}.pdf`;
-      const verifyUrl = getCloudinaryUrl(expectedFilename);
+      const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify/${referenceNumber}`;
       const qrBuf = await QRCode.toBuffer(verifyUrl, { margin: 1 });
       const qrImage = await pdfDoc.embedPng(qrBuf);
       
-      // Draw QR Code on the bottom left or right (adjust based on template)
-      // Let's place it at bottom right
       firstPage.drawImage(qrImage, {
         x: width - 80,
         y: 10,
@@ -210,23 +201,11 @@ const fillTemplatePdf = async (templatePath, citizenData, referenceNumber, mappi
 const generateReceiptPdf = (request, citizen, referenceNumber) =>
   new Promise(async (resolve, reject) => {
     try {
-      const filename = `receipt-${referenceNumber}.pdf`;
       const doc = new PDFDocument({ size: 'A4', margin: 50 });
       
-      const stream = cloudinary.uploader.upload_stream(
-        { resource_type: 'raw', folder: 'dembeni/documents', public_id: filename },
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary Upload Error:', error);
-            reject(error);
-          } else {
-            console.log('Cloudinary URL:', result.secure_url);
-            resolve(result.secure_url);
-          }
-        }
-      );
-      
-      doc.pipe(stream);
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
 
       const NAVY = '#0D1B4B';
       const PW = doc.page.width;
@@ -262,13 +241,10 @@ const generateReceiptPdf = (request, citizen, referenceNumber) =>
       doc.fontSize(13).font('Helvetica-Bold').fillColor('white')
         .text('MAIRIE DE DEMBÉNI — RÉCÉPISSÉ DE DÉPÔT', M + 8, headerY + 10, { width: IW - 80, lineBreak: false });
 
-      // QR Code pointing to Cloudinary URL
-      const qrUrl = getCloudinaryUrl(filename);
-      const qrBuf = await QRCode.toBuffer(qrUrl);
+      // QR Code pointing to verification URL
+      const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify/${referenceNumber}`;
+      const qrBuf = await QRCode.toBuffer(verifyUrl);
       doc.image(qrBuf, PW - M - 70, headerY + 2, { width: 70 });
-
-      console.log('Uploading PDF to Cloudinary');
-      console.log('  filename:', filename);
 
       let y = headerY + 50;
 
@@ -362,23 +338,11 @@ const generateReceiptPdf = (request, citizen, referenceNumber) =>
 const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {}) =>
   new Promise(async (resolve, reject) => {
     try {
-      const filename = `official-${referenceNumber}.pdf`;
       const doc = new PDFDocument({ size: 'A4', margin: 50 });
       
-      const stream = cloudinary.uploader.upload_stream(
-        { resource_type: 'raw', folder: 'dembeni/documents', public_id: filename },
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary Upload Error:', error);
-            reject(error);
-          } else {
-            console.log('Cloudinary URL:', result.secure_url);
-            resolve(result.secure_url);
-          }
-        }
-      );
-      
-      doc.pipe(stream);
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
 
       const NAVY = '#0D1B4B';
       const GREEN = '#065F46';
@@ -415,13 +379,10 @@ const generateOfficialPdf = (request, citizen, referenceNumber, stampOptions = {
       doc.fontSize(12).font('Helvetica-Bold').fillColor('white')
         .text('MAIRIE DE DEMBÉNI — DOCUMENT OFFICIEL VALIDÉ', M + 8, headerY + 10, { width: IW - 80, lineBreak: false });
 
-      // QR Code pointing to Cloudinary URL
-      const qrUrl = getCloudinaryUrl(filename);
-      const qrBuf = await QRCode.toBuffer(qrUrl);
+      // QR Code pointing to verification URL
+      const verifyUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify/${referenceNumber}`;
+      const qrBuf = await QRCode.toBuffer(verifyUrl);
       doc.image(qrBuf, PW - M - 70, headerY + 2, { width: 70 });
-
-      console.log('Uploading PDF to Cloudinary');
-      console.log('  filename:', filename);
 
       let y = headerY + 50;
       doc.fontSize(10).font('Helvetica').fillColor('#444')
@@ -520,20 +481,7 @@ const generateTemplatePdf = async (request, citizen, referenceNumber, procedure)
     const citizenData = buildCitizenData(citizen, formData, referenceNumber, request);
     const pdfBytes = await fillTemplatePdf(procedure.pdfTemplate, citizenData, referenceNumber);
 
-    const uploadDir = ensureUploadDir();
-    const filename = `receipt-${referenceNumber}.pdf`;
-    const filePath = path.join(uploadDir, filename);
-    fs.writeFileSync(filePath, pdfBytes);
-
-    console.log(`[generateTemplatePdf] Upload Cloudinary : ${filename}`);
-    const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: 'raw',
-      folder: 'dembeni/documents',
-      public_id: filename
-    });
-    fs.unlinkSync(filePath);
-    console.log(`[generateTemplatePdf] Cloudinary URL : ${result.secure_url}`);
-    return result.secure_url;
+    return Buffer.from(pdfBytes);
   } catch (templateErr) {
     console.error(`[generateTemplatePdf] Échec template (${templateErr.message}) — fallback vers récépissé générique`);
     return generateReceiptPdf(
@@ -597,20 +545,7 @@ const generateFromOfficialTemplate = async (request, citizen, referenceNumber, t
       template.isDemonstration || false
     );
 
-    const uploadDir = ensureUploadDir();
-    const filename = `official-${referenceNumber}.pdf`;
-    const filePath = path.join(uploadDir, filename);
-    fs.writeFileSync(filePath, pdfBytes);
-
-    console.log(`[generateFromOfficialTemplate] Upload Cloudinary : ${filename}`);
-    const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: 'raw',
-      folder: 'dembeni/documents',
-      public_id: filename
-    });
-    fs.unlinkSync(filePath);
-    console.log(`[generateFromOfficialTemplate] Cloudinary URL : ${result.secure_url}`);
-    return result.secure_url;
+    return Buffer.from(pdfBytes);
   } catch (templateErr) {
     console.error(`[generateFromOfficialTemplate] Échec template (${templateErr.message}) — fallback vers récépissé générique`);
     return generateReceiptPdf(
