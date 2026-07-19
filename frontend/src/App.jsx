@@ -40,7 +40,7 @@ const CMSCollecteSchedule = lazy(() => import('./pages/admin/CMSCollecteSchedule
 const AdminDocuments = lazy(() => import('./pages/admin/AdminDocuments'));
 const AdminHomePage = lazy(() => import('./pages/admin/AdminHomePage'));
 const AdminPdfTemplates = lazy(() => import('./pages/admin/AdminPdfTemplates'));
-const VerifyDocument = lazy(() => import('./pages/VerifyDocument'));
+const DocumentVerification = lazy(() => import('./pages/DocumentVerification'));
 
 const NotFound = () => (
   <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -78,7 +78,7 @@ function App() {
             <Route path="formulaires-dynamiques" element={<DynamicPdfForm />} />
             <Route path="demarches/:id" element={<DemarcheDetail />} />
           </Route>
-          <Route path="/verify-document/:reference" element={<VerifyDocument />} />
+          <Route path="/verify/:reference" element={<DocumentVerification />} />
 
           {/* Auth Routes */}
           <Route path="/inscription" element={<Inscription />} />
