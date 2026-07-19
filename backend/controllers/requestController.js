@@ -256,14 +256,17 @@ exports.updateRequestStatus = async (req, res) => {
       const citizen = await require('../models/User').findById(request.citizenId);
       if (citizen && citizen.email) {
         const proc = await Procedure.findById(request.procedureId);
-        await emailService.sendEmail({
+        // Envoi d'email en mode fire-and-forget pour ne pas bloquer l'API
+        emailService.sendEmail({
           email: citizen.email,
           subject: 'Mise à jour de votre demande - Mairie de Dembéni',
           message: `Bonjour ${citizen.firstname || ''},\n\nLe statut de votre demande "${proc?.title || 'Démarche'}" est passé à : ${status}.\n${adminComment ? 'Commentaire : ' + adminComment : ''}\n\nCordialement,\nMairie de Dembéni`
+        }).catch(emailErr => {
+          console.warn('Email notification failed:', emailErr.message);
         });
       }
     } catch (emailErr) {
-      console.warn('Email notification failed:', emailErr.message);
+      console.warn('Email block failed:', emailErr.message);
     }
 
     res.json({ message: 'Statut mis à jour avec succès', request });
@@ -423,8 +426,10 @@ exports.downloadPdfReceipt = async (req, res) => {
     console.log(`[PDF Download] Envoi du PDF → ${pdfUrl}`);
 
     if (pdfUrl.startsWith('http')) {
-      // URL Cloudinary : redirection
-      return res.redirect(pdfUrl);
+      // Au lieu de res.redirect, on retourne l'URL en JSON.
+      // Cela évite que le navigateur n'envoie le header 'Authorization: Bearer'
+      // à Cloudinary lors de la redirection (ce qui provoque une erreur 401).
+      return res.json({ url: pdfUrl });
     }
 
     // Fallback legacy fichier local
@@ -441,6 +446,10 @@ exports.downloadPdfReceipt = async (req, res) => {
       });
     }
 
+    // Return JSON for local files as well so the frontend handles it uniformly if needed,
+    // or just download. The frontend fetch expects a blob if not redirected!
+    // But since we can't redirect, the frontend will see response.ok and call response.blob().
+    // So for local files, res.download is perfect.
     res.download(fullPath);
     console.log(`[PDF Download] ─── Succès ───────────────────────────────`);
   } catch (error) {
