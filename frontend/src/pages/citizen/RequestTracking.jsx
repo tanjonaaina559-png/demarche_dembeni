@@ -45,20 +45,26 @@ const RequestTracking = () => {
 
   const handleDownloadReceipt = async (reqId) => {
     try {
-      const response = await api.get(`/requests/${reqId}/pdf`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `recepisse_${reqId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Le backend retourne { url: "https://cloudinary.com/..." } — NE PAS utiliser responseType:'blob'
+      // car cela convertirait le JSON en blob corrompu, produisant un PDF invalide.
+      const res = await api.get(`/requests/${reqId}/pdf?type=receipt`);
+      console.log('[PDF Receipt]', res.data);
+
+      if (res.data && res.data.url) {
+        window.open(res.data.url, '_blank');
+      } else {
+        alert('Impossible de récupérer le lien du document.');
+      }
     } catch (error) {
       console.error('Erreur lors du téléchargement du PDF', error);
-      alert('Impossible de télécharger le reçu.');
+      if (error.response?.status === 403) {
+        alert('Document disponible uniquement après validation.');
+      } else {
+        alert(`Impossible de télécharger le reçu : ${error.response?.data?.message || error.message}`);
+      }
     }
   };
+
 
   const filtered = filter === 'all'
     ? requests

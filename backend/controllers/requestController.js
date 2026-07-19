@@ -423,12 +423,17 @@ exports.downloadPdfReceipt = async (req, res) => {
     }
 
     // 6. Servir le PDF
-    console.log(`[PDF Download] Envoi du PDF → ${pdfUrl}`);
+    console.log(`[PDF Download] ─── Envoi ───────────────────────────────`);
+    console.log(`[PDF Download] pdfUrl        : ${pdfUrl}`);
+    console.log(`[PDF Download] type          : ${type}`);
+    console.log(`[PDF Download] starts http?  : ${String(pdfUrl).startsWith('http')}`);
+    console.log(`[PDF Download] contains .pdf?: ${String(pdfUrl).toLowerCase().includes('.pdf')}`);
+    console.log(`[PDF Download] Content-Type  : application/json (payload: { url })`);
 
     if (pdfUrl.startsWith('http')) {
-      // Au lieu de res.redirect, on retourne l'URL en JSON.
-      // Cela évite que le navigateur n'envoie le header 'Authorization: Bearer'
-      // à Cloudinary lors de la redirection (ce qui provoque une erreur 401).
+      // Retourne l'URL en JSON — le frontend ouvre window.open(data.url)
+      // NE PAS faire res.redirect() car cela enverrait le header Authorization à Cloudinary → 401
+      console.log(`[PDF Download] ✅ Réponse JSON → { url: "${pdfUrl.substring(0, 80)}..." }`);
       return res.json({ url: pdfUrl });
     }
 
