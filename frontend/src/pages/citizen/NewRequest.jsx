@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -448,16 +448,16 @@ const NewRequestComponent = () => {
         {renderStepIndicator()}
 
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.15 }}
-          >
-            {/* â”€â”€ STEP 1 : SÃ©lection de la dÃ©marche â”€â”€ */}
+            {/* ── STEP 1  : SÃ©lection de la dÃ©marche ── */}
             {currentStep === 1 && (
-              <div>
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div>
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', color: '#1F2937' }}>Choisissez votre dÃ©marche</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '15px' }}>
                   {(procedures || []).map(p => (
@@ -482,11 +482,19 @@ const NewRequestComponent = () => {
                   ))}
                 </div>
               </div>
+              </motion.div>
             )}
 
-            {/* â”€â”€ STEP 2 : Formulaire â”€â”€ */}
+            {/* ── STEP 2  : Formulaire ── */}
             {currentStep === 2 && (
-              <div>
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div>
                 {selectedProcDetails ? (
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', background: '#F9FAFB', padding: '12px', borderRadius: '8px' }}>
@@ -537,11 +545,19 @@ const NewRequestComponent = () => {
                   <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Chargement de la procÃ©dure...</div>
                 )}
               </div>
+              </motion.div>
             )}
 
-            {/* â”€â”€ STEP 3 : PiÃ¨ces justificatives â”€â”€ */}
+            {/* ── STEP 3  : PiÃ¨ces justificatives ── */}
             {currentStep === 3 && (
-              <div>
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div>
                 <h2 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#1F2937' }}>PiÃ¨ces justificatives</h2>
 
                 {(selectedProcDetails?.documents || []).length > 0 ? (
@@ -624,9 +640,10 @@ const NewRequestComponent = () => {
                   </div>
                 )}
               </div>
+              </motion.div>
             )}
 
-            {/* â”€â”€ STEP 4 : Confirmation â”€â”€ */}
+            {/* ── STEP 4  : Confirmation ── */}
             {currentStep === 4 && (() => {
               const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
               const rawPdf = successData?.generatedPdf;
@@ -634,7 +651,14 @@ const NewRequestComponent = () => {
                 ? (rawPdf.startsWith('http') ? rawPdf : `${API_BASE}${rawPdf.split('//').join('/')}`)
                 : null;
               return (
-                <div style={{ textAlign: 'center', padding: '20px 10px' }}>
+                <motion.div
+                  key="step4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <div style={{ textAlign: 'center', padding: '20px 10px' }}>
                   <div style={{ width: '72px', height: '72px', background: 'linear-gradient(135deg, #10B981, #059669)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white', boxShadow: '0 8px 20px rgba(16,185,129,0.35)' }}>
                     <CheckCircle size={36} />
                   </div>
@@ -681,9 +705,9 @@ const NewRequestComponent = () => {
                     )}
                   </div>
                 </div>
+              </motion.div>
               );
             })()}
-          </motion.div>
         </AnimatePresence>
 
         {/* Navigation Buttons */}
