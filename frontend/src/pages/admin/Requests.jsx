@@ -58,9 +58,9 @@ const Requests = () => {
     return full || citizen.email || 'Inconnu';
   };
 
-  const downloadRequestPdf = async (id, type = 'receipt') => {
-    console.log('[DOWNLOAD]', id, 'type:', type);
-    const result = await handlePdf(id, type, 'view');
+  const handlePdfAction = async (id, type = 'receipt', action = 'view') => {
+    console.log(`[PDF] ${action.toUpperCase()}`, id, 'type:', type);
+    const result = await handlePdf(id, type, action);
     if (!result.ok) {
       showToast(result.error, 'error');
     }
@@ -230,23 +230,43 @@ const Requests = () => {
               <X size={16} />
             </button>
           )}
-          <button
-            title="Télécharger Récépissé PDF"
-            disabled={submitting}
-            style={{ background: '#f0fdf4', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: submitting ? 'not-allowed' : 'pointer', color: '#16a34a', opacity: submitting ? 0.5 : 1 }}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadRequestPdf(row._id, 'receipt'); }}
-          >
-            <Download size={16} />
-          </button>
-          {row.status === 'Validée' && (
+          <div style={{ display: 'flex', gap: 4 }}>
             <button
-              title="Télécharger Document Officiel"
+              title="Voir Récépissé PDF"
               disabled={submitting}
-              style={{ background: '#eff6ff', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: submitting ? 'not-allowed' : 'pointer', color: '#1E40AF', opacity: submitting ? 0.5 : 1 }}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadRequestPdf(row._id, 'official'); }}
+              style={{ background: '#f0fdf4', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: submitting ? 'not-allowed' : 'pointer', color: '#16a34a', opacity: submitting ? 0.5 : 1 }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePdfAction(row._id, 'receipt', 'view'); }}
             >
-              <FileText size={16} />
+              <Eye size={16} />
             </button>
+            <button
+              title="Télécharger Récépissé PDF"
+              disabled={submitting}
+              style={{ background: '#f0fdf4', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: submitting ? 'not-allowed' : 'pointer', color: '#16a34a', opacity: submitting ? 0.5 : 1 }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePdfAction(row._id, 'receipt', 'download'); }}
+            >
+              <Download size={16} />
+            </button>
+          </div>
+          {row.status === 'Validée' && (
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button
+                title="Voir Document Officiel"
+                disabled={submitting}
+                style={{ background: '#eff6ff', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: submitting ? 'not-allowed' : 'pointer', color: '#1E40AF', opacity: submitting ? 0.5 : 1 }}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePdfAction(row._id, 'official', 'view'); }}
+              >
+                <Eye size={16} />
+              </button>
+              <button
+                title="Télécharger Document Officiel"
+                disabled={submitting}
+                style={{ background: '#eff6ff', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: submitting ? 'not-allowed' : 'pointer', color: '#1E40AF', opacity: submitting ? 0.5 : 1 }}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePdfAction(row._id, 'official', 'download'); }}
+              >
+                <Download size={16} />
+              </button>
+            </div>
           )}
           <button
             title="Supprimer"

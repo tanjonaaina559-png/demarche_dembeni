@@ -203,13 +203,24 @@ const MesDemandes = () => {
                   </button>
                   {['validée', 'terminée'].includes(demande.status?.toLowerCase()) ? (
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button onClick={() => downloadPdf(demande._id, 'receipt')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'var(--vert-600)', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
-                        <Download size={16} /> Récépissé de dépôt
-                      </button>
-                      {demande.finalDocument && (
-                        <button onClick={() => downloadPdf(demande._id, 'official')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: '#1D4ED8', color: '#fff', border: 'none', fontWeight: '500', cursor: 'pointer' }}>
-                          <Download size={16} /> Document officiel
+                      <div className="btn-group" style={{ display: 'flex', border: '1px solid var(--vert-600)', borderRadius: '8px', overflow: 'hidden' }}>
+                        <button onClick={() => downloadPdf(demande._id, 'receipt', 'view')} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: 'var(--vert-600)', color: '#fff', border: 'none', cursor: 'pointer', borderRight: '1px solid rgba(255,255,255,0.2)' }} title="Voir Récépissé">
+                          <Eye size={16} /> Récépissé
                         </button>
+                        <button onClick={() => downloadPdf(demande._id, 'receipt', 'download')} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', background: 'var(--vert-600)', color: '#fff', border: 'none', cursor: 'pointer' }} title="Télécharger Récépissé">
+                          <Download size={16} />
+                        </button>
+                      </div>
+                      
+                      {demande.finalDocument && (
+                        <div className="btn-group" style={{ display: 'flex', border: '1px solid #1D4ED8', borderRadius: '8px', overflow: 'hidden' }}>
+                          <button onClick={() => downloadPdf(demande._id, 'official', 'view')} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#1D4ED8', color: '#fff', border: 'none', cursor: 'pointer', borderRight: '1px solid rgba(255,255,255,0.2)' }} title="Voir Document Officiel">
+                            <Eye size={16} /> Officiel
+                          </button>
+                          <button onClick={() => downloadPdf(demande._id, 'official', 'download')} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', background: '#1D4ED8', color: '#fff', border: 'none', cursor: 'pointer' }} title="Télécharger Document Officiel">
+                            <Download size={16} />
+                          </button>
+                        </div>
                       )}
                     </div>
                   ) : (

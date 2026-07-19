@@ -44,15 +44,8 @@ const RequestTracking = () => {
     fetchRequests();
   }, [user]);
 
-  const handleDownloadReceipt = async (reqId) => {
-    const result = await handlePdf(reqId, 'receipt', 'view');
-    if (!result.ok) {
-      alert(result.error);
-    }
-  };
-
-  const handleDownloadOfficial = async (reqId) => {
-    const result = await handlePdf(reqId, 'official', 'download');
+  const handlePdfAction = async (reqId, type, action) => {
+    const result = await handlePdf(reqId, type, action);
     if (!result.ok) {
       alert(result.error);
     }
@@ -209,11 +202,25 @@ const RequestTracking = () => {
                       </div>
                     )}
 
-                    <div className="tracking-card__footer-actions">
-                      {['validée', 'terminée'].includes(req.status?.toLowerCase()) ? (
-                        <button className="btn btn-outline" onClick={() => handleDownloadReceipt(req._id)}>
-                          <i className="fas fa-file-download"></i> Télécharger le document
+                    <div className="tracking-card__footer-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <div className="btn-group" style={{ display: 'flex', border: '1px solid var(--vert-600)', borderRadius: '8px', overflow: 'hidden' }}>
+                        <button className="btn" onClick={() => handlePdfAction(req._id, 'receipt', 'view')} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#fff', color: 'var(--vert-600)', border: 'none', cursor: 'pointer', borderRight: '1px solid #E5E7EB' }} title="Voir Récépissé">
+                          <i className="fas fa-eye"></i> Récépissé
                         </button>
+                        <button className="btn" onClick={() => handlePdfAction(req._id, 'receipt', 'download')} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', background: '#fff', color: 'var(--vert-600)', border: 'none', cursor: 'pointer' }} title="Télécharger Récépissé">
+                          <i className="fas fa-download"></i>
+                        </button>
+                      </div>
+
+                      {['validée', 'terminée'].includes(req.status?.toLowerCase()) ? (
+                        <div className="btn-group" style={{ display: 'flex', border: '1px solid #1D4ED8', borderRadius: '8px', overflow: 'hidden' }}>
+                          <button className="btn" onClick={() => handlePdfAction(req._id, 'official', 'view')} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#1D4ED8', color: '#fff', border: 'none', cursor: 'pointer', borderRight: '1px solid rgba(255,255,255,0.2)' }} title="Voir Document Officiel">
+                            <i className="fas fa-eye"></i> Officiel
+                          </button>
+                          <button className="btn" onClick={() => handlePdfAction(req._id, 'official', 'download')} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', background: '#1D4ED8', color: '#fff', border: 'none', cursor: 'pointer' }} title="Télécharger Document Officiel">
+                            <i className="fas fa-download"></i>
+                          </button>
+                        </div>
                       ) : (
                         <div style={{ padding: '8px 12px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <i className="fas fa-clock"></i> Le document sera disponible après validation par l'administration.
