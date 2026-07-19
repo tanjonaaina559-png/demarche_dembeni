@@ -196,11 +196,16 @@ exports.getAllRequests = async (req, res) => {
 exports.updateRequestStatus = async (req, res) => {
   try {
     const { status, adminComment } = req.body;
+    console.log("REQUEST ID =", req.params.id);
+    console.log("NEW STATUS =", req.body.status);
 
     const request = await Request.findById(req.params.id);
     if (!request) {
       return res.status(404).json({ message: 'Demande introuvable' });
     }
+    
+    console.log("REQUEST FOUND =", request);
+    console.log("BEFORE SAVE =", request.status);
 
     request.status = status || request.status;
     if (adminComment !== undefined) {
@@ -216,14 +221,19 @@ exports.updateRequestStatus = async (req, res) => {
         request.finalDocument = request.generatedPdf;
         await request.save();
 
-        await GeneratedDocument.create({
-          citizenId: request.citizenId,
-          requestId: request._id,
-          documentType: 'official',
-          referenceNumber: `DOC-${request.referenceNumber}`,
-          pdfUrl: request.generatedPdf,
-          status: 'available'
-        });
+        try {
+          await GeneratedDocument.create({
+            citizenId: request.citizenId,
+            requestId: request._id,
+            documentType: 'official',
+            referenceNumber: `DOC-${request.referenceNumber}`,
+            pdfUrl: request.generatedPdf,
+            status: 'available'
+          });
+        } catch (genErr) {
+          console.error('[GeneratedDocument] Erreur lors de la création:', genErr.message);
+          // Ignorer si E11000 Duplicate Key
+        }
       }
     }
 
@@ -258,6 +268,7 @@ exports.updateRequestStatus = async (req, res) => {
 
     res.json({ message: 'Statut mis à jour avec succès', request });
   } catch (error) {
+    console.error(error.stack);
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
