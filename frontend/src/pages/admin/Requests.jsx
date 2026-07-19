@@ -39,7 +39,7 @@ const Requests = () => {
   /* ── Fetch ── */
   const fetchRequests = async () => {
     try {
-      const res = await api.get('/admin/requests');
+      const res = await api.get(`/admin/requests?t=${Date.now()}`);
       setRequests(Array.isArray(res?.data) ? res.data : []);
     } catch {
       showToast('Erreur lors du chargement des demandes', 'error');
@@ -128,6 +128,13 @@ const Requests = () => {
         adminComment: commentaire,
       });
       console.log('[API RESPONSE]', res);
+      
+      setRequests(prev => prev.map(req => 
+        req._id === selectedRequest._id 
+          ? { ...req, status: status, adminComment: commentaire } 
+          : req
+      ));
+      
       showToast('Statut mis à jour avec succès');
       setSelectedRequest(null);
       fetchRequests();
@@ -147,6 +154,11 @@ const Requests = () => {
     try {
       const res = await api.put(url, { status: 'Validée' });
       console.log('[API RESPONSE]', res);
+      
+      setRequests(prev => prev.map(req => 
+        req._id === id ? { ...req, status: 'Validée' } : req
+      ));
+      
       showToast('Demande validée');
       fetchRequests();
     } catch(err) { console.error(err); showToast('Erreur', 'error'); }
@@ -159,6 +171,11 @@ const Requests = () => {
     try {
       const res = await api.put(url, { status: 'Rejetée' });
       console.log('[API RESPONSE]', res);
+      
+      setRequests(prev => prev.map(req => 
+        req._id === id ? { ...req, status: 'Rejetée' } : req
+      ));
+      
       showToast('Demande rejetée');
       fetchRequests();
     } catch(err) { console.error(err); showToast('Erreur', 'error'); }
