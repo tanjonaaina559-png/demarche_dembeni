@@ -8,6 +8,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Toast from '../../components/ui/Toast';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import api from '../../services/api';
+import { handlePdf } from '../../utils/pdfDownload';
 import { Inbox, Eye, Trash2, Check, X, Search, Filter, Download, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PdfViewer from '../../components/ui/PdfViewer';
@@ -59,35 +60,11 @@ const Requests = () => {
 
   const downloadRequestPdf = async (id, type = 'receipt') => {
     console.log('[DOWNLOAD]', id, 'type:', type);
-    try {
-      const url = `/requests/${id}/pdf?type=${type}`;
-      console.log('[API REQUEST]', url);
-
-      // ── Utiliser api (Axios) et non fetch() natif ──────────────────────
-      // Axios envoie automatiquement le header Authorization: Bearer <token>
-      // via son intercepteur (api.js) — contrairement à window.open() ou fetch brut.
-      const res = await api.get(url);
-      console.log('[API RESPONSE]', res.data);
-
-      if (res.data && res.data.url) {
-        // Backend retourne { url: "https://cloudinary.com/..." }
-        // On ouvre l'URL Cloudinary publique directement dans un nouvel onglet.
-        window.open(res.data.url, '_blank');
-      } else {
-        showToast('Impossible de récupérer le lien PDF.', 'error');
-      }
-    } catch (error) {
-      console.error('[DOWNLOAD ERROR]', error);
-      if (error.response?.status === 403) {
-        showToast('Document officiel disponible uniquement pour les demandes validées.', 'error');
-      } else if (error.response?.status === 404) {
-        showToast('PDF introuvable pour cette demande.', 'error');
-      } else {
-        showToast(`Erreur téléchargement : ${error.response?.data?.message || error.message}`, 'error');
-      }
+    const result = await handlePdf(id, type, 'view');
+    if (!result.ok) {
+      showToast(result.error, 'error');
     }
   };
-
 
   const statusBadge = (s) => {
     const map = {

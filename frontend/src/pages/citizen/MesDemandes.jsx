@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { handlePdf } from '../../utils/pdfDownload';
 import Loader from '../../components/ui/Loader';
 import EmptyState from '../../components/ui/EmptyState';
 import { useAuth } from '../../context/AuthContext';
@@ -19,29 +20,10 @@ const MesDemandes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('toutes');
 
-  const downloadPdf = async (demandeId, type = 'receipt') => {
-    try {
-      const url = `/requests/${demandeId}/pdf?type=${type}`;
-      console.log(`[PDF] Téléchargement → ${url}`);
-
-      // Axios envoie automatiquement le header Authorization via l'intercepteur api.js
-      const res = await api.get(url);
-      console.log('[PDF] Réponse :', res.data);
-
-      if (res.data && res.data.url) {
-        window.open(res.data.url, '_blank');
-      } else {
-        alert('Impossible de récupérer le lien du document.');
-      }
-    } catch (error) {
-      console.error('[PDF] Erreur :', error);
-      if (error.response?.status === 403) {
-        alert(`⚠️ Document officiel disponible uniquement après validation de votre demande.`);
-      } else if (error.response?.status === 404) {
-        alert(`❌ Document introuvable.`);
-      } else {
-        alert(`Erreur : ${error.response?.data?.message || error.message}`);
-      }
+  const downloadPdf = async (demandeId, type = 'receipt', action = 'view') => {
+    const result = await handlePdf(demandeId, type, action);
+    if (!result.ok) {
+      alert(result.error);
     }
   };
 

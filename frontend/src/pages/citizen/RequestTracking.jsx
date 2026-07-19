@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
+import { handlePdf } from '../../utils/pdfDownload';
 import './RequestTracking.css';
 
 
@@ -44,24 +45,16 @@ const RequestTracking = () => {
   }, [user]);
 
   const handleDownloadReceipt = async (reqId) => {
-    try {
-      // Le backend retourne { url: "https://cloudinary.com/..." } — NE PAS utiliser responseType:'blob'
-      // car cela convertirait le JSON en blob corrompu, produisant un PDF invalide.
-      const res = await api.get(`/requests/${reqId}/pdf?type=receipt`);
-      console.log('[PDF Receipt]', res.data);
+    const result = await handlePdf(reqId, 'receipt', 'view');
+    if (!result.ok) {
+      alert(result.error);
+    }
+  };
 
-      if (res.data && res.data.url) {
-        window.open(res.data.url, '_blank');
-      } else {
-        alert('Impossible de récupérer le lien du document.');
-      }
-    } catch (error) {
-      console.error('Erreur lors du téléchargement du PDF', error);
-      if (error.response?.status === 403) {
-        alert('Document disponible uniquement après validation.');
-      } else {
-        alert(`Impossible de télécharger le reçu : ${error.response?.data?.message || error.message}`);
-      }
+  const handleDownloadOfficial = async (reqId) => {
+    const result = await handlePdf(reqId, 'official', 'download');
+    if (!result.ok) {
+      alert(result.error);
     }
   };
 
