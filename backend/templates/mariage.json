@@ -1,45 +1,51 @@
 [
   {
     "key": "referenceNumber",
-    "x": 200,
-    "y": 661.89,
-    "size": 11,
-    "font": "Helvetica-Bold",
-    "placeholder": "{{referenceNumber}}"
+    "x": 440,
+    "y": 733.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   },
   {
-    "key": "nom",
-    "x": 150,
-    "y": 591.89,
+    "key": "date_mariage",
+    "x": 190,
+    "y": 633.89,
     "size": 10,
-    "placeholder": "{{nom}}"
+    "font": "Helvetica"
   },
   {
-    "key": "prenom",
-    "x": 150,
-    "y": 571.89,
+    "key": "epoux_nom",
+    "x": 190,
+    "y": 603.89,
     "size": 10,
-    "placeholder": "{{prenom}}"
+    "font": "Helvetica"
   },
   {
-    "key": "adresse",
-    "x": 150,
-    "y": 551.89,
+    "key": "epouse_nom",
+    "x": 190,
+    "y": 573.89,
     "size": 10,
-    "placeholder": "{{adresse}}"
+    "font": "Helvetica"
   },
   {
-    "key": "date_soumission",
-    "x": 170,
-    "y": 481.89,
+    "key": "regime",
+    "x": 190,
+    "y": 543.89,
     "size": 10,
-    "placeholder": "{{date_demande}}"
+    "font": "Helvetica"
   },
   {
     "key": "date_validation",
-    "x": 170,
-    "y": 461.89,
+    "x": 160,
+    "y": 438.89,
     "size": 10,
-    "placeholder": "{{date_validation}}"
+    "font": "Helvetica-Bold"
+  },
+  {
+    "key": "agent",
+    "x": 50,
+    "y": 403.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   }
 ]

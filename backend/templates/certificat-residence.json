@@ -1,45 +1,58 @@
 [
   {
     "key": "referenceNumber",
-    "x": 200,
-    "y": 661.89,
-    "size": 11,
-    "font": "Helvetica-Bold",
-    "placeholder": "{{referenceNumber}}"
+    "x": 440,
+    "y": 733.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   },
   {
     "key": "nom",
-    "x": 150,
-    "y": 591.89,
-    "size": 10,
-    "placeholder": "{{nom}}"
+    "x": 140,
+    "y": 623.89,
+    "size": 11,
+    "font": "Helvetica"
   },
   {
     "key": "prenom",
-    "x": 150,
-    "y": 571.89,
-    "size": 10,
-    "placeholder": "{{prenom}}"
+    "x": 140,
+    "y": 593.89,
+    "size": 11,
+    "font": "Helvetica"
+  },
+  {
+    "key": "dateNaissance",
+    "x": 140,
+    "y": 563.89,
+    "size": 11,
+    "font": "Helvetica"
+  },
+  {
+    "key": "lieuNaissance",
+    "x": 320,
+    "y": 563.89,
+    "size": 11,
+    "font": "Helvetica"
   },
   {
     "key": "adresse",
-    "x": 150,
-    "y": 551.89,
-    "size": 10,
-    "placeholder": "{{adresse}}"
-  },
-  {
-    "key": "date_soumission",
-    "x": 170,
-    "y": 481.89,
-    "size": 10,
-    "placeholder": "{{date_demande}}"
+    "x": 140,
+    "y": 533.89,
+    "size": 11,
+    "font": "Helvetica"
   },
   {
     "key": "date_validation",
-    "x": 170,
-    "y": 461.89,
+    "x": 160,
+    "y": 278.89,
     "size": 10,
-    "placeholder": "{{date_validation}}"
+    "font": "Helvetica-Bold"
+  },
+  {
+    "key": "agent",
+    "x": 50,
+    "y": 243.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   }
 ]

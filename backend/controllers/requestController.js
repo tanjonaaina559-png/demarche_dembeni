@@ -311,34 +311,33 @@ const handleDynamicPdf = async (req, res, type) => {
     const pdfGenerator = require('../utils/pdfGenerator');
     let pdfBuffer;
 
-    if (type === 'official') {
-      const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
-      const officialTemplate = request.procedureId?._id
-        ? await OfficialPdfTemplate.findOne({ procedureId: request.procedureId._id, status: 'active' })
-        : null;
+    const OfficialPdfTemplate = require('../models/OfficialPdfTemplate');
+    const officialTemplate = request.procedureId?._id
+      ? await OfficialPdfTemplate.findOne({ procedureId: request.procedureId._id, status: 'active' })
+      : null;
 
-      if (officialTemplate && officialTemplate.templateFile) {
-        console.log(`[PDF Dynamic] Using OfficialPdfTemplate`);
-        pdfBuffer = await pdfGenerator.generateFromOfficialTemplate(
-          request.toObject(), request.citizenId, request.referenceNumber, officialTemplate
-        );
-      } else if (request.procedureId?.pdfTemplate) {
-        console.log(`[PDF Dynamic] Using Procedure pdfTemplate: ${request.procedureId.pdfTemplate}`);
-        pdfBuffer = await pdfGenerator.generateTemplatePdf(
-          request.toObject(), request.citizenId, request.referenceNumber, request.procedureId
-        );
-      } else {
-        console.log(`[PDF Dynamic] Fallback to generic official PDFKit`);
+    if (officialTemplate && officialTemplate.templateFile) {
+      console.log(`[PDF Dynamic] Using OfficialPdfTemplate for ${type}`);
+      pdfBuffer = await pdfGenerator.generateFromOfficialTemplate(
+        request.toObject(), request.citizenId, request.referenceNumber, officialTemplate
+      );
+    } else if (request.procedureId?.pdfTemplate) {
+      console.log(`[PDF Dynamic] Using Procedure pdfTemplate: ${request.procedureId.pdfTemplate} for ${type}`);
+      pdfBuffer = await pdfGenerator.generateTemplatePdf(
+        request.toObject(), request.citizenId, request.referenceNumber, request.procedureId
+      );
+    } else {
+      console.log(`[PDF Dynamic] Fallback to generic PDFKit for ${type}`);
+      if (type === 'official') {
         pdfBuffer = await pdfGenerator.generateOfficialPdf(
           request.toObject(), request.citizenId, request.referenceNumber
         );
+      } else {
+        pdfBuffer = await pdfGenerator.generateReceiptPdf(
+          { ...request.toObject(), procedureType: request.procedureId?.title },
+          request.citizenId, request.referenceNumber
+        );
       }
-    } else {
-      console.log(`[PDF Dynamic] Generating generic PDFKit receipt`);
-      pdfBuffer = await pdfGenerator.generateReceiptPdf(
-        { ...request.toObject(), procedureType: request.procedureId?.title },
-        request.citizenId, request.referenceNumber
-      );
     }
 
     // Set headers and return the raw binary buffer directly

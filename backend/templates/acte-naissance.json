@@ -1,45 +1,86 @@
 [
   {
     "key": "referenceNumber",
-    "x": 200,
-    "y": 661.89,
-    "size": 11,
-    "font": "Helvetica-Bold",
-    "placeholder": "{{referenceNumber}}"
+    "x": 440,
+    "y": 733.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   },
   {
     "key": "nom",
-    "x": 150,
-    "y": 591.89,
+    "x": 190,
+    "y": 638.89,
     "size": 10,
-    "placeholder": "{{nom}}"
+    "font": "Helvetica"
   },
   {
     "key": "prenom",
-    "x": 150,
-    "y": 571.89,
+    "x": 190,
+    "y": 618.89,
     "size": 10,
-    "placeholder": "{{prenom}}"
+    "font": "Helvetica"
   },
   {
-    "key": "adresse",
-    "x": 150,
-    "y": 551.89,
+    "key": "dateNaissance",
+    "x": 190,
+    "y": 598.89,
     "size": 10,
-    "placeholder": "{{adresse}}"
+    "font": "Helvetica"
   },
   {
-    "key": "date_soumission",
-    "x": 170,
-    "y": 481.89,
+    "key": "lieuNaissance",
+    "x": 190,
+    "y": 578.89,
     "size": 10,
-    "placeholder": "{{date_demande}}"
+    "font": "Helvetica"
+  },
+  {
+    "key": "pere_nom_complet",
+    "x": 190,
+    "y": 508.89,
+    "size": 10,
+    "font": "Helvetica"
+  },
+  {
+    "key": "pere_profession",
+    "x": 190,
+    "y": 488.89,
+    "size": 10,
+    "font": "Helvetica"
+  },
+  {
+    "key": "mere_nom_complet",
+    "x": 190,
+    "y": 418.89,
+    "size": 10,
+    "font": "Helvetica"
+  },
+  {
+    "key": "mere_profession",
+    "x": 190,
+    "y": 398.89,
+    "size": 10,
+    "font": "Helvetica"
+  },
+  {
+    "key": "mentions",
+    "x": 50,
+    "y": 328.89,
+    "size": 10,
+    "font": "Helvetica"
   },
   {
     "key": "date_validation",
-    "x": 170,
-    "y": 461.89,
+    "x": 150,
+    "y": 228.89,
     "size": 10,
-    "placeholder": "{{date_validation}}"
+    "font": "Helvetica-Bold"
+  },
+  {
+    "key": "agent",
+    "x": 50,
+    "y": 193.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   }
 ]
