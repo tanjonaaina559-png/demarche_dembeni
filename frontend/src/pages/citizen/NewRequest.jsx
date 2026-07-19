@@ -413,7 +413,7 @@ const NewRequestComponent = () => {
               border: isActive || isCompleted ? 'none' : '2px solid #E5E7EB',
               fontWeight: 'bold', fontSize: '14px', transition: 'all 0.3s ease'
             }}>
-              {isCompleted ? <CheckCircle size={18} /> : step.id}
+              {isCompleted ? <CheckCircle size={18} /> : <span>{step.id}</span>}
             </div>
             <span style={{ fontSize: '0.8rem', marginTop: '8px', color: isActive ? 'var(--vert-700)' : '#6B7280', fontWeight: isActive ? 'bold' : 'normal' }}>
               {step.title}
@@ -727,20 +727,22 @@ const NewRequestComponent = () => {
               className="btn btn-outline" 
               style={{ padding: '10px 20px', opacity: currentStep === 1 ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <ArrowLeft size={16} /> PrÃ©cÃ©dent
+              <ArrowLeft size={16} /> <span>PrÃ©cÃ©dent</span>
             </button>
 
             {currentStep < 3 ? (
               <button 
+                key="btn-next"
                 type="button" 
                 onClick={nextStep} 
                 className="btn btn-primary"
                 style={{ padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                Suivant <ArrowRight size={16} />
+                <span>Suivant</span> <ArrowRight size={16} />
               </button>
             ) : (
               <button 
+                key="btn-submit"
                 type="button" 
                 onClick={handleSubmit} 
                 disabled={submitting}
