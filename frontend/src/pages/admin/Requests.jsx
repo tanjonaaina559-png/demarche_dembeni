@@ -58,30 +58,39 @@ const Requests = () => {
   };
 
   const downloadRequestPdf = async (id, type = 'receipt') => {
+    console.log('[DOWNLOAD]', id);
     try {
-      // The backend redirects to the Cloudinary URL — open in a new tab
       const token = localStorage.getItem('token') ||
         JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
       const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const url = `${apiBase}/requests/${id}/pdf?type=${type}`;
-      // Use fetch to follow the redirect and get the final Cloudinary URL
+      console.log('[API REQUEST]', url);
+      
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
         redirect: 'follow'
       });
-      if (response.ok || response.redirected) {
-        window.open(response.url || url, '_blank');
+      
+      console.log('[API RESPONSE]', response);
+
+      if (response.ok) {
+        // If Cloudinary redirected us, open the Cloudinary URL
+        if (response.redirected || response.url.includes('cloudinary')) {
+          window.open(response.url, '_blank');
+        } else {
+          // If it is a local file Blob returned directly
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          window.open(objectUrl, '_blank');
+        }
       } else if (response.status === 403) {
         showToast('Document disponible uniquement pour les demandes validées.', 'error');
       } else {
         showToast('Impossible de télécharger le PDF.', 'error');
       }
     } catch (error) {
-      // Fallback: open via API link directly
-      const token = localStorage.getItem('token') ||
-        JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      window.open(`${apiBase}/requests/${id}/pdf?type=${type}`, '_blank');
+      console.error(error);
+      showToast('Erreur inattendue.', 'error');
     }
   };
 
@@ -110,15 +119,20 @@ const Requests = () => {
   const handleUpdateStatus = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    console.log('[UPDATE STATUS]', selectedRequest._id, status);
+    const url = `/requests/${selectedRequest._id}/status`;
+    console.log('[API REQUEST]', url);
     try {
-      await api.put(`/requests/${selectedRequest._id}/status`, {
+      const res = await api.put(url, {
         status,
         adminComment: commentaire,
       });
+      console.log('[API RESPONSE]', res);
       showToast('Statut mis à jour avec succès');
       setSelectedRequest(null);
       fetchRequests();
-    } catch {
+    } catch (err) {
+      console.error(err);
       showToast('Erreur lors de la mise à jour', 'error');
     } finally {
       setSubmitting(false);
@@ -127,30 +141,42 @@ const Requests = () => {
 
   /* ── Boutons rapides ── */
   const handleQuickApprove = async (id) => {
+    console.log('[VALIDATE]', id);
+    const url = `/requests/${id}/status`;
+    console.log('[API REQUEST]', url);
     try {
-      await api.put(`/requests/${id}/status`, { status: 'Validée' });
+      const res = await api.put(url, { status: 'Validée' });
+      console.log('[API RESPONSE]', res);
       showToast('Demande validée');
       fetchRequests();
-    } catch { showToast('Erreur', 'error'); }
+    } catch(err) { console.error(err); showToast('Erreur', 'error'); }
   };
 
   const handleQuickReject = async (id) => {
+    console.log('[REJECT]', id);
+    const url = `/requests/${id}/status`;
+    console.log('[API REQUEST]', url);
     try {
-      await api.put(`/requests/${id}/status`, { status: 'Rejetée' });
+      const res = await api.put(url, { status: 'Rejetée' });
+      console.log('[API RESPONSE]', res);
       showToast('Demande rejetée');
       fetchRequests();
-    } catch { showToast('Erreur', 'error'); }
+    } catch(err) { console.error(err); showToast('Erreur', 'error'); }
   };
 
   /* ── Suppression ── */
   const handleDelete = async () => {
     const id = confirm.id;
     setConfirm({ open: false, id: null });
+    console.log('[DELETE]', id);
+    const url = `/admin/requests/${id}`;
+    console.log('[API REQUEST]', url);
     try {
-      await api.delete(`/admin/requests/${id}`);
+      const res = await api.delete(url);
+      console.log('[API RESPONSE]', res);
       showToast('Demande supprimée');
       fetchRequests();
-    } catch { showToast('Erreur lors de la suppression', 'error'); }
+    } catch(err) { console.error(err); showToast('Erreur lors de la suppression', 'error'); }
   };
 
   /* ── Colonnes ── */
@@ -184,7 +210,7 @@ const Requests = () => {
           <button
             title="Voir / gérer"
             style={{ background: '#eff6ff', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#3b82f6' }}
-            onClick={() => { setSelectedRequest(row); setStatus(row.status || 'En attente'); setCommentaire(row.adminComment || ''); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[VIEW]', row._id); setSelectedRequest(row); setStatus(row.status || 'En attente'); setCommentaire(row.adminComment || ''); }}
           >
             <Eye size={16} />
           </button>
@@ -192,7 +218,7 @@ const Requests = () => {
             <button
               title="Valider"
               style={{ background: '#ecfdf5', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#10B981' }}
-              onClick={() => handleQuickApprove(row._id)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleQuickApprove(row._id); }}
             >
               <Check size={16} />
             </button>
@@ -201,7 +227,7 @@ const Requests = () => {
             <button
               title="Rejeter"
               style={{ background: '#fff1f2', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#ef4444' }}
-              onClick={() => handleQuickReject(row._id)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleQuickReject(row._id); }}
             >
               <X size={16} />
             </button>
@@ -209,7 +235,7 @@ const Requests = () => {
           <button
             title="Télécharger Récépissé PDF"
             style={{ background: '#f0fdf4', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#16a34a' }}
-            onClick={() => downloadRequestPdf(row._id, 'receipt')}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadRequestPdf(row._id, 'receipt'); }}
           >
             <Download size={16} />
           </button>
@@ -217,7 +243,7 @@ const Requests = () => {
             <button
               title="Télécharger Document Officiel"
               style={{ background: '#eff6ff', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1E40AF' }}
-              onClick={() => downloadRequestPdf(row._id, 'official')}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); downloadRequestPdf(row._id, 'official'); }}
             >
               <FileText size={16} />
             </button>
@@ -225,7 +251,7 @@ const Requests = () => {
           <button
             title="Supprimer"
             style={{ background: '#fef2f2', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#dc2626' }}
-            onClick={() => setConfirm({ open: true, id: row._id })}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirm({ open: true, id: row._id }); }}
           >
             <Trash2 size={16} />
           </button>
