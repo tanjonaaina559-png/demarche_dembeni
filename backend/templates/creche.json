@@ -1,142 +1,142 @@
 [
   {
     "key": "resp1_civilite",
-    "x": 100,
-    "y": 583.89,
-    "size": 9,
-    "placeholder": "{{resp1_civilite}}"
+    "x": 83,
+    "y": 554.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   },
   {
     "key": "resp1_nom",
-    "x": 135,
-    "y": 568.89,
+    "x": 74.003,
+    "y": 536.89,
     "size": 9,
-    "placeholder": "{{resp1_nom}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp1_nom_naissance",
-    "x": 135,
-    "y": 553.89,
+    "x": 129.533,
+    "y": 518.89,
     "size": 9,
-    "placeholder": "{{resp1_nom_naissance}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp1_prenom",
-    "x": 135,
-    "y": 538.89,
+    "x": 86.513,
+    "y": 500.89,
     "size": 9,
-    "placeholder": "{{resp1_prenom}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp1_email",
-    "x": 135,
-    "y": 523.89,
+    "x": 107.01499999999999,
+    "y": 482.89,
     "size": 9,
-    "placeholder": "{{resp1_email}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp1_telephone",
-    "x": 135,
-    "y": 508.89,
+    "x": 96.449,
+    "y": 464.89,
     "size": 9,
-    "placeholder": "{{resp1_telephone}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp1_adresse",
-    "x": 135,
-    "y": 493.89,
+    "x": 45,
+    "y": 446.89,
     "size": 9,
-    "placeholder": "{{resp1_adresse}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp2_civilite",
-    "x": 362.64,
-    "y": 583.89,
-    "size": 9,
-    "placeholder": "{{resp2_civilite}}"
+    "x": 355.64,
+    "y": 554.89,
+    "size": 10,
+    "font": "Helvetica-Bold"
   },
   {
     "key": "resp2_nom",
-    "x": 397.64,
-    "y": 568.89,
+    "x": 346.643,
+    "y": 536.89,
     "size": 9,
-    "placeholder": "{{resp2_nom}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp2_nom_naissance",
-    "x": 397.64,
-    "y": 553.89,
+    "x": 402.173,
+    "y": 518.89,
     "size": 9,
-    "placeholder": "{{resp2_nom_naissance}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp2_prenom",
-    "x": 397.64,
-    "y": 538.89,
+    "x": 359.15299999999996,
+    "y": 500.89,
     "size": 9,
-    "placeholder": "{{resp2_prenom}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp2_email",
-    "x": 397.64,
-    "y": 523.89,
+    "x": 379.655,
+    "y": 482.89,
     "size": 9,
-    "placeholder": "{{resp2_email}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp2_telephone",
-    "x": 397.64,
-    "y": 508.89,
+    "x": 369.089,
+    "y": 464.89,
     "size": 9,
-    "placeholder": "{{resp2_telephone}}"
+    "font": "Helvetica"
   },
   {
     "key": "resp2_adresse",
-    "x": 397.64,
-    "y": 493.89,
+    "x": 317.64,
+    "y": 446.89,
     "size": 9,
-    "placeholder": "{{resp2_adresse}}"
+    "font": "Helvetica"
   },
   {
     "key": "enfant_date_naissance",
-    "x": 175,
-    "y": 443.89,
+    "x": 165,
+    "y": 389.89,
     "size": 9,
-    "placeholder": "{{enfant_date_naissance}}"
+    "font": "Helvetica"
   },
   {
     "key": "autre_enfant_1",
-    "x": 45,
-    "y": 388.89,
+    "x": 35,
+    "y": 319.89,
     "size": 9,
-    "placeholder": "{{autre_enfant_1}}"
+    "font": "Helvetica"
   },
   {
     "key": "autre_enfant_2",
-    "x": 45,
-    "y": 373.89,
+    "x": 35,
+    "y": 301.89,
     "size": 9,
-    "placeholder": "{{autre_enfant_2}}"
+    "font": "Helvetica"
   },
   {
     "key": "autre_enfant_3",
-    "x": 45,
-    "y": 358.89,
+    "x": 35,
+    "y": 283.89,
     "size": 9,
-    "placeholder": "{{autre_enfant_3}}"
+    "font": "Helvetica"
   },
   {
     "key": "autre_enfant_4",
-    "x": 45,
-    "y": 343.89,
+    "x": 35,
+    "y": 265.89,
     "size": 9,
-    "placeholder": "{{autre_enfant_4}}"
+    "font": "Helvetica"
   },
   {
     "key": "date_soumission",
-    "x": 75,
-    "y": 263.89,
+    "x": 65,
+    "y": 172.89,
     "size": 9,
-    "placeholder": "{{date_soumission}}"
+    "font": "Helvetica"
   }
 ]
